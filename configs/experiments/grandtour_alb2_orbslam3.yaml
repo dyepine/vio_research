@@ -1,0 +1,14 @@
+orbslam3_stereo_vi_alb2_no_loop:
+  Config: configs/experiments/grandtour_alb2_sequences.yaml
+  StorageConfig: configs/datasets/prepare.yaml
+  ResultsDir: results/grandtour-alb2-run-01
+  MethodSettings: configs/methods/orbslam3_stereo_vi.yaml
+  NumRuns: 1
+  Module: orbslam3
+  Parameters:
+    verbose: 0
+    mode: stereo-vi
+  Evaluation:
+    align: SE3
+    correct_scale: false
+    max_time_difference_s: 0.01

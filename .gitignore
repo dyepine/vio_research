@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+datasets/
+.tools/
+results/
+.pixi/
+*.local.yaml
+.env
+.env.*
+!.env.example

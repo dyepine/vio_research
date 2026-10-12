@@ -1,0 +1,8 @@
+numpy==1.26.4
+scipy==1.14.1
+Pillow==11.1.0
+PyYAML==6.0.2
+requests==2.32.3
+zarr==2.18.3
+numcodecs==0.12.1
+rosbags==0.10.11
