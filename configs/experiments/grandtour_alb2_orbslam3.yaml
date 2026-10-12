@@ -12,3 +12,9 @@ orbslam3_stereo_vi_alb2_no_loop:
     align: SE3
     correct_scale: false
     max_time_difference_s: 0.01
+    estimate_frame: camera
+    camera: rgb_0
+    evaluate_orientation: true
+    max_pose_gap_s: 1.0
+    rpe_delta_m: 1.0
+    rpe_relative_tolerance: 0.1

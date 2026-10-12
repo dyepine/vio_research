@@ -1,4 +1,6 @@
 .venv/
+.venv-rerun/
+*.rrd
 __pycache__/
 *.pyc
 .pytest_cache/
