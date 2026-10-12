@@ -26,6 +26,8 @@ from scipy.spatial.transform import Rotation
 import yaml
 import zarr
 
+from config_paths import config_path
+
 ROOT = Path(__file__).resolve().parents[1]
 DATASET_CONFIG_DIR = ROOT / 'configs' / 'datasets'
 GB = 10**9
@@ -563,8 +565,7 @@ def load_config(path, available):
             raise ValueError(f'{key} must be a finite number')
     if value['max_data_gb'] <= 0 or value['reserve_gb'] < 0:
         raise ValueError('Invalid storage limits in YAML')
-    data_dir = Path(value['data_dir']).expanduser()
-    value['data_dir'] = data_dir if data_dir.is_absolute() else path.parent / data_dir
+    value['data_dir'] = config_path(value['data_dir'], path.parent)
     value['sequences'] = [name for name, active in selected.items() if active]
     if not value['sequences']:
         raise ValueError('No active sequences. Set at least one sequence to true in the YAML.')
