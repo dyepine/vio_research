@@ -2,7 +2,7 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-datasets/
+/datasets/
 .tools/
 results/
 .pixi/

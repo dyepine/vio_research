@@ -1,0 +1,262 @@
+{
+  "version": 1,
+  "sources": {
+    "grandtour_revision": "daf91c5e2b6db564822a35cc58222d73f8e75bab",
+    "botanicgarden_revision": "84c4806428ca16c154238e263a7f8bf828bf58e1",
+    "botanicgarden_record": "kfjy8-ex881"
+  },
+  "sequences": {
+    "grandtour-alb2": {
+      "dataset": "grandtour",
+      "mission": "2024-11-15-11-37-15",
+      "duration_bound_s": 518,
+      "image_rate_bound": 15,
+      "resolution": [
+        1920,
+        1080
+      ],
+      "files": [
+        {
+          "path": "data/.zgroup",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-11-37-15/data/.zgroup",
+          "size": 24,
+          "checksum": "git-sha1:3b7daf227c1687f28bc23b69f183e27ce9a475c1"
+        },
+        {
+          "path": "data/zed2i_left_images.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-11-37-15/data/zed2i_left_images.tar",
+          "size": 2201600,
+          "checksum": "sha256:3e7e00bd7850b597fb4be4ea2f23e723e87484078e419bc89e6b8e324ce09c87"
+        },
+        {
+          "path": "data/zed2i_right_images.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-11-37-15/data/zed2i_right_images.tar",
+          "size": 2201600,
+          "checksum": "sha256:9ee9e87086dcf2c7fa1a8c7725fdfc71bc7a2a7adfd0c5e6cf134932fe4f6a90"
+        },
+        {
+          "path": "data/adis_imu.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-11-37-15/data/adis_imu.tar",
+          "size": 11356160,
+          "checksum": "sha256:01266a3ab3ef0a652f20da86d6ebd186328a7a82b5e6dec2023d0c31adb2eb11"
+        },
+        {
+          "path": "data/cpt7_ie_tc_odometry.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-11-37-15/data/cpt7_ie_tc_odometry.tar",
+          "size": 20510720,
+          "checksum": "sha256:62a1f3b9534fac9692629d5cda5ac3b30be900220c20ac447a7528459e47de4b"
+        },
+        {
+          "path": "data/cpt7_ie_tc_tf.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-11-37-15/data/cpt7_ie_tc_tf.tar",
+          "size": 8857600,
+          "checksum": "sha256:3ad389fea8ab07977c0e527786b8b866014b50969d42090c02ad1f641588be6b"
+        },
+        {
+          "path": "data/prism_position.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-11-37-15/data/prism_position.tar",
+          "size": 3082240,
+          "checksum": "sha256:29c833786d26a60c0e78121c1074ad1a1e2a1110b88185b45c07ed3df86c8af5"
+        },
+        {
+          "path": "data/tf.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-11-37-15/data/tf.tar",
+          "size": 30720,
+          "checksum": "sha256:40f1601084b84abf0ed3af62052fc99019fc7f3c5afb3fa8e6d62e631fd96e5f"
+        },
+        {
+          "path": "images/zed2i_left_images.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-11-37-15/images/zed2i_left_images.tar",
+          "size": 2479636480,
+          "checksum": "sha256:e887f7ce4ebcac8a5759fdcdfff8b66d553425ed49a2e03f62da1004ce3c761f"
+        },
+        {
+          "path": "images/zed2i_right_images.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-11-37-15/images/zed2i_right_images.tar",
+          "size": 2477926400,
+          "checksum": "sha256:e478445bd81ffcc8675a685d958dfcbda27cb482d2a6f3e4deff8a653e891cac"
+        }
+      ]
+    },
+    "grandtour-trim1": {
+      "dataset": "grandtour",
+      "mission": "2024-11-15-10-16-35",
+      "duration_bound_s": 475,
+      "image_rate_bound": 15,
+      "resolution": [
+        1920,
+        1080
+      ],
+      "files": [
+        {
+          "path": "data/.zgroup",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-10-16-35/data/.zgroup",
+          "size": 24,
+          "checksum": "git-sha1:3b7daf227c1687f28bc23b69f183e27ce9a475c1"
+        },
+        {
+          "path": "data/zed2i_left_images.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-10-16-35/data/zed2i_left_images.tar",
+          "size": 2201600,
+          "checksum": "sha256:c6526cf261dfaa50f2416a3a122578fc027151c99e7b60e37ab4a03f5b9c8f67"
+        },
+        {
+          "path": "data/zed2i_right_images.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-10-16-35/data/zed2i_right_images.tar",
+          "size": 2201600,
+          "checksum": "sha256:0801bff690a78c3df56b3f3b27fd41f058b9d7db644173de80fb8004e68b405c"
+        },
+        {
+          "path": "data/adis_imu.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-10-16-35/data/adis_imu.tar",
+          "size": 10967040,
+          "checksum": "sha256:142313bc901bed375216ee3366328b1ac3499c0c059c06e2b32f1918d2127551"
+        },
+        {
+          "path": "data/cpt7_ie_tc_odometry.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-10-16-35/data/cpt7_ie_tc_odometry.tar",
+          "size": 19589120,
+          "checksum": "sha256:2262c56b02da29730b89078679796d2086e058c48f3da82b5c5dd116327690bb"
+        },
+        {
+          "path": "data/cpt7_ie_tc_tf.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-10-16-35/data/cpt7_ie_tc_tf.tar",
+          "size": 8448000,
+          "checksum": "sha256:759e518189b73f327a1f548c96637c7651beb6818f00e6cbb97882ff6d89a666"
+        },
+        {
+          "path": "data/prism_position.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-10-16-35/data/prism_position.tar",
+          "size": 3082240,
+          "checksum": "sha256:6815e468b41a5e56d81f48f5a34b1f9b2d9b9659bec6057dbf0b4c3752e5476f"
+        },
+        {
+          "path": "data/tf.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-10-16-35/data/tf.tar",
+          "size": 30720,
+          "checksum": "sha256:2ca8da7e72d1e0bd4d4e40c8ab9e2f4ebabecccf00486ec182abe63407555ec6"
+        },
+        {
+          "path": "images/zed2i_left_images.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-10-16-35/images/zed2i_left_images.tar",
+          "size": 2667489280,
+          "checksum": "sha256:f9a6beb555546bd09bca202dc674fd4ee38cb46eea1062d841dfcc9db687fa5c"
+        },
+        {
+          "path": "images/zed2i_right_images.tar",
+          "url": "https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset/resolve/daf91c5e2b6db564822a35cc58222d73f8e75bab/2024-11-15-10-16-35/images/zed2i_right_images.tar",
+          "size": 2638592000,
+          "checksum": "sha256:5b5512d2c45722c884c7e277664120a5dca6030a51634643d1ac7ec8a4e6aa10"
+        }
+      ]
+    },
+    "botanicgarden-1018-00": {
+      "dataset": "botanicgarden",
+      "sequence": "1018_00",
+      "duration_bound_s": 141.12,
+      "image_rate_bound": 10,
+      "resolution": [
+        960,
+        600
+      ],
+      "files": [
+        {
+          "path": "1018_00_VLIO.bag",
+          "url": "https://scidata.sjtu.edu.cn/api/records/kfjy8-ex881/files/1018_00_VLIO.bag/content",
+          "size": 5826482733,
+          "checksum": "md5:3c1d2e5216c0a20629e0bd6d5fef5575"
+        },
+        {
+          "path": "GT_pose_qnew.zip",
+          "url": "https://scidata.sjtu.edu.cn/api/records/kfjy8-ex881/files/GT_pose_qnew.zip/content",
+          "size": 2391626,
+          "checksum": "md5:9620b47d36ad9f57beb28d7b4687e04f"
+        },
+        {
+          "path": "calib/camera_intrinsics/dalsa_gray0_down.yaml",
+          "url": "https://raw.githubusercontent.com/robot-pesg/BotanicGarden/84c4806428ca16c154238e263a7f8bf828bf58e1/calib/camera_intrinsics/dalsa_gray0_down.yaml",
+          "size": 308,
+          "checksum": "git-sha1:60c32ca3962976c8fbd8449a0c64655ad5a22926"
+        },
+        {
+          "path": "calib/camera_intrinsics/dalsa_gray1_down.yaml",
+          "url": "https://raw.githubusercontent.com/robot-pesg/BotanicGarden/84c4806428ca16c154238e263a7f8bf828bf58e1/calib/camera_intrinsics/dalsa_gray1_down.yaml",
+          "size": 308,
+          "checksum": "git-sha1:a3dc10385423915b3ce8e0d6d46d218a09195256"
+        },
+        {
+          "path": "calib/extrinsics/calib_chain.yaml",
+          "url": "https://raw.githubusercontent.com/robot-pesg/BotanicGarden/84c4806428ca16c154238e263a7f8bf828bf58e1/calib/extrinsics/calib_chain.yaml",
+          "size": 6026,
+          "checksum": "git-sha1:068918920648949cc0657c00556afcfcbff518db"
+        },
+        {
+          "path": "calib/extrinsics/seq_extrinsics.yaml",
+          "url": "https://raw.githubusercontent.com/robot-pesg/BotanicGarden/84c4806428ca16c154238e263a7f8bf828bf58e1/calib/extrinsics/seq_extrinsics.yaml",
+          "size": 3075,
+          "checksum": "git-sha1:37266752dc2207dda6d39c923b20c9e9c78f62d0"
+        },
+        {
+          "path": "calib/imu_intrinsics/xsens_imu_param.yaml",
+          "url": "https://raw.githubusercontent.com/robot-pesg/BotanicGarden/84c4806428ca16c154238e263a7f8bf828bf58e1/calib/imu_intrinsics/xsens_imu_param.yaml",
+          "size": 568,
+          "checksum": "git-sha1:abf804bd89feec58691c4e02805a6432ddc36931"
+        }
+      ]
+    },
+    "botanicgarden-1005-00": {
+      "dataset": "botanicgarden",
+      "sequence": "1005_00",
+      "duration_bound_s": 593.78,
+      "image_rate_bound": 10,
+      "resolution": [
+        960,
+        600
+      ],
+      "files": [
+        {
+          "path": "1005_00_VLIO.bag",
+          "url": "https://scidata.sjtu.edu.cn/api/records/kfjy8-ex881/files/1005_00_VLIO.bag/content",
+          "size": 32319311357,
+          "checksum": "md5:49d45853bc0fca326120fffe281badd3"
+        },
+        {
+          "path": "GT_pose_qnew.zip",
+          "url": "https://scidata.sjtu.edu.cn/api/records/kfjy8-ex881/files/GT_pose_qnew.zip/content",
+          "size": 2391626,
+          "checksum": "md5:9620b47d36ad9f57beb28d7b4687e04f"
+        },
+        {
+          "path": "calib/camera_intrinsics/dalsa_gray0_down.yaml",
+          "url": "https://raw.githubusercontent.com/robot-pesg/BotanicGarden/84c4806428ca16c154238e263a7f8bf828bf58e1/calib/camera_intrinsics/dalsa_gray0_down.yaml",
+          "size": 308,
+          "checksum": "git-sha1:60c32ca3962976c8fbd8449a0c64655ad5a22926"
+        },
+        {
+          "path": "calib/camera_intrinsics/dalsa_gray1_down.yaml",
+          "url": "https://raw.githubusercontent.com/robot-pesg/BotanicGarden/84c4806428ca16c154238e263a7f8bf828bf58e1/calib/camera_intrinsics/dalsa_gray1_down.yaml",
+          "size": 308,
+          "checksum": "git-sha1:a3dc10385423915b3ce8e0d6d46d218a09195256"
+        },
+        {
+          "path": "calib/extrinsics/calib_chain.yaml",
+          "url": "https://raw.githubusercontent.com/robot-pesg/BotanicGarden/84c4806428ca16c154238e263a7f8bf828bf58e1/calib/extrinsics/calib_chain.yaml",
+          "size": 6026,
+          "checksum": "git-sha1:068918920648949cc0657c00556afcfcbff518db"
+        },
+        {
+          "path": "calib/extrinsics/seq_extrinsics.yaml",
+          "url": "https://raw.githubusercontent.com/robot-pesg/BotanicGarden/84c4806428ca16c154238e263a7f8bf828bf58e1/calib/extrinsics/seq_extrinsics.yaml",
+          "size": 3075,
+          "checksum": "git-sha1:37266752dc2207dda6d39c923b20c9e9c78f62d0"
+        },
+        {
+          "path": "calib/imu_intrinsics/xsens_imu_param.yaml",
+          "url": "https://raw.githubusercontent.com/robot-pesg/BotanicGarden/84c4806428ca16c154238e263a7f8bf828bf58e1/calib/imu_intrinsics/xsens_imu_param.yaml",
+          "size": 568,
+          "checksum": "git-sha1:abf804bd89feec58691c4e02805a6432ddc36931"
+        }
+      ]
+    }
+  }
+}
