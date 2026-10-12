@@ -13,12 +13,11 @@ from types import SimpleNamespace
 import yaml
 
 from check_vio_inputs import camera_imu_window, csv_rows
+from config_paths import config_path
 
 ROOT = Path(__file__).resolve().parents[1]
 LAB = ROOT / 'external/VSLAM-LAB'
-CONFIG_PATH = ROOT / 'configs/experiments/grandtour_alb2_orbslam3.local.yaml'
-if not CONFIG_PATH.exists():
-    CONFIG_PATH = ROOT / 'configs/experiments/grandtour_alb2_orbslam3.yaml'
+CONFIG_PATH = ROOT / 'configs/experiments/grandtour_alb2_orbslam3.yaml'
 sys.path.insert(0, str(LAB))
 from Baselines.get_baseline import get_baseline
 from Datasets.get_dataset import get_dataset
@@ -44,15 +43,13 @@ def main():
     seq = str(names[0])
     storage_path = ROOT / settings['StorageConfig']
     storage = yaml.safe_load(storage_path.read_text())
-    data_root = Path(storage['data_dir']).expanduser()
-    if not data_root.is_absolute():
-        data_root = (storage_path.parent / data_root).resolve()
+    data_root = config_path(storage['data_dir'], storage_path.parent)
     dataset = get_dataset(dataset_name)
     # Instance-local paths: no changes to path_constants or framework source files.
     dataset.dataset_path = data_root / 'VSLAM-LAB-Benchmark' / dataset.dataset_folder
     folder = dataset.sequence_path(seq)
     selected, audit = camera_imu_window(folder)
-    report = ROOT / settings['ResultsDir']
+    report = config_path(settings['ResultsDir'], ROOT)
     if action == ['audit']:
         print(json.dumps(audit, indent=2))
         return

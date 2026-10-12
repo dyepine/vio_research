@@ -6,7 +6,7 @@ __pycache__/
 .tools/
 results/
 .pixi/
-*.local.yaml
+.envrc
 .env
 .env.*
 !.env.example

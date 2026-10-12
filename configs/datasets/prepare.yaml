@@ -1,6 +1,7 @@
 # Настройки для make plan / prepare / download / convert / validate.
-# Относительный data_dir считается от папки этого YAML; ~ раскрывается как HOME.
-data_dir: ~/datasets/vio_research
+# Путь задаётся в .envrc; make автоматически читает его.
+# Для явного пути: ~ раскрывается как HOME, относительный путь считается от этого YAML.
+data_dir: ${VIO_DATA_DIR}
 max_data_gb: 125
 reserve_gb: 15
 

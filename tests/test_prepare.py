@@ -20,6 +20,7 @@ import yaml
 import zarr
 
 SCRIPT = Path(__file__).resolve().parents[1] / 'scripts/prepare.py'
+sys.path.insert(0, str(SCRIPT.parent))
 spec = importlib.util.spec_from_file_location('prepare', SCRIPT)
 p = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(p)
