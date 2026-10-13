@@ -51,7 +51,7 @@ OneDrive, без обращений к SJTU. Подписанный download URL
 
 Адаптер BotanicGarden и необходимые исправления ROS/download helpers находятся
 в нашем [fork VSLAM-LAB](https://github.com/dyepine/VSLAM-LAB/tree/vio-research-datasets).
-Submodule закреплён на commit `ee2d562e9fd35e112e57e77e0db6feff0c81c1ff`;
+Submodule закреплён на commit `f2cefb84afe717b10944db0318832aef02e22f4f`;
 ветка fork — `vio-research-datasets`. Чистый checkout сразу содержит адаптер,
 патч и его применение при bootstrap удалены. Bootstrap читает pin из Git,
 при несовпадении ревизии сохраняет checkout и останавливается.
@@ -157,6 +157,15 @@ make evaluate EXPERIMENT=/path/to/comparison_.../experiment.yaml
 
 Для каждого повтора сохраняются immutable `summary.json`, `protocol.yaml` и
 стандартные ZIP evo в `<native output>/evaluations/<iteration>/<timestamp>/`.
+После оценки автоматически создаётся `<comparison>/figures/`: для каждой записи
+PNG и PDF с проекциями XY/XZ/YZ и 3D, APE/RPE во времени и RMSE/покрытием.
+Проекции содержат все сохранённые позы метода и измеренный GT в их временном
+диапазоне; используется уже сохранённое преобразование evo, без нового fit.
+На 2D-проекциях масштабы осей одинаковы; 3D имеет независимые масштабы осей,
+что подписано на рисунке. Временные ошибки берутся из ZIP evo; RPE all_pairs
+показывается точками. Неудачные запуски отмечаются в сводных графиках.
+Картинки обновляются вместе с последней таблицей, версии самих оценок сохраняются.
+
 Общая таблица — `<comparison>/comparison.csv`: отдельная строка для каждого
 запуска, ошибки позиции/ориентации, число пар, доля сопоставленных сохранённых поз
 и статус. Неудачные запуски остаются строками таблицы; команда возвращает ошибку.
