@@ -51,7 +51,7 @@ OneDrive, без обращений к SJTU. Подписанный download URL
 
 Адаптер BotanicGarden и необходимые исправления ROS/download helpers находятся
 в нашем [fork VSLAM-LAB](https://github.com/dyepine/VSLAM-LAB/tree/vio-research-datasets).
-Submodule закреплён на commit `219df9d6667817db42e7b7a1db902fc7825807ea`;
+Submodule закреплён на commit `65e7eac788eb4c2d44f15658c58b3564b10c3da7`;
 ветка fork — `vio-research-datasets`. Чистый checkout сразу содержит адаптер,
 патч и его применение при bootstrap удалены. Bootstrap читает pin из Git,
 при несовпадении ревизии сохраняет checkout и останавливается.
@@ -59,51 +59,77 @@ Submodule закреплён на commit `219df9d6667817db42e7b7a1db902fc7825807
 в upstream не входит в эту работу. Обновление fork и pin требует проверки
 совместимости адаптера и повторного запуска тестов.
 
-## Метод из каталога
+## Конфигурация и запуск
 
-```bash
-make methods
-make run METHOD=orbslam3 MODE=stereo-vi  # KAB-1 по умолчанию
-make run CONFIG=configs/experiments/botanicgarden_1018_00_orbslam3.yaml
-make run METHOD=orbslam2 MODE=stereo CONFIG=configs/experiments/botanicgarden_1018_00_orbslam3.yaml
-make run RGB_MAX=200                    # короткая проверка
+`configs/datasets/selected.yaml` — список скачиваемых записей в штатном формате
+VSLAM-LAB `dataset: [sequence, ...]`. Его читают `make prepare`, `make plan` и
+`make validate`. Запас места — 15 GB, лимит каталога данных — 125 GB;
+проверка места не резервирует диск. При подготовке по файлу эксперимента можно
+переопределить бюджеты через необязательный `Preparation: {reserve_gb: 15, max_data_gb: 125}`.
+
+`configs/experiments/comparison.yaml` — один файл эксперимента:
+
+```yaml
+Datasets:
+  grandtour-alphasense: [kaeb_1]
+  botanicgarden: ['1018_00']
+Methods:
+  orbslam3_default:
+    Module: orbslam3
+    Parameters: {mode: stereo-vi, verbose: 0}
+  orbslam3_no_loop:
+    Module: orbslam3
+    Parameters: {mode: stereo-vi, verbose: 0}
+    Settings: {loopClosing: 0}
+NumRuns: 1
+Evaluation:
+  align: SE3
+  correct_scale: false
+  max_time_difference_s: 0.01
 ```
 
-Метод должен поддерживать режим и модель камеры — проверяет VSLAM-LAB.
-При первом запуске фреймворк сам устанавливает метод и его vocabulary/weights.
-`run_catalog.py` только выбирает последовательность, проверяет окно IMU,
-формирует native YAML и вызывает **штатный `run_exp`/`run_sequence`**.
-Настройки метода берутся из каталога, viewer выключен native `verbose=0`.
-Каждый запуск получает отдельный experiment в
-`${VIO_RESULTS_DIR}/VSLAM-LAB-Evaluation/`, включая YAML, native logs и траекторию.
-`CONFIG` выбирает запись; `METHOD` и `MODE` выбирают метод независимо от имени YAML.
-Исследовательские `MethodSettings`/`Evaluation` при таком запуске не применяются.
+Каждый вариант `Methods` запускается на каждой записи `Datasets` с `NumRuns`
+повторами. В примере — четыре запуска. Варианты имеют отдельные логи и результаты.
+`Parameters` — параметры запуска VSLAM-LAB; `Settings` переопределяет только
+указанные ключи штатного YAML метода. Калибровка камер/IMU берётся из датасета.
+Без `Settings` применяется штатный файл метода. Viewer по умолчанию выключен
+(`verbose: 0`); при первом запуске VSLAM-LAB устанавливает метод и vocabulary/weights.
 
 ```bash
-make plan                              # оценка места для всего набора
-make prepare CONFIG=configs/experiments/grandtour_kaeb_1_orbslam3.yaml
-make validate CONFIG=configs/experiments/grandtour_kaeb_1_orbslam3.yaml
+make methods                                  # каталог методов
+make run                                      # вся матрица comparison.yaml
+make run CONFIG=configs/experiments/comparison.yaml
+make run RGB_MAX=200                           # короткая проверка всей матрицы
+make run PLAN=1                                # native YAML без запуска методов
+make plan                                     # место для selected.yaml
+make prepare CONFIG=configs/experiments/comparison.yaml # только записи эксперимента
+make validate CONFIG=configs/experiments/comparison.yaml
 ```
 
-Без `CONFIG` подготовка читает `VIO_DATASET_CONFIG` (`prepare_all.yaml`),
-запуск — `VIO_EXPERIMENT_CONFIG` (`grandtour_kaeb_1_orbslam3.yaml`).
-Оба читают одинаковый native формат `Config` dataset/sequence.
-`Preparation.reserve_gb` и `max_data_gb` задаются в YAML. Проверка места
-и блокировка параллельной подготовки сохраняются; оценка места не резервирует диск.
+`METHOD`/`MODE` перенесены в файл эксперимента. Без `CONFIG` подготовка читает
+`VIO_DATASET_CONFIG` (`selected.yaml`), запуск — `VIO_EXPERIMENT_CONFIG`
+(`comparison.yaml`). Машинные пути остаются в `.envrc`.
+`run_catalog.py` проверяет подготовленные входы и окно IMU, генерирует native YAML,
+затем вызывает штатные `run_exp`/`run_sequence`. Исходный файл эксперимента,
+эффективные настройки всех вариантов, протокол оценки и аудит входов сохраняются
+в `${VIO_RESULTS_DIR}/VSLAM-LAB-Evaluation/comparison_.../inputs/`.
+`PLAN=1` может установить метод для получения его штатного файла настроек.
 Конвертация выполняется в `dataset.download_sequence`, отдельной команды convert нет.
 
-Для прежнего эксперимента без loop closing, с provenance и SE(3)-метриками:
+Для одного исследовательского запуска с provenance и SE(3)-метриками используйте
+тот же файл и выберите вариант и запись:
 
 ```bash
-make run-research CONFIG=configs/experiments/grandtour_kaeb_1_orbslam3.yaml
+make run-research VARIANT=orbslam3_no_loop DATASET=grandtour-alphasense SEQUENCE=kaeb_1
 make evaluate
 make visualize
 ```
 
-`make evaluate`/`make visualize` работают с research run. Встроенные native
-оценка/сравнение доступны через команды VSLAM-LAB с сохранённым native experiment YAML;
-их Sim(3)-протокол отличается от исследовательского SE(3), поэтому автоматически
-после `make run` они не вызываются.
+`Evaluation` применяется при `make evaluate` к research run; `make run` сохраняет
+протокол, но автоматически метрики не вычисляет. `make evaluate`/`make visualize`
+работают с research run. Встроенные native оценка/сравнение доступны через команды
+VSLAM-LAB с сохранённым native experiment YAML; их Sim(3)-протокол отличается от
+исследовательского SE(3).
 
 ## Формат и источники
 

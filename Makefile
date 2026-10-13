@@ -5,16 +5,16 @@ ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 export PYTHON
 VENV ?= $(ROOT).venv
 VIS_VENV := $(ROOT).venv-rerun
-# CONFIG overrides selection for preparation or execution; defaults select all vs one.
+# CONFIG overrides the download selection or comparison experiment.
 CONFIG ?=
-$(foreach option,DATA_DIR SEQUENCES MAX_DATA_GB RESERVE_GB,$(if $(filter command,$(origin $(option))),$(error $(option) is no longer supported; edit experiment YAML instead)))
+$(foreach option,DATA_DIR SEQUENCES MAX_DATA_GB RESERVE_GB,$(if $(filter command,$(origin $(option))),$(error $(option) is no longer supported; edit dataset selection or experiment YAML instead)))
 SETUP = source "$(ROOT).envrc" && export VSLAMLAB_BENCHMARK="$$VIO_DATA_DIR/VSLAM-LAB-Benchmark" VSLAMLAB_EVALUATION="$$VIO_RESULTS_DIR/VSLAM-LAB-Evaluation" PYTHONPATH= &&
 ARGS = $(if $(CONFIG),--config "$(CONFIG)",)
 RUN = "$$PIXI_BIN" run --frozen -e vslamlab python "$(ROOT)scripts/prepare_datasets.py"
 
 .PHONY: help configure bootstrap env plan prepare validate test run run-research methods evaluate visualize visualize-env
 help:
-	@printf '%s\n' 'make prepare # bootstrap, download and prepare all four selected recordings' 'make prepare CONFIG=... # prepare the selection from an experiment YAML' 'make plan # estimate storage without downloading recordings' 'make validate # validate the four selected recordings' 'make methods # list VSLAM-LAB catalog' 'make run METHOD=orbslam3 MODE=stereo-vi CONFIG=... # native pipeline; defaults to KAB-1' 'make run RGB_MAX=200 # short native smoke run' 'make run-research CONFIG=... # prior no-loop experiment and provenance for SE(3) evaluation' 'make evaluate [RUN_DIR=...] # evo evaluation of a research run' 'make visualize [RUN_DIR=...] # Rerun comparison of a research run' 'make test # offline tests (after bootstrap)' 'VIO_DATA_DIR=/path/to/ssd make prepare # use external storage; .envrc is preserved'
+	@printf '%s\n' 'make prepare # bootstrap, download and prepare all four selected recordings' 'make prepare CONFIG=... # prepare the selection from an experiment YAML' 'make plan # estimate storage without downloading recordings' 'make validate # validate the four selected recordings' 'make methods # list VSLAM-LAB catalog' 'make run CONFIG=... # run every Methods variant on every Datasets sequence' 'make run RGB_MAX=200 # short native smoke run' 'make run-research VARIANT=... DATASET=... SEQUENCE=... # one research run with evo provenance' 'make evaluate [RUN_DIR=...] # evo evaluation of a research run' 'make visualize [RUN_DIR=...] # Rerun comparison of a research run' 'make test # offline tests (after bootstrap)' 'VIO_DATA_DIR=/path/to/ssd make prepare # use external storage; .envrc is preserved'
 
 configure: $(ROOT).envrc
 
@@ -32,7 +32,7 @@ $(VENV)/.installed: $(ROOT)requirements.txt | configure
 	"$(VENV)/bin/python" -m pip install -r "$(ROOT)requirements.txt"
 	@touch "$@"
 
-PREP_ARGS = --config "$(if $(CONFIG),$(CONFIG),$${VIO_DATASET_CONFIG:-$(ROOT)configs/experiments/prepare_all.yaml})"
+PREP_ARGS = --config "$(if $(CONFIG),$(CONFIG),$${VIO_DATASET_CONFIG:-$(ROOT)configs/datasets/selected.yaml})"
 plan: bootstrap
 	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && $(RUN) plan $(PREP_ARGS)
 prepare: bootstrap
@@ -44,12 +44,11 @@ test: env visualize-env
 	$(SETUP) cd "$(ROOT)" && "$(VENV)/bin/python" -m unittest discover -s tests -v
 	PYTHONPATH= "$(VIS_VENV)/bin/python" -m unittest discover -s "$(ROOT)tests/evaluation" -v
 
-METHOD ?= orbslam3
-MODE ?= stereo-vi
+$(foreach option,METHOD MODE,$(if $(filter command,$(origin $(option))),$(error $(option) is now selected in experiment Methods)))
 run: bootstrap
 	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && \
 		"$$PIXI_BIN" run --frozen -e vslamlab python "$(ROOT)scripts/run_catalog.py" \
-		$(ARGS) --method "$(METHOD)" --mode "$(MODE)" $(if $(RGB_MAX),--rgb-max "$(RGB_MAX)",)
+		$(ARGS) $(if $(RGB_MAX),--rgb-max "$(RGB_MAX)",) $(if $(PLAN),--plan,)
 
 methods: bootstrap
 	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && "$$PIXI_BIN" run --frozen -e vslamlab print-baselines
@@ -57,7 +56,8 @@ methods: bootstrap
 run-research: bootstrap
 	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && \
 		"$$PIXI_BIN" run --frozen -e vslamlab \
-		python "$(ROOT)scripts/run_vio.py" $(ARGS)
+		python "$(ROOT)scripts/run_vio.py" $(ARGS) \
+		$(if $(VARIANT),--variant "$(VARIANT)",) $(if $(DATASET),--dataset "$(DATASET)",) $(if $(SEQUENCE),--sequence "$(SEQUENCE)",) $(if $(RGB_MAX),--rgb-max "$(RGB_MAX)",)
 
 visualize-env: $(VIS_VENV)/.installed
 $(VIS_VENV)/.installed: $(ROOT)requirements-visualize.txt | configure

@@ -138,12 +138,51 @@ class MigrationTests(unittest.TestCase):
         self.assertNotIn('sigma_bg',text)
         self.assertNotIn('g_max',text)
 
+    def test_native_settings_are_opencv_readable_and_variants_stay_separate(self):
+        import cv2
+        import vslamlab_utilities as native
+        from dataset_inputs import write_method_settings
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            stock = root / 'stock.yaml'
+            stock.write_text('%YAML 1.2\n---\ncam_stereo: [rgb_0, rgb_1]\nFile.version: "1.0"\n')
+            class Baseline:
+                settings_yaml = stock
+                def ensure_installed(self): pass
+                def download_vslamlab_settings(self): return True
+            changed = write_method_settings(Baseline(), {'loopClosing': 0}, root / 'changed.yaml')
+            reader = cv2.FileStorage(str(changed), cv2.FILE_STORAGE_READ)
+            try:
+                self.assertEqual(reader.getNode('cam_stereo').at(1).string(), 'rgb_1')
+                self.assertEqual(reader.getNode('File.version').string(), '1.0')
+                self.assertEqual(reader.getNode('loopClosing').real(), 0)
+            finally:
+                reader.release()
+            selection = root / 'sequences.yaml'
+            selection.write_text('grandtour-alphasense: [kaeb_1]\n')
+            recipe = {'Config': str(selection), 'Module': 'orbslam3', 'NumRuns': 2,
+                      'Parameters': {'mode': 'stereo-vi'}}
+            exp = root / 'experiment.yaml'
+            exp.write_text(yaml.safe_dump({'stock': recipe,
+                'changed': dict(recipe, MethodSettings=str(changed))}))
+            seen = []
+            def execute(it, experiment, baseline, dataset, sequence):
+                seen.append((experiment.name, baseline.settings_yaml))
+                return dict(duration_time=.001, success=True, comments='', ram=0, swap=0, gpu=0)
+            with patch.object(native, 'VSLAMLAB_EVALUATION', root / 'results'), \
+                 patch.object(native, 'get_baseline', side_effect=lambda _: Baseline()), \
+                 patch.object(native, 'run_sequence', side_effect=execute):
+                native.update_experiment_csv_logs(exp)
+                native.run_exp(exp)
+            self.assertCountEqual(seen, [('stock', stock), ('changed', changed)] * 2)
+            self.assertNotIn('loopClosing', stock.read_text())
+
     def test_prepare_and_runner_share_selection_and_machine_path(self):
         with patch.dict(os.environ, {'VIO_DATA_DIR':'/tmp/custom data'}):
-            _,_,_,pairs=experiment_inputs(ROOT/'configs/experiments/botanicgarden_1018_00_orbslam3.yaml')
-            self.assertEqual(pairs,[('botanicgarden','1018_00')])
-            d=dataset_at_root(pairs[0][0])
-            self.assertEqual(d.sequence_path(pairs[0][1]),Path('/tmp/custom data/VSLAM-LAB-Benchmark/BOTANICGARDEN/1018_00'))
+            _,_,_,pairs=experiment_inputs(ROOT/'configs/experiments/comparison.yaml')
+            self.assertEqual(pairs,[('grandtour-alphasense','kaeb_1'), ('botanicgarden','1018_00')])
+            d=dataset_at_root(pairs[1][0])
+            self.assertEqual(d.sequence_path(pairs[1][1]),Path('/tmp/custom data/VSLAM-LAB-Benchmark/BOTANICGARDEN/1018_00'))
 
     def test_only_owned_incomplete_import_can_resume(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -214,9 +253,9 @@ class MigrationTests(unittest.TestCase):
         import prepare_datasets as preparation
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
-            selection=root/'sequences.yaml';selection.write_text('grandtour-alphasense:\n  - kaeb_1\n')
-            config=root/'experiment.yaml';config.write_text(yaml.safe_dump({'experiment':{
-                'Config':str(selection),'Preparation':{'max_data_gb':.001,'reserve_gb':0}}}))
+            config=root/'experiment.yaml';config.write_text(yaml.safe_dump({
+                'Datasets': {'grandtour-alphasense': ['kaeb_1']},
+                'Preparation': {'max_data_gb':.001,'reserve_gb':0}}))
             from Datasets.dataset_files.dataset_grandtour import GrandtourAlphasenseDataset
             with patch.dict(os.environ,{'VIO_DATA_DIR':str(root/'data')}), \
                  patch.object(sys,'argv',['prepare_datasets.py','prepare','--config',str(config)]), \

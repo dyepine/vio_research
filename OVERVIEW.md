@@ -1,3 +1,5 @@
+Текущая схема конфигурации: `configs/datasets/selected.yaml` для скачивания; `configs/experiments/comparison.yaml` для записей и вариантов методов эксперимента. Старые конфиги отдельных пар удалены; описание ниже сохраняет историю работы.
+
 # Outdoor VIO: что мы делаем и к чему хотим прийти
 
 ## 1. Задача проекта
@@ -181,9 +183,6 @@ SSD увеличит доступное место, но не устранит �
 
 - [PLAN.md](PLAN.md) — подробный операционный план следующих шагов.
 - [README.md](README.md) — документация первоначального загрузчика/экспортера, не полного VSLAM-LAB-пайплайна.
-- `configs/experiments/grandtour_alb2_orbslam3.yaml` — конфигурация первого эксперимента.
-- `configs/experiments/grandtour_alb2_sequences.yaml` — выбор последовательности.
-- `configs/methods/orbslam3_stereo_vi.yaml` — параметры ORB-SLAM3.
 - `scripts/run_grandtour_alb2.py` — launcher поверх VSLAM-LAB.
 - `results/grandtour-alb2/` — материалы текущей попытки.
 
