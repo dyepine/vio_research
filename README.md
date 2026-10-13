@@ -51,7 +51,7 @@ OneDrive, без обращений к SJTU. Подписанный download URL
 
 Адаптер BotanicGarden и необходимые исправления ROS/download helpers находятся
 в нашем [fork VSLAM-LAB](https://github.com/dyepine/VSLAM-LAB/tree/vio-research-datasets).
-Submodule закреплён на commit `662faaaf0d7349d0e2c66ca3db85929294ca44bb`;
+Submodule закреплён на commit `157d3f277c929dc397f069f17d556e62e39e661c`;
 ветка fork — `vio-research-datasets`. Чистый checkout сразу содержит адаптер,
 патч и его применение при bootstrap удалены. Bootstrap читает pin из Git,
 при несовпадении ревизии сохраняет checkout и останавливается.
@@ -161,7 +161,7 @@ make evaluate EXPERIMENT=/path/to/comparison_.../experiment.yaml
 PNG и PDF с XY-проекцией траекторий, APE/RPE во времени и RMSE/покрытием.
 Проекции содержат все сохранённые позы метода и измеренный GT в их временном
 диапазоне; используется уже сохранённое преобразование evo, без нового fit.
-На XY-проекции масштабы осей одинаковы. Временные ошибки берутся из ZIP evo; RPE all_pairs
+На XY-проекции масштабы осей одинаковы; общая GT показана один раз серым пунктиром. Временные ошибки берутся из ZIP evo; RPE all_pairs
 показывается точками. Неудачные запуски отмечаются в сводных графиках.
 Картинки обновляются вместе с последней таблицей, версии самих оценок сохраняются.
 
