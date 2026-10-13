@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import os
+import math
 import numpy as np
 import yaml
 
@@ -71,8 +72,8 @@ def preparation_estimate(dataset, sequence):
         asset = dataset.cfg['bags'][sequence]
         bag = source / f'{sequence}_VLIO.bag'
         missing = 0 if bag.exists() and bag.stat().st_size == asset['size'] else asset['size']
-        image_bounds = {'1018_00': 1500, '1018_13': 2100}
-        return missing + image_bounds[sequence] * 2 * 960 * 600 * 1.2 + 100_000_000
+        image_bound = math.ceil(dataset.cfg['durations_s'][sequence] * dataset.rgb_hz * 1.2)
+        return missing + image_bound * 2 * 960 * 600 * 1.2 + 100_000_000
     if dataset.dataset_name == 'grandtour-alphasense':
         from huggingface_hub import HfApi
         from Datasets.dataset_files.dataset_grandtour import OPTIONAL_TOPICS

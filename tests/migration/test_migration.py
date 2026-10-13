@@ -21,6 +21,35 @@ def read_rows(path):
 
 
 class MigrationTests(unittest.TestCase):
+    def test_catalog_contains_all_public_sources_but_project_selects_two(self):
+        d = BotanicgardenDataset()
+        expected = {'1005_00', '1005_01', '1005_05', '1005_07', '1006_01',
+                    '1006_03', '1008_01', '1008_03', '1018_00', '1018_13'}
+        self.assertEqual(set(d.sequence_names), expected)
+        for kind in ['bags', 'groundtruth_bags', 'durations_s']:
+            self.assertEqual(set(d.cfg[kind]), expected)
+        selection = yaml.safe_load((ROOT/'configs/datasets/selected.yaml').read_text())
+        self.assertEqual(selection['botanicgarden'], ['1018_00', '1018_13'])
+
+    def test_new_public_sequence_uses_sha256_and_only_its_own_assets(self):
+        import hashlib
+        from Datasets.dataset_files.dataset_botanicgarden import verified
+        import prepare_datasets as preparation
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);d=BotanicgardenDataset();d.dataset_path=root/'data'
+            d.cfg['calibration_files']={}
+            with patch.dict(os.environ, {'BOTANICGARDEN_SOURCE_DIR':str(root/'local')}), \
+                 patch('Datasets.dataset_files.dataset_botanicgarden.download_onedrive_file') as download:
+                d.download_sequence_data('1005_05')
+            self.assertEqual(download.call_count,2)
+            self.assertEqual([c.kwargs['filename'] for c in download.call_args_list],
+                             ['1005_05_VLIO.bag','gt_1005_05_qnew.bag'])
+            self.assertEqual(download.call_args_list[0].kwargs['checksum'],
+                             'sha256:'+d.cfg['bags']['1005_05']['sha256'])
+            self.assertGreater(preparation.preparation_estimate(d,'1005_05'),d.cfg['bags']['1005_05']['size'])
+            candidate=root/'small.bag';candidate.write_bytes(b'fixture')
+            self.assertTrue(verified(candidate,{'size':7,'sha256':hashlib.sha256(b'fixture').hexdigest()}))
+
     def test_grandtour_interrupted_image_folder_is_rebuilt(self):
         from PIL import Image
         from Datasets.dataset_files.dataset_grandtour import GrandtourAlphasenseDataset

@@ -24,7 +24,7 @@ BotanicGarden интегрируем как `DatasetVSLAMLAB` adapter по оф�
 `make prepare` включает bootstrap и все четыре записи; `make run METHOD=... MODE=...`
 вызывает штатный pipeline. По последнему решению пользователя адаптер поставляется
 через fork `dyepine/VSLAM-LAB`, ветка `vio-research-datasets`, закреплённый submodule
-commit `6657e8ccd1c3ac166375bffe1581610cf8c4eb68`. Патч и его применение удалены;
+commit `219df9d6667817db42e7b7a1db902fc7825807ea`. Патч и его применение удалены;
 PR в upstream не планируется. BotanicGarden
 1018_00, KÄB-1 и ALB-1 проверены; 1018_13 докачивается на T7 напрямую с OneDrive.
 Последующие разделы описывают текущий/предыдущий ALB-2
