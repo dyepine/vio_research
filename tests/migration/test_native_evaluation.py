@@ -171,3 +171,43 @@ class NativeEvaluationTests(unittest.TestCase):
             self.assertEqual(benchmark.call_count, 4)
             self.assertTrue(all(call.args[0].evaluation is None for call in benchmark.call_args_list))
             self.assertFalse((root/'comparison.csv').exists())
+
+    def test_plots_use_all_saved_poses_and_do_not_modify_metrics(self):
+        import hashlib
+        from Evaluate.protocol import evaluate_files
+        from Evaluate.protocol_plots import full_paths, plot_comparison
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.fixture(root)
+            output = root/'results/body/BOTANICGARDEN/1018_00'
+            trajectory = output/'00000_KeyFrameTrajectory.csv'
+            with trajectory.open() as stream:
+                data = list(csv.reader(stream))
+            for index, row in enumerate(data[1:]):
+                if index % 2: row[0] = str(int(row[0]) + 50_000_000)
+            with trajectory.open('w') as stream:
+                csv.writer(stream).writerows(data)
+            protocol = validate_protocol({'estimate_frame':'body', 'rpe_delta_m': .4})
+            destination = evaluate_files(trajectory, output/'groundtruth.csv', output/'calibration_exp.yaml',
+                                         root/'evaluations', protocol, {})
+            summary = json.loads((destination/'summary.json').read_text())
+            self.assertLess(summary['unique_matched_estimate_poses'], 30)
+            estimate, reference = full_paths(summary)
+            self.assertEqual(estimate.num_poses, 30)
+            np.testing.assert_allclose(estimate.positions_xyz, reference.positions_xyz, atol=1e-10)
+            table = root/'comparison.csv'
+            record = dict(dataset='botanicgarden', sequence='1018_00', experiment='body', iteration=0,
+                          status='evaluated', evaluation_directory=str(destination),
+                          matched_fraction_of_saved_poses=summary['matched_fraction_of_saved_poses'],
+                          ape_position_m_rmse=summary['metrics']['ape_position_m']['rmse'])
+            with table.open('w') as stream:
+                writer = csv.DictWriter(stream, fieldnames=record);writer.writeheader();writer.writerow(record)
+            artifacts = [table, *destination.glob('*.zip')]
+            before = {p:hashlib.sha256(p.read_bytes()).hexdigest() for p in artifacts}
+            figures = plot_comparison(table)
+            self.assertEqual(len(list(figures.glob('*.png'))), 3)
+            self.assertEqual(len(list(figures.glob('*.pdf'))), 3)
+            self.assertEqual(before, {p:hashlib.sha256(p.read_bytes()).hexdigest() for p in artifacts})
+            trajectory.write_text('changed')
+            with self.assertRaisesRegex(ValueError, 'changed since evaluation'):
+                full_paths(summary)
