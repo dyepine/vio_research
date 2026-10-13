@@ -18,7 +18,14 @@ make run
 Pixi 0.81.0 с проверкой SHA-256 и окружения из `pixi.lock`,
 скачивает и готовит **все четыре выбранные записи**:
 GrandTour `kaeb_1`, `alb_1`; BotanicGarden `1018_00`, `1018_13` вместе с corrected GT.
-Список — `configs/datasets/selected.yaml`. `lmb_2`, `hoeb_1` и прежняя `alb_2`
+Список — `configs/datasets/selected.yaml`. Каталог адаптера содержит все 10 публичных
+BotanicGarden-записей с bags и corrected GT: `1005_00`, `1005_01`, `1005_05`,
+`1005_07`, `1006_01`, `1006_03`, `1008_01`, `1008_03`, `1018_00`, `1018_13`.
+Расширение каталога не расширяет выбор для скачивания: у нас остаются две `1018`-записи.
+Чтобы выбрать другую опубликованную запись, укажите её в selection YAML.
+Для трёх дополнительных bags checksum — SHA-256 из OneDrive metadata;
+для остальных bags и corrected GT сохранены MD5. Другие 23 записи авторы
+предоставляют по запросу, публичные download URLs для них не указаны. `lmb_2`, `hoeb_1` и прежняя `alb_2`
 не включены в основной набор.
 
 По умолчанию данные лежат в `$HOME/datasets/vio_research`. Для SSD:
@@ -44,7 +51,7 @@ OneDrive, без обращений к SJTU. Подписанный download URL
 
 Адаптер BotanicGarden и необходимые исправления ROS/download helpers находятся
 в нашем [fork VSLAM-LAB](https://github.com/dyepine/VSLAM-LAB/tree/vio-research-datasets).
-Submodule закреплён на commit `6657e8ccd1c3ac166375bffe1581610cf8c4eb68`;
+Submodule закреплён на commit `219df9d6667817db42e7b7a1db902fc7825807ea`;
 ветка fork — `vio-research-datasets`. Чистый checkout сразу содержит адаптер,
 патч и его применение при bootstrap удалены. Bootstrap читает pin из Git,
 при несовпадении ревизии сохраняет checkout и останавливается.
