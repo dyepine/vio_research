@@ -62,8 +62,8 @@ Submodule закреплён на commit `9ba879d1a002d84a3dd768144dfbf5ed2653fb
 ## Конфигурация и запуск
 
 `configs/datasets/selected.yaml` — список скачиваемых записей в штатном формате
-VSLAM-LAB `dataset: [sequence, ...]`. Его читают `make prepare`, `make plan` и
-`make validate`. Запас места — 15 GB, лимит каталога данных — 125 GB;
+VSLAM-LAB `dataset: [sequence, ...]`. Его читает `make prepare`, который также
+проверяет подготовленные данные. Запас места — 15 GB, лимит каталога данных — 125 GB;
 проверка места не резервирует диск. При подготовке по файлу эксперимента можно
 переопределить бюджеты через необязательный `Preparation: {reserve_gb: 15, max_data_gb: 125}`.
 
@@ -98,14 +98,11 @@ Evaluation:
 (`verbose: 0`); при первом запуске VSLAM-LAB устанавливает метод и vocabulary/weights.
 
 ```bash
-make methods                                  # каталог методов
 make run                                      # вся матрица comparison.yaml
 make run CONFIG=configs/experiments/comparison.yaml
 make run RGB_MAX=200                           # короткая проверка всей матрицы
 make run PLAN=1                                # native YAML без запуска методов
-make plan                                     # место для selected.yaml
 make prepare CONFIG=configs/experiments/comparison.yaml # только записи эксперимента
-make validate CONFIG=configs/experiments/comparison.yaml
 ```
 
 `METHOD`/`MODE` перенесены в файл эксперимента. Без `CONFIG` подготовка читает
@@ -177,17 +174,22 @@ RPE all_pairs показывается точками. Таблица содер
 оценкам. Запуски разных последовательностей не усредняются в общий рейтинг.
 Повторная оценка сохраняет новую версию и обновляет ссылки в native логе.
 
-Допуск 10 мс сохранён; он не увеличивается автоматически при низком покрытии.
+Допуск времени задаётся в `Evaluation` и не увеличивается автоматически при низком покрытии.
 Метрики описывают сохранённые позы, а не все входные изображения. Native YAML без
 `Evaluation` сохраняет прежний benchmark-путь VSLAM-LAB с Sim(3); наши сгенерированные
 эксперименты всегда содержат явный протокол без коррекции масштаба.
 `make run` сохраняет протокол, а оценка запускается отдельной командой.
 
-Прежние research runs сохранены и оцениваются тем же кодом `Evaluate`:
+Старые research runs можно переоценивать тем же кодом `Evaluate`:
 
 ```bash
-make run-research VARIANT=orbslam3_no_loop DATASET=grandtour-alphasense SEQUENCE=kaeb_1
 make evaluate RUN_DIR=/path/to/research_run
+```
+
+Новые запуски создаёт только `make run`. Все тесты выполняются в Pixi:
+
+```bash
+make test
 ```
 
 Корневые `evaluate_result.py`, `trajectory_inputs.py` и `run_results.py` делегируют
@@ -231,12 +233,12 @@ BotanicGarden возобновляет hooks; неизвестные части�
 
 ## Состояние миграции
 
-Адаптер BotanicGarden пока находится в рабочем дереве submodule. Публикация,
-commit и обновление pin ещё не выполнены: чистый checkout пока его не получает.
+Адаптер BotanicGarden опубликован в закреплённом fork/submodule VSLAM-LAB;
+чистый checkout получает его через автоматический bootstrap.
 Старый EuRoC-like exporter, manifest, storage YAML и его тесты удалены после
 проверки BotanicGarden, KÄB-1 и ALB-1. `zarr`, `numcodecs`, `rosbags`, `requests`,
-`scipy`, `Pillow` удалены из bootstrap requirements; подготовка использует Pixi,
-а оценка evo использует окружение Pixi VSLAM-LAB. Уже установленные окружения и
+`scipy`, `Pillow` больше не устанавливаются отдельным bootstrap-окружением;
+подготовка, методы, оценка и тесты используют Pixi VSLAM-LAB. Уже установленные окружения и
 данные не удалялись. Историческая инструкция — [здесь](docs/legacy-dataset-preparation.md).
 
 ## Оценка результатов через evo
