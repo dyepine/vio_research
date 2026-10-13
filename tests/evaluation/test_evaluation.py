@@ -76,6 +76,28 @@ class EvaluationTests(unittest.TestCase):
 
         # Verify actual serialized scalar series, not just that an rrd file exists.
 
+    def test_origin_alignment_matches_first_pose_and_preserves_drift(self):
+        estimate = to_evo(self.ns, self.values, int(self.ns[0]))
+        reference = copy.deepcopy(estimate)
+        transform = np.eye(4)
+        transform[:3, :3] = Rotation.from_euler('xyz', [.2, -.3, .4]).as_matrix()
+        transform[:3, 3] = [3, -2, 1]
+        estimate.transform(transform)
+        # Later position errors must survive alignment at the start.
+        estimate.positions_xyz[1:] += np.arange(1, 20)[:, None] * [.01, .02, 0]
+        results, summary = calculate(estimate, reference,
+                                     dict(self.protocol, align='origin', evaluate_orientation=True))
+        aligned = results['ape_position_m'].trajectories['estimate']
+        np.testing.assert_allclose(aligned.poses_se3[0], reference.poses_se3[0], atol=1e-12)
+        self.assertLess(results['ape_position_m'].np_arrays['error_array'][0], 1e-12)
+        self.assertGreater(results['ape_position_m'].np_arrays['error_array'][-1], .1)
+        # A rigid global alignment cannot change relative motion errors.
+        unaligned, _ = calculate(estimate, reference, dict(self.protocol, align='none'))
+        np.testing.assert_allclose(results['rpe_position_m'].np_arrays['error_array'],
+                                   unaligned['rpe_position_m'].np_arrays['error_array'], atol=1e-12)
+        np.testing.assert_allclose(np.asarray(summary['alignment_transform_gt_from_estimate']) @
+                                   transform, np.eye(4), atol=1e-12)
+
     def test_camera_extrinsic_is_right_multiplication(self):
         body = to_evo(self.ns, self.values, int(self.ns[0]))
         body_transform = np.eye(4)
