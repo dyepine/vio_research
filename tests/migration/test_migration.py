@@ -51,9 +51,8 @@ class MigrationTests(unittest.TestCase):
             (local / '1018_13_VLIO.bag.part').write_bytes(b'partial')
             d = BotanicgardenDataset(); d.dataset_path = root / 'data'
             d.cfg['calibration_files'] = {}
-            d.cfg['bags']['1018_13'].pop('onedrive', None)
             with patch.dict(os.environ, {'BOTANICGARDEN_SOURCE_DIR': str(local)}), \
-                 patch('Datasets.dataset_files.dataset_botanicgarden.downloadFile', side_effect=OSError('connection lost')):
+                 patch('Datasets.dataset_files.dataset_botanicgarden.download_onedrive_file', side_effect=OSError('connection lost')):
                 with self.assertRaises(OSError):
                     d.download_sequence_data('1018_13')
             self.assertEqual(d.check_sequence_availability('1018_13', False), 'non-available')
@@ -63,7 +62,7 @@ class MigrationTests(unittest.TestCase):
                 path.with_name(path.name + '.part').unlink(missing_ok=True)
                 return str(path)
             with patch.dict(os.environ, {'BOTANICGARDEN_SOURCE_DIR': str(local)}), \
-                 patch('Datasets.dataset_files.dataset_botanicgarden.downloadFile', side_effect=complete):
+                 patch('Datasets.dataset_files.dataset_botanicgarden.download_onedrive_file', side_effect=complete):
                 d.download_sequence_data('1018_13')
             files = json.loads((d.sequence_path('1018_13') / 'sources.json').read_text())['files']
             self.assertEqual(files['1018_13_VLIO.bag'], str(local / '1018_13_VLIO.bag'))
@@ -268,19 +267,19 @@ class MigrationTests(unittest.TestCase):
                 download_onedrive_file('https://1drv.ms/u/test', '/tmp', 999,
                                        filename='bag', checksum='md5:'+'0'*32)
 
-    def test_adapter_switches_to_official_source_on_unresumable_mirror(self):
-        from utilities import ResumeNotSupportedError
+    def test_adapter_uses_onedrive_directly_for_bag_and_corrected_gt(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = BotanicgardenDataset(); d.dataset_path = Path(tmp)
             d.cfg['calibration_files'] = {}
             with patch.dict(os.environ, {'BOTANICGARDEN_SOURCE_DIR': tmp}), \
                  patch('Datasets.dataset_files.dataset_botanicgarden.downloadFile') as mirror, \
-                 patch('Datasets.dataset_files.dataset_botanicgarden.download_onedrive_file') as fallback:
-                mirror.side_effect = [ResumeNotSupportedError('no Range'), None]
+                 patch('Datasets.dataset_files.dataset_botanicgarden.download_onedrive_file') as source:
                 d.download_sequence_data('1018_13')
-                self.assertEqual(fallback.call_count, 1)
-                self.assertEqual(fallback.call_args.kwargs['filename'], '1018_13_VLIO.bag')
-                self.assertEqual(fallback.call_args.kwargs['checksum'], 'md5:50ad55dc11d80c519f964a80dbeedf82')
+                mirror.assert_not_called()
+                self.assertEqual(source.call_count, 2)
+                self.assertEqual(source.call_args_list[0].kwargs['filename'], '1018_13_VLIO.bag')
+                self.assertEqual(source.call_args_list[0].kwargs['checksum'], 'md5:50ad55dc11d80c519f964a80dbeedf82')
+                self.assertEqual(source.call_args_list[1].kwargs['filename'], 'gt_1018_13_qnew.bag')
 
     def test_resume_prefers_larger_partial_on_dataset_disk(self):
         import json
@@ -293,7 +292,7 @@ class MigrationTests(unittest.TestCase):
             (local / (name+'.part')).write_bytes(b'old')
             (d._raw() / (name+'.part')).write_bytes(b'more progress')
             with patch.dict(os.environ, {'BOTANICGARDEN_SOURCE_DIR': str(local)}), \
-                 patch('Datasets.dataset_files.dataset_botanicgarden.downloadFile'):
+                 patch('Datasets.dataset_files.dataset_botanicgarden.download_onedrive_file'):
                 d.download_sequence_data('1018_13')
             sources = json.loads((d.sequence_path('1018_13') / 'sources.json').read_text())
             self.assertEqual(sources['files'][name], str(d._raw() / name))

@@ -31,16 +31,16 @@ VIO_DATA_DIR=/path/to/ssd/vio_research/data make run
 Пути можно сохранить в `.envrc`, которую `make` создаёт и не перезаписывает.
 Локальная `.envrc` этой машины уже указывает на `/media/napalkov/T7/vio_research/data`.
 `BOTANICGARDEN_SOURCE_DIR` позволяет переиспользовать скачанные bags/GT; `.part`
-докачивается на месте. При обрыве SJTU или отсутствии
-докачки загрузка bag автоматически переключается на официальный OneDrive
-с сохранением `.part`; прямой download URL обновляется при каждой попытке.
-Повторные обрывы допускаются, пока файл растёт; 10 ошибок подряд без прогресса
-останавливают загрузку с сохранением `.part`. Полный размер и MD5 обязательны. Повтор той же команды не требует ручного распаковывания.
+докачивается на месте. Bags и corrected GT скачиваются сразу с официального
+OneDrive, без обращений к SJTU. Подписанный download URL обновляется при каждой
+попытке. Обрывы допускаются, пока сохранённый файл растёт; 10 ошибок подряд
+без прогресса останавливают загрузку с сохранением `.part`.
+Полный размер и MD5 обязательны. Повтор той же команды не требует ручного распаковывания.
 Доступность и скорость внешних зеркал остаются ограничением.
 
 Адаптер BotanicGarden и необходимые исправления ROS/download helpers находятся
 в нашем [fork VSLAM-LAB](https://github.com/dyepine/VSLAM-LAB/tree/vio-research-datasets).
-Submodule закреплён на commit `eb34016b0f6ac494ca42d2a65ce81307c17244b0`;
+Submodule закреплён на commit `1a8a33a32a036076da24e7dd6e305df446226562`;
 ветка fork — `vio-research-datasets`. Чистый checkout сразу содержит адаптер,
 патч и его применение при bootstrap удалены. Bootstrap читает pin из Git,
 при несовпадении ревизии сохраняет checkout и останавливается.
@@ -112,7 +112,7 @@ BMI085. Основные записи — KÄB-1 и ALB-1. Стандартны�
 `cpt7_ie_tc_odometry`; prism-only fallback не принимается как 6DoF GT.
 HF revision данных штатным адаптером не закрепляется; это отмечено в provenance.
 
-BotanicGarden использует VLIO bags с SJTU, corrected `GT_pose_qnew.zip` и
+BotanicGarden использует VLIO bags и corrected `gt_<sequence>_qnew.bag` с OneDrive и
 калибровку из закреплённого GitHub revision. Bags и GT проверяются по MD5.
 Native gray stereo — 960×600/10 Hz; Xsens IMU — nominal 400 Hz.
 Извлечение использует `header.stamp`, стереопары сопоставляются по одинаковому

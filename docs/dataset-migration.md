@@ -5,7 +5,7 @@
 KÄB-1, ALB-1 и BotanicGarden 1018_00 подготовлены; 1018_13 ещё загружается.
 По последнему решению пользователя от 2026-10-13 адаптер поставляется через
 fork `dyepine/VSLAM-LAB`, ветка `vio-research-datasets`, submodule commit
-`eb34016b0f6ac494ca42d2a65ce81307c17244b0`. Патч и его применение удалены.
+`1a8a33a32a036076da24e7dd6e305df446226562`. Патч и его применение удалены.
 Отправка изменений в upstream не планируется.
 Этот документ определяет целевую подготовку данных; старые попытки ALB-2 в
 `PLAN.md` остаются историей эксперимента, а не обязательным выбором новых записей.
@@ -155,7 +155,7 @@ GT подходят для нового импорта; повторная за�
 
 | Hook | Ответственность |
 |---|---|
-| `download_sequence_data` | Официальный SJTU VLIO bag, corrected `GT_pose_qnew.zip`, calibration из закреплённой версии BotanicGarden; проверить размеры/checksums |
+| `download_sequence_data` | Официальные OneDrive VLIO bag и corrected `gt_<sequence>_qnew.bag`, calibration из закреплённой версии BotanicGarden; проверить размеры/checksums |
 | `create_rgb_folder` | Извлечь `/dalsa_gray/left/image_raw` и `/dalsa_gray/right/image_raw` в `rgb_0`/`rgb_1` через общие ROS1-утилиты |
 | `create_rgb_csv` | Использовать timestamps каждой камеры из `header.stamp`, сопоставить по времени, явно учесть пропуски; не соединять камеры по номеру строки |
 | `create_imu_csv` | Извлечь raw Xsens `/imu/data` в стандартный `imu_0.csv`, ns, rad/s и m/s²; время из `header.stamp` |
@@ -457,3 +457,27 @@ log: `results/botanicgarden-download-20261013/prepare-13-native.log`.
 Synthetic transfer пережил 25 принудительных обрывов; recovery/source/checksum
 и Git delivery входят в regression tests. Logs:
 `results/botanicgarden-download-20261013/prepare-13-resumable*.log`.
+
+
+## OneDrive основной источник — 2026-10-13
+
+По запросу пользователя SJTU исключён из новой сетевой подготовки BotanicGarden.
+Submodule pin: `1a8a33a32a036076da24e7dd6e305df446226562`.
+
+VLIO bags и corrected GT bags для обеих выбранных записей скачиваются сразу
+с официальных OneDrive share links. GT bags получают отдельные size/MD5,
+сверенные с прежним проверенным GT_pose_qnew.zip. Старые ZIP imports остаются
+читаемыми, новые не требуют ZIP или SJTU. Calibration по-прежнему pinned GitHub.
+
+Проверка настоящего OneDrive transfer на GT 1018_13: после получения 1622 bytes
+чтение принудительно оборвано ConnectionResetError. URL обновлён, сервер вернул
+HTTP 206 Content-Range bytes 1622-276790/276791; загрузка завершилась с ожидаемым
+MD5 d64f15d54afdbfc972414947b068185a. Также полностью проверен GT 1018_00:
+188248 bytes, MD5 ed0e99e2696574a8c4b8a6ae1616d0d4. Новый direct-GT hook
+проверен реальным ROS1 reader и преобразованием в Xsens frame: 1938 поз для 13.
+
+В текущей большой загрузке естественных OneDrive обрывов в наблюдавшемся log
+не было. Это не доказательство их отсутствия в будущем; проверена именно
+обработка обрыва и докачка. Активный 1018_13 transfer уже идёт с OneDrive и
+не перезапускается ради изменения выбора источника. Full bag MD5/import ожидается.
+Evidence: results/onedrive-resume-check/verification.json.
