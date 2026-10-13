@@ -1,3 +1,15 @@
+## Оценка через штатный lifecycle
+
+Расчёт по явному протоколу перенесён в `Evaluate` нашего форка.
+`evaluate_exp` обходит всю матрицу и повторы; `compare_exp` собирает таблицу всех
+запусков, включая неудачные. Root CLI выбирает сохранённый эксперимент;
+старые research artifacts и viewer поддерживаются через тот же backend.
+Метрики — evo APE/RPE позиции и ориентации, SE(3) без коррекции масштаба.
+Каждый вариант метода задаёт входной frame через Methods.<variant>.Evaluation;
+camera→body применяется только к camera-экспорту. Timestamp association остаётся
+стандартным evo; доля сопоставленных сохранённых поз включена в comparison.csv.
+Без Evaluation исходный benchmark evaluator VSLAM-LAB сохраняет прежнее поведение.
+
 ## Компактная конфигурация экспериментов
 
 `configs/datasets/selected.yaml` — список скачиваемых записей.

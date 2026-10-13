@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 import yaml
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from dataset_inputs import load_comparison, experiment_inputs
 from run_catalog import materialize
@@ -36,7 +36,7 @@ class ComparisonTests(unittest.TestCase):
                 'Datasets': {'d': ['s1', 's2']}, 'NumRuns': 2,
                 'Methods': {'stock': {'Module': 'm', 'Parameters': {'mode': 'stereo-vi'}},
                             'no_loop': {'Module': 'm', 'Settings': {'loopClosing': 0}}},
-                'Evaluation': {'align': 'SE3', 'correct_scale': False}}))
+                'Evaluation': {'align': 'SE3', 'correct_scale': False, 'estimate_frame': 'body'}}))
             def audit(folder):
                 return [], {'framework_rgb_idx_inclusive': [1 if folder.name == 's1' else 2, 300]}
             with patch('run_catalog.dataset_at_root', return_value=Dataset()), \
