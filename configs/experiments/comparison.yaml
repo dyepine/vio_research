@@ -17,7 +17,7 @@ Methods:
 
 NumRuns: 1
 Evaluation:
-  align: SE3
+  align: origin
   correct_scale: false
   max_time_difference_s: 0.01
   evaluate_orientation: true
