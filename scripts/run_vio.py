@@ -69,7 +69,7 @@ def main():
     variant = args.variant or next(iter(methods))
     if variant not in methods:
         parser.error(f'Unknown variant {variant!r}')
-    settings = dict(methods[variant], Evaluation=comparison.get('Evaluation', {}),
+    settings = dict(methods[variant], Evaluation=dict(comparison.get('Evaluation', {}), **methods[variant].get('Evaluation', {})),
                     NumRuns=comparison.get('NumRuns', 1), ResultsDir='${VIO_RESULTS_DIR}')
     if args.rgb_max is not None:
         if args.rgb_max < 100:

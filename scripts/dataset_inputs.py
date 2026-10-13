@@ -55,11 +55,11 @@ def load_comparison(path=None):
     for variant, method in methods.items():
         if not isinstance(variant, str) or not re.fullmatch(r'[A-Za-z0-9_-]+', variant):
             raise ValueError('Method variant names must contain only letters, digits, _ or -')
-        if not isinstance(method, dict) or set(method) - {'Module', 'Parameters', 'Settings'}:
-            raise ValueError(f'{variant}: expected Module, Parameters and optional Settings')
+        if not isinstance(method, dict) or set(method) - {'Module', 'Parameters', 'Settings', 'Evaluation'}:
+            raise ValueError(f'{variant}: expected Module, Parameters and optional Settings/Evaluation')
         if not isinstance(method.get('Module'), str):
             raise ValueError(f'{variant}: Module is required')
-        for key in ('Parameters', 'Settings'):
+        for key in ('Parameters', 'Settings', 'Evaluation'):
             if not isinstance(method.get(key, {}), dict):
                 raise ValueError(f'{variant}: {key} must be a mapping')
     return path, name, settings, pairs

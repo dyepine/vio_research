@@ -51,7 +51,7 @@ OneDrive, без обращений к SJTU. Подписанный download URL
 
 Адаптер BotanicGarden и необходимые исправления ROS/download helpers находятся
 в нашем [fork VSLAM-LAB](https://github.com/dyepine/VSLAM-LAB/tree/vio-research-datasets).
-Submodule закреплён на commit `65e7eac788eb4c2d44f15658c58b3564b10c3da7`;
+Submodule закреплён на commit `ee2d562e9fd35e112e57e77e0db6feff0c81c1ff`;
 ветка fork — `vio-research-datasets`. Чистый checkout сразу содержит адаптер,
 патч и его применение при bootstrap удалены. Bootstrap читает pin из Git,
 при несовпадении ревизии сохраняет checkout и останавливается.
@@ -77,9 +77,11 @@ Methods:
   orbslam3_default:
     Module: orbslam3
     Parameters: {mode: stereo-vi, verbose: 0}
+    Evaluation: {estimate_frame: camera, camera: rgb_0}
   orbslam3_no_loop:
     Module: orbslam3
     Parameters: {mode: stereo-vi, verbose: 0}
+    Evaluation: {estimate_frame: camera, camera: rgb_0}
     Settings: {loopClosing: 0}
 NumRuns: 1
 Evaluation:
@@ -116,20 +118,55 @@ make validate CONFIG=configs/experiments/comparison.yaml
 `PLAN=1` может установить метод для получения его штатного файла настроек.
 Конвертация выполняется в `dataset.download_sequence`, отдельной команды convert нет.
 
-Для одного исследовательского запуска с provenance и SE(3)-метриками используйте
-тот же файл и выберите вариант и запись:
+Оценка всей сохранённой матрицы выполняется штатным `evaluate_exp` из нашего
+форка VSLAM-LAB, в том же Pixi-окружении, что и запуск:
+
+```bash
+make evaluate                                  # последняя запущенная матрица, PLAN пропускается
+make evaluate RUN_DIR=/path/to/comparison_...   # конкретная сохранённая матрица
+make evaluate EXPERIMENT=/path/to/inputs/experiment.yaml
+```
+
+Протокол `Evaluation` задаёт выравнивание, допуск времени и APE/RPE.
+Общие настройки применяются ко всем вариантам; `Methods.<variant>.Evaluation`
+переопределяет их для конкретного метода. `estimate_frame: camera` вместе с
+`camera: rgb_0` означает экспорт позы камеры — оценщик переводит её в body/IMU
+через сохранённую калибровку. Для экспорта позы корпуса укажите
+`estimate_frame: body`; преобразование камеры тогда не применяется.
+Для ORB-SLAM3 в текущих вариантах явно указан экспорт камеры.
+
+Для каждого повтора сохраняются immutable `summary.json`, `protocol.yaml` и
+стандартные ZIP evo в `<native output>/evaluations/<iteration>/<timestamp>/`.
+Общая таблица — `<comparison>/inputs/comparison.csv`: отдельная строка для каждого
+запуска, ошибки позиции/ориентации, число пар, доля сопоставленных сохранённых поз
+и статус. Неудачные запуски остаются строками таблицы; команда возвращает ошибку.
+`compare_exp` для экспериментов с `Evaluation` собирает ту же таблицу по сохранённым
+оценкам. Запуски разных последовательностей не усредняются в общий рейтинг.
+Повторная оценка сохраняет новую версию и обновляет ссылки в native логе.
+
+Допуск 10 мс сохранён; он не увеличивается автоматически при низком покрытии.
+Метрики описывают сохранённые позы, а не все входные изображения. Native YAML без
+`Evaluation` сохраняет прежний benchmark-путь VSLAM-LAB с Sim(3); наши сгенерированные
+эксперименты всегда содержат явный протокол SE(3) без коррекции масштаба.
+`make run` сохраняет протокол, а оценка запускается отдельной командой.
+
+Визуализация одной строки сравнения использует её `evaluation_directory`:
+
+```bash
+make visualize EVALUATION_DIR=/path/from/comparison.csv VIS_ARGS='--save /tmp/result.rrd'
+```
+
+Прежние research runs сохранены и оцениваются тем же кодом `Evaluate`:
 
 ```bash
 make run-research VARIANT=orbslam3_no_loop DATASET=grandtour-alphasense SEQUENCE=kaeb_1
-make evaluate
-make visualize
+make evaluate RUN_DIR=/path/to/research_run
+make visualize RUN_DIR=/path/to/research_run
 ```
 
-`Evaluation` применяется при `make evaluate` к research run; `make run` сохраняет
-протокол, но автоматически метрики не вычисляет. `make evaluate`/`make visualize`
-работают с research run. Встроенные native оценка/сравнение доступны через команды
-VSLAM-LAB с сохранённым native experiment YAML; их Sim(3)-протокол отличается от
-исследовательского SE(3).
+Корневые `evaluate_result.py`, `trajectory_inputs.py` и `run_results.py` делегируют
+работу модулю `Evaluate`; независимой реализации метрик в корневом репозитории нет.
+Rerun остаётся в отдельном окружении визуализации.
 
 ## Формат и источники
 

@@ -14,7 +14,7 @@ RUN = "$$PIXI_BIN" run --frozen -e vslamlab python "$(ROOT)scripts/prepare_datas
 
 .PHONY: help configure bootstrap env plan prepare validate test run run-research methods evaluate visualize visualize-env
 help:
-	@printf '%s\n' 'make prepare # bootstrap, download and prepare all four selected recordings' 'make prepare CONFIG=... # prepare the selection from an experiment YAML' 'make plan # estimate storage without downloading recordings' 'make validate # validate the four selected recordings' 'make methods # list VSLAM-LAB catalog' 'make run CONFIG=... # run every Methods variant on every Datasets sequence' 'make run RGB_MAX=200 # short native smoke run' 'make run-research VARIANT=... DATASET=... SEQUENCE=... # one research run with evo provenance' 'make evaluate [RUN_DIR=...] # evo evaluation of a research run' 'make visualize [RUN_DIR=...] # Rerun comparison of a research run' 'make test # offline tests (after bootstrap)' 'VIO_DATA_DIR=/path/to/ssd make prepare # use external storage; .envrc is preserved'
+	@printf '%s\n' 'make prepare # bootstrap, download and prepare all four selected recordings' 'make prepare CONFIG=... # prepare the selection from an experiment YAML' 'make plan # estimate storage without downloading recordings' 'make validate # validate the four selected recordings' 'make methods # list VSLAM-LAB catalog' 'make run CONFIG=... # run every Methods variant on every Datasets sequence' 'make run RGB_MAX=200 # short native smoke run' 'make run-research VARIANT=... DATASET=... SEQUENCE=... # one research run with evo provenance' 'make evaluate [RUN_DIR=...] # evo evaluation of saved native comparison or research run' 'make visualize EVALUATION_DIR=... # Rerun view of a saved evaluation' 'make test # offline tests (after bootstrap)' 'VIO_DATA_DIR=/path/to/ssd make prepare # use external storage; .envrc is preserved'
 
 configure: $(ROOT).envrc
 
@@ -65,10 +65,10 @@ $(VIS_VENV)/.installed: $(ROOT)requirements-visualize.txt | configure
 	PYTHONPATH= "$(VIS_VENV)/bin/python" -m pip install -r "$<"
 	@touch "$@"
 
-evaluate: visualize-env configure
-	$(SETUP) PYTHONPATH= "$(VIS_VENV)/bin/python" "$(ROOT)scripts/evaluate_result.py" \
-		$(if $(RUN_DIR),--run-dir "$(RUN_DIR)",) $(EVAL_ARGS)
+evaluate: bootstrap
+	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && "$$PIXI_BIN" run --frozen -e vslamlab python "$(ROOT)scripts/evaluate_result.py" \
+		$(if $(RUN_DIR),--run-dir "$(RUN_DIR)",) $(if $(EXPERIMENT),--experiment "$(EXPERIMENT)",) $(EVAL_ARGS)
 
 visualize: visualize-env configure
 	$(SETUP) PYTHONPATH= "$(VIS_VENV)/bin/python" "$(ROOT)scripts/visualize_result.py" \
-		$(if $(RUN_DIR),--run-dir "$(RUN_DIR)",) $(VIS_ARGS)
+		$(if $(RUN_DIR),--run-dir "$(RUN_DIR)",) $(if $(EVALUATION_DIR),--evaluation-dir "$(EVALUATION_DIR)",) $(VIS_ARGS)

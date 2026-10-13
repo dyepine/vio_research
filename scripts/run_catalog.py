@@ -16,6 +16,7 @@ sys.path.insert(0, str(ROOT / 'external/VSLAM-LAB'))
 
 def materialize(config, inputs, get_baseline, rgb_max=None):
     """Freeze effective inputs; one native experiment per variant and sequence."""
+    from Evaluate.protocol import validate_protocol
     path, _, settings, pairs = load_comparison(config)
     inputs.mkdir(parents=True)
     (inputs / 'comparison.yaml').write_bytes(path.read_bytes())
@@ -27,6 +28,10 @@ def materialize(config, inputs, get_baseline, rgb_max=None):
         _, audits[(dataset_name, sequence)] = camera_imu_window(dataset.sequence_path(sequence))
     native = {}
     for variant, method in settings['Methods'].items():
+        protocol = dict(settings.get('Evaluation', {}), **method.get('Evaluation', {}))
+        if 'estimate_frame' not in protocol:
+            raise ValueError(f'{variant}: declare Evaluation.estimate_frame (camera or body)')
+        protocol = validate_protocol(protocol)
         baseline = get_baseline(method['Module'])
         if isinstance(baseline, str):
             raise ValueError(f'Unknown catalog method {method["Module"]!r}; use make methods')
@@ -52,7 +57,8 @@ def materialize(config, inputs, get_baseline, rgb_max=None):
             audit = audits[(dataset_name, sequence)]
             recipe = {'Config': str(selection), 'Module': method['Module'],
                       'NumRuns': settings.get('NumRuns', 1),
-                      'Parameters': dict(parameters, rgb_idx=audit['framework_rgb_idx_inclusive'])}
+                      'Parameters': dict(parameters, rgb_idx=audit['framework_rgb_idx_inclusive']),
+                      'Evaluation': dict(protocol)}
             recipe['MethodSettings'] = str(settings_path)
             native[name] = recipe
     experiment = inputs / 'experiment.yaml'
