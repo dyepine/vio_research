@@ -15,9 +15,9 @@ from Evaluate.artifacts import select_run
 
 def latest_comparison(root):
     candidates = []
-    for path in root.glob('comparison_*/inputs/experiment.yaml'):
+    for path in root.glob('comparison_*/experiment.yaml'):
         recipes = yaml.safe_load(path.read_text())
-        if any((root / name / 'vslamlab_exp_log.csv').exists() for name in recipes):
+        if any((path.parent / name / 'vslamlab_exp_log.csv').exists() for name in recipes):
             candidates.append(path)
     return max(candidates, key=lambda p: p.stat().st_mtime_ns) if candidates else None
 
@@ -37,7 +37,7 @@ def main():
         print('Evaluation:', evaluate_run(run, args.protocol, args.gt))
         return
     if run:
-        experiment = run / 'inputs/experiment.yaml'
+        experiment = run / 'experiment.yaml'
     if not experiment:
         experiment = latest_comparison(config_path('${VIO_RESULTS_DIR}/VSLAM-LAB-Evaluation', ROOT))
     if not experiment:
@@ -47,16 +47,12 @@ def main():
     if args.gt:
         parser.error('--gt is supported only for a single legacy research run')
     # Derive the saved native result root, independent of the current machine defaults.
-    os.environ['VSLAMLAB_EVALUATION'] = str(experiment.parent.parent.parent)
+    os.environ['VSLAMLAB_EVALUATION'] = str(experiment.parent)
     from vslamlab_utilities import evaluate_exp
     recipes = yaml.safe_load(experiment.read_text())
     override = yaml.safe_load(args.protocol.read_text()) if args.protocol else None
-    # Comparisons created before native Evaluation support saved this alongside the YAML.
     if override is None and not all('Evaluation' in recipe for recipe in recipes.values()):
-        saved = experiment.parent / 'evaluation.yaml'
-        if not saved.is_file():
-            raise ValueError('No saved protocol; pass --protocol explicitly')
-        override = yaml.safe_load(saved.read_text())
+        raise ValueError('No saved protocol; pass --protocol explicitly')
     evaluate_exp(experiment, protocol_override=override)
     print('Comparison:', experiment.parent / 'comparison.csv')
 

@@ -115,6 +115,26 @@ make validate CONFIG=configs/experiments/comparison.yaml
 затем вызывает штатные `run_exp`/`run_sequence`. Исходный файл эксперимента,
 эффективные настройки всех вариантов, протокол оценки и аудит входов сохраняются
 в `${VIO_RESULTS_DIR}/VSLAM-LAB-Evaluation/comparison_.../inputs/`.
+Каждый `make run` создаёт одну папку для всей матрицы: `experiment.yaml` и
+`comparison.csv` лежат в её корне, результаты вариантов — внутри этой же папки.
+Штатный `VSLAMLAB_EVALUATION` указывает на эту папку только для текущего процесса.
+Повторный запуск создаёт новую папку и сохраняет предыдущие результаты.
+
+```text
+comparison_<timestamp>_<id>/
+  experiment.yaml
+  comparison.csv
+  inputs/
+  orbslam3_default_0/
+  orbslam3_default_1/
+  orbslam3_no_loop_0/
+  orbslam3_no_loop_1/
+```
+
+Существующие матрицы на этой машине перенесены в эту структуру. Ранние одиночные
+проверки сохранены отдельно в `${VIO_RESULTS_DIR}/legacy-catalog-runs/`.
+Прежнее плоское расположение больше не поддерживается командами запуска и оценки.
+
 `PLAN=1` может установить метод для получения его штатного файла настроек.
 Конвертация выполняется в `dataset.download_sequence`, отдельной команды convert нет.
 
@@ -124,7 +144,7 @@ make validate CONFIG=configs/experiments/comparison.yaml
 ```bash
 make evaluate                                  # последняя запущенная матрица, PLAN пропускается
 make evaluate RUN_DIR=/path/to/comparison_...   # конкретная сохранённая матрица
-make evaluate EXPERIMENT=/path/to/inputs/experiment.yaml
+make evaluate EXPERIMENT=/path/to/comparison_.../experiment.yaml
 ```
 
 Протокол `Evaluation` задаёт выравнивание, допуск времени и APE/RPE.
@@ -137,7 +157,7 @@ make evaluate EXPERIMENT=/path/to/inputs/experiment.yaml
 
 Для каждого повтора сохраняются immutable `summary.json`, `protocol.yaml` и
 стандартные ZIP evo в `<native output>/evaluations/<iteration>/<timestamp>/`.
-Общая таблица — `<comparison>/inputs/comparison.csv`: отдельная строка для каждого
+Общая таблица — `<comparison>/comparison.csv`: отдельная строка для каждого
 запуска, ошибки позиции/ориентации, число пар, доля сопоставленных сохранённых поз
 и статус. Неудачные запуски остаются строками таблицы; команда возвращает ошибку.
 `compare_exp` для экспериментов с `Evaluation` собирает ту же таблицу по сохранённым
