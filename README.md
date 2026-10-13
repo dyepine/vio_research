@@ -1,180 +1,141 @@
-# VIO research: preparation of selected public recordings
+# VIO research
 
-Общее описание задачи, текущего состояния и целевого результата: **[OVERVIEW.md](OVERVIEW.md)**. Дальнейшие действия: **[PLAN.md](PLAN.md)**.
+Подготовка и запуск используют стандартный lifecycle VSLAM-LAB.
+План и состояние переезда: [docs/dataset-migration.md](docs/dataset-migration.md).
 
-Этот README описывает первоначальный загрузчик/экспортер. Текущий эксперимент на GrandTour Alphasense использует VSLAM-LAB — это отдельный путь подготовки и запуска.
+## Чистая машина
 
-Минимальная подготовка данных без ROS-установки. Makefile управляет окружением и стадиями; Python отвечает за загрузку, проверку и конвертацию.
-
-## Клонирование
-
-```bash
-git clone --recurse-submodules https://github.com/dyepine/vio_research.git
-cd vio_research
-make test
-```
-
-VSLAM-LAB подключён как submodule с зафиксированной ревизией. Если репозиторий уже клонирован без submodules: `git submodule update --init --recursive`. Датасеты, результаты, окружения и кеш не публикуются.
-
-## Настройки окружения
+Поддерживается Linux x86_64; нужны `git`, `make`, `curl`, `tar`, `sha256sum`
+(обычные системные утилиты). Системный ROS и ручная установка Python-пакетов не нужны.
+После checkout репозитория:
 
 ```bash
-make configure  # один раз создаёт .envrc из scripts/env.sh
-# Отредактируйте .envrc: VIO_DATA_DIR, VIO_RESULTS_DIR, VIO_EXPERIMENT_CONFIG,
-# PIXI_BIN, PYTHON и другие настройки окружения.
+make prepare
+make run
 ```
 
-`scripts/env.sh` — публичные defaults с комментариями. `.envrc` — локальный, игнорируется Git; существующий файл не перезаписывается даже при изменении defaults. Все команды Makefile сами читают `.envrc`, поэтому direnv и ручные `export` не обязательны. Если файла нет, он создаётся автоматически. Чтобы изменить общие defaults, редактируйте `scripts/env.sh`, а не `.envrc`. Локальных копий YAML больше нет.
+`make prepare` сам инициализирует закреплённый submodule, устанавливает локальный
+Pixi 0.81.0 с проверкой SHA-256 и окружения из `pixi.lock`,
+скачивает и готовит **все четыре выбранные записи**:
+GrandTour `kaeb_1`, `alb_1`; BotanicGarden `1018_00`, `1018_13` вместе с corrected GT.
+Список — `configs/datasets/selected.yaml`. `lmb_2`, `hoeb_1` и прежняя `alb_2`
+не включены в основной набор.
 
-`PYTHON` в `.envrc` выбирает интерпретатор для первоначального создания `.venv` (по умолчанию `python3`); существующее окружение автоматически не пересоздаётся. Для VSLAM-LAB используется Python из Pixi, а не этот интерпретатор. Служебные команды, зависимости и фиксированный путь `.venv` остаются в Makefile.
+По умолчанию данные лежат в `$HOME/datasets/vio_research`. Для SSD:
 
-`.envrc` выполняется как shell-код: используйте только доверенный файл. Клонирование и `make configure` не устанавливают Pixi или окружения VSLAM-LAB.
+```bash
+VIO_DATA_DIR=/path/to/ssd/vio_research/data make prepare
+VIO_DATA_DIR=/path/to/ssd/vio_research/data make run
+```
 
-## Запуск ORB-SLAM3 через VSLAM-LAB
+Пути можно сохранить в `.envrc`, которую `make` создаёт и не перезаписывает.
+Локальная `.envrc` этой машины уже указывает на `/media/napalkov/T7/vio_research/data`.
+`BOTANICGARDEN_SOURCE_DIR` позволяет переиспользовать скачанные bags/GT; `.part`
+докачивается на месте. При игнорировании HTTP Range сервером загрузка начинается
+заново; размер и MD5 обязательны. Повтор той же команды не требует ручного распаковывания.
+Доступность и скорость внешних зеркал остаются ограничением.
 
-Из корня проекта: `make run`. Makefile читает пути Pixi, кеша и число потоков из `.envrc`; ручные `export` и переход в каталог VSLAM-LAB не нужны. Требуются уже установленный Pixi (`PIXI_BIN`) и окружения VSLAM-LAB.
+Адаптер BotanicGarden и необходимые исправления ROS/download helpers находятся
+в нашем [fork VSLAM-LAB](https://github.com/dyepine/VSLAM-LAB/tree/vio-research-datasets).
+Submodule закреплён на commit `6a865b197e7d3fa5d952412bc1905159e3cbaabe`;
+ветка fork — `vio-research-datasets`. Чистый checkout сразу содержит адаптер,
+патч и его применение при bootstrap удалены. Bootstrap читает pin из Git,
+при несовпадении ревизии сохраняет checkout и останавливается.
+Исходный `VSLAM-LAB/VSLAM-LAB` остаётся источником обновлений. Отправка PR
+в upstream не входит в эту работу. Обновление fork и pin требует проверки
+совместимости адаптера и повторного запуска тестов.
 
-Выбранный YAML эксперимента задаётся через `VIO_EXPERIMENT_CONFIG` в `.envrc` (по умолчанию `configs/experiments/grandtour_alb2_orbslam3.yaml`). Можно указать абсолютный путь или путь относительно корня проекта; обвязка по-прежнему поддерживает один эксперимент и одну последовательность. YAML ссылаются на `${VIO_DATA_DIR}` и `${VIO_RESULTS_DIR}` из `.envrc`. `VIO_RESULTS_DIR` — постоянный корневой каталог результатов. Каждый `make run` создаёт внутри него отдельную папку по локальной дате и времени, например `2026-10-12_21-30-00`; при совпадении времени добавляется суффикс `-02`, `-03` и т. д. Переименовывать каталоги или менять `.envrc` перед каждым запуском не нужно. Старые результаты не перезаписываются. Проверки камер/IMU выполняются автоматически; путь нового запуска печатается в терминале, native log и отчёты сохраняются внутри него.
+## Метод из каталога
 
-`scripts/run_grandtour_alb2.py` — внешняя обвязка существующих API VSLAM-LAB, не альтернативная реализация алгоритма. Она задаёт пути на отдельных объектах датасета/эксперимента, не меняя файлы фреймворка или его глобальные константы. Входы остаются в формате VSLAM-LAB: `rgb.csv`, `imu_0.csv`, `calibration.yaml` и каталоги изображений. Подготовку экспериментальных CSV/калибровки, команду запуска и защиту RAM выполняет VSLAM-LAB. Проверка окна камер/IMU вынесена в `scripts/check_vio_inputs.py`. Эталон GNSS/INS не читается при запуске и должен проверяться отдельно перед оценкой; оценка выполняется отдельно через evo без коррекции масштаба.
+```bash
+make methods
+make run METHOD=orbslam3 MODE=stereo-vi  # KAB-1 по умолчанию
+make run CONFIG=configs/experiments/botanicgarden_1018_00_orbslam3.yaml
+make run METHOD=orbslam2 MODE=stereo CONFIG=configs/experiments/botanicgarden_1018_00_orbslam3.yaml
+make run RGB_MAX=200                    # короткая проверка
+```
 
-**До устранения отключений T7 и проверки целостности данных новый прогон не запускать.** Подробнее о текущем состоянии — в `PLAN.md`.
+Метод должен поддерживать режим и модель камеры — проверяет VSLAM-LAB.
+При первом запуске фреймворк сам устанавливает метод и его vocabulary/weights.
+`run_catalog.py` только выбирает последовательность, проверяет окно IMU,
+формирует native YAML и вызывает **штатный `run_exp`/`run_sequence`**.
+Настройки метода берутся из каталога, viewer выключен native `verbose=0`.
+Каждый запуск получает отдельный experiment в
+`${VIO_RESULTS_DIR}/VSLAM-LAB-Evaluation/`, включая YAML, native logs и траекторию.
+`CONFIG` выбирает запись; `METHOD` и `MODE` выбирают метод независимо от имени YAML.
+Исследовательские `MethodSettings`/`Evaluation` при таком запуске не применяются.
 
-## Быстрый старт
+```bash
+make plan                              # оценка места для всего набора
+make prepare CONFIG=configs/experiments/grandtour_kaeb_1_orbslam3.yaml
+make validate CONFIG=configs/experiments/grandtour_kaeb_1_orbslam3.yaml
+```
 
-Python >= 3.10, `make`, модуль `venv`, доступ в интернет для первоначальной установки зависимостей и загрузки файлов.
+Без `CONFIG` подготовка читает `VIO_DATASET_CONFIG` (`prepare_all.yaml`),
+запуск — `VIO_EXPERIMENT_CONFIG` (`grandtour_kaeb_1_orbslam3.yaml`).
+Оба читают одинаковый native формат `Config` dataset/sequence.
+`Preparation.reserve_gb` и `max_data_gb` задаются в YAML. Проверка места
+и блокировка параллельной подготовки сохраняются; оценка места не резервирует диск.
+Конвертация выполняется в `dataset.download_sequence`, отдельной команды convert нет.
 
-Конфиги находятся в `configs/`, настройки датасетов — в `configs/datasets/`:
+Для прежнего эксперимента без loop closing, с provenance и SE(3)-метриками:
+
+```bash
+make run-research CONFIG=configs/experiments/grandtour_kaeb_1_orbslam3.yaml
+make evaluate
+make visualize
+```
+
+`make evaluate`/`make visualize` работают с research run. Встроенные native
+оценка/сравнение доступны через команды VSLAM-LAB с сохранённым native experiment YAML;
+их Sim(3)-протокол отличается от исследовательского SE(3), поэтому автоматически
+после `make run` они не вызываются.
+
+## Формат и источники
 
 ```text
-configs/
-  datasets/
-    prepare.yaml   # папка данных, активные записи, лимиты места
-    datasets.json  # официальные URL, размеры, checksums и revisions
+${VIO_DATA_DIR}/VSLAM-LAB-Benchmark/<DATASET>/<sequence>/
+  rgb_0/, rgb_1/
+  rgb.csv
+  imu_0.csv
+  calibration.yaml
+  groundtruth.csv
+  preparation_report.json
 ```
 
-Активные последовательности и лимиты находятся в **`configs/datasets/prepare.yaml`**, папка данных — в `.envrc`:
+GrandTour использует штатный `grandtour-alphasense`: global-shutter камеры и
+BMI085. Основные записи — KÄB-1 и ALB-1. Стандартный resize `[640,480]` сохраняет
+пропорции. Для наших outdoor-записей проверяется наличие GNSS/INS
+`cpt7_ie_tc_odometry`; prism-only fallback не принимается как 6DoF GT.
+HF revision данных штатным адаптером не закрепляется; это отмечено в provenance.
 
-```yaml
-data_dir: ${VIO_DATA_DIR}
-max_data_gb: 125
-reserve_gb: 15
-sequences:
-  grandtour-alb2: true
-  grandtour-trim1: false
-  botanicgarden-1018-00: false
-  botanicgarden-1005-00: false
-```
+BotanicGarden использует VLIO bags с SJTU, corrected `GT_pose_qnew.zip` и
+калибровку из закреплённого GitHub revision. Bags и GT проверяются по MD5.
+Native gray stereo — 960×600/10 Hz; Xsens IMU — nominal 400 Hz.
+Извлечение использует `header.stamp`, стереопары сопоставляются по одинаковому
+времени. Corrected GT VLP16 приводится к Xsens:
+`T_world_xsens = T_world_vlp16 @ inverse(T_xsens_vlp16)`.
 
-`true` — обрабатывать, `false` — пропустить. По умолчанию активна только ALB-2; остальные включай после проверки первой записи. Порядок строк задаёт порядок обработки. Выключение записи **не удаляет** уже скачанные данные. Для всех четырёх поставь все значения в `true`; прежде проверь место.
+Исходный GT сохраняется в `groundtruth_vlp16.csv`. Позы с NaN/Inf исключаются
+без интерполяции; их timestamps перечислены в `reference_metadata.json`.
+В реальной `1018_00` обнаружена одна такая поза. Reference использует
+VIO-assisted tracking и не полностью независим от визуального метода.
+Исходные bags, GT и калибровка сохраняются. Прерванный собственный импорт
+BotanicGarden возобновляет hooks; неизвестные частичные каталоги не перезаписываются.
 
-```bash
-cd ~/coding/vio_research
-make plan       # выбранные в YAML записи; без загрузки датасетов
-make prepare    # загрузка, конвертация и проверка тех же записей
-make download   # только загрузка
-make convert    # только конвертация
-make validate   # повторная структурная проверка
-make test       # offline synthetic tests
-```
+`make test` проверяет миграцию, окружение, входы runner и evaluator.
+Успешная подготовка не доказывает успешность VIO. На нестабильном T7 реальные
+прогоны не запускать; локальная проверка импорта выполнена на внутреннем NVMe.
 
-Первый запуск может установить Python-пакеты. `~` в `data_dir` раскрывается как HOME, относительный путь считается от папки YAML, не от текущей рабочей директории. Неизвестные имена, повторные ключи YAML, значения вроде строки `"false"`, некорректные лимиты и пустой активный набор вызывают ошибку до загрузки.
+## Состояние миграции
 
-**YAML задаёт последовательности и лимиты, `.envrc` — машинные пути.** В полях путей YAML поддерживаются явные `${VARIABLE}`; отсутствие указанной переменной вызывает ошибку. Никаких скрытых переопределений параметров алгоритма через окружение нет. Старые make-параметры `DATA_DIR`, `SEQUENCES`, `MAX_DATA_GB`, `RESERVE_GB` и соответствующие CLI-флаги больше не поддерживаются.
-
-Можно выбрать другой YAML, не меняя механизм настройки:
-
-```bash
-make plan CONFIG=/path/to/another.yaml
-```
-
-`configs/datasets/datasets.json` остаётся каталогом официальных URL/checksums; для выбора записей его редактировать не нужно.
-
-Повторный `prepare` использует проверенные исходники и не перезаписывает готовые результаты. Версия конвертера или manifest изменилась? Старый результат нужно явно переместить в другую папку. Сбой конвертации удаляет только её временный каталог; исходники и частичные загрузки сохраняются. При `convert` все исходные файлы должны присутствовать.
-
-## Место на диске
-
-Доступны для выбора в `configs/datasets/prepare.yaml`:
-
-| Идентификатор | Запись | Объём исходников | Консервативная оценка результата |
-|---|---|---:|---:|
-| `grandtour-alb2` | `2024-11-15-11-37-15` | 5.01 GB | 34.03 GB |
-| `grandtour-trim1` | `2024-11-15-10-16-35` | 5.35 GB | 31.23 GB |
-| `botanicgarden-1018-00` | `1018_00_VLIO.bag` | 5.83 GB | 1.91 GB |
-| `botanicgarden-1005-00` | `1005_00_VLIO.bag` | 32.32 GB | 7.38 GB |
-
-Размер PNG заранее неизвестен. Оценка использует несжатые grayscale pixels + запас; обычно фактический размер меньше. Если включить все четыре записи, все исходники + результат оцениваются в **123.1 decimal GB**, ещё **15 GB** оставляются свободными. Для одной активной ALB-2 оценка данных — **39.04 GB** плюс резерв. Учитываются уже находящиеся в папке `data_dir` файлы и реальное свободное место выбранной файловой системы. Ограничения задаются только полями `max_data_gb` и `reserve_gb` в YAML. После их изменения запусти `make plan`.
-
-Конвертация идёт последовательно. GrandTour image tar читается напрямую: не создаётся дополнительная полная папка исходных JPEG. LiDAR, depth, дополнительные камеры, карты и splats не скачиваются. BotanicGarden опубликован монолитным VLIO bag: при загрузке приходится получить весь bag, но экспортируются только gray stereo, Xsens и corrected reference.
-
-Исходники автоматически **не удаляются**. Данные вне папки `data_dir`, окружение и системные файлы не входят в лимит `max_data_gb`; свободное место файловой системы учитывает их. Preflight — консервативная оценка, не резервирование диска: не запускайте параллельно другие большие загрузки. Одновременные запуски этого конвертера в одной папке `data_dir` блокируются.
-
-## Поставка и воспроизводимость
-
-`configs/datasets/datasets.json` содержит конкретные URL, опубликованные размеры и checksums. Hugging Face и GitHub URL закреплены за revisions. SJTU bags/GT закреплены опубликованными MD5; изменение содержимого останавливает загрузку. Checksums защищают от ошибки передачи, но MD5 не является криптографической гарантией происхождения.
-
-Загрузки возобновляются через HTTP Range, `.part` не считается готовым файлом. Если сервер игнорирует Range, загрузка начинается заново. Неудачная проверка checksum не маскируется: остановка, без использования файла.
-
-После подготовки:
-
-```text
-<data_dir>/
-  raw/<sequence>/...                  # проверенные официальные исходники
-  processed/<sequence>/
-    mav0/
-      cam0/data.csv                  # timestamp ns, filename
-      cam0/data/<timestamp>.png      # uint8 grayscale
-      cam0/sensor.yaml
-      cam1/...                       # правая камера
-      imu0/data.csv                  # ns, wx,wy,wz [rad/s], ax,ay,az [m/s²]
-      imu0/sensor.yaml
-    calibration/...                  # оригинальные калибровки/attributes
-    reference/
-      poses.tum                      # seconds, x,y,z,qx,qy,qz,qw
-      metadata.json                  # происхождение, frames, transform к reference
-      pose_covariance.csv            # только GrandTour
-      prism_original.npz             # только GrandTour, POSITION-ONLY
-    provenance.json                  # источники, revisions, hash конвертера
-    validation.json                  # counts, интервалы, gaps, stereo time differences
-    complete.json                    # создан только после успешной проверки
-```
-
-Это **EuRoC-подобная структура сенсоров**, не настоящий EuRoC ground-truth `state_groundtruth_estimate0`: velocity/bias GT не выдумываются. Reference остаётся отдельно с явной семантикой. Картинки переводятся в grayscale PNG; без resize, rectification, поворотов, изменения времени или потери кадров. У BotanicGarden используется уже уменьшенный официальный поток 960x600/10Hz, у GrandTour ZED2i — 1920x1080/15Hz. Depth не используется.
-
-Файлы `sensor.yaml` содержат модель/искажения и `T_BS`, где **B — выбранный IMU**, S — сенсор, `p_B = T_BS @ p_S`. Это не готовые конфиги OpenVINS/VINS/ORB-SLAM: параметры шума, поддерживаемую модель, temporal calibration и настройки frontend нужно адаптировать отдельно. Для ADIS параметры шума не придуманы; для Xsens сохранены авторские параметры. Timestamp ns — формат хранения, не утверждение о наносекундной точности источника.
-
-## Reference: нельзя смешивать происхождение и frames
-
-**GrandTour**: stereo ZED2i + raw ADIS16475. Reference — `cpt7_ie_tc_odometry`, offline tightly coupled NovAtel Inertial Explorer; не ZED VIO, DLIO или onboard ANYmal odometry. Сохраняются source covariance и position-only призма. World frame из опубликованных attributes: `enu_origin`; tracked frame берётся из соответствующего CPT7 TF metadata. Для оценки IMU-траектории применяйте опубликованный `T_imu_reference`:
-
-```text
-T_world_reference(t) = T_world_imu(t) @ T_imu_reference
-```
-
-GrandTour ZARR transforms **не имеют обычного направления ROS TF**: в коде авторов metadata построены через `lookupTransform(child_frame_id, orig_frame)`. Конвертер инвертирует их и собирает цепочку до выбранного IMU. Не инвертируйте готовый `T_BS` повторно. Оригинальные attributes сохраняются.
-
-**BotanicGarden**: gray stereo + Xsens. Берётся corrected `GT_pose_qnew.zip`, а не старый reference из VLIO bag. Траектория относится к VLP16, world остаётся sequence-local. Camera1 extrinsics собираются из gray0/Xsens и stereo calibration; независимо оцененные extrinsics gray1/Xsens также сохраняются в source calibration. Survey-map reference получен с VIO-assisted tracking/deskew: **не полностью независим от визуального метода**. Никакой общей регистрации последовательностей или выдуманного covariance не выполняется.
-
-Reference не подаётся в VIO на вход. Не используйте `prism_original.npz` как 6DoF GT и не добавляйте к позиции единичные quaternion.
-
-## Проверки и остающийся аудит
-
-Конвертер проверяет checksums, безопасность архивов, наличие обоих image streams и raw IMU, конечность значений, строго возрастающее время, соответствие image/calibration resolution, quaternion norms и временное пересечение reference. Ошибки не исправляются сортировкой, фиктивными pose или заменой сенсора.
-
-`validation.json` показывает максимальные gaps, nearest stereo timestamp difference, число кадров без IMU bracketing и **`usable_input_window_ns`**. На ALB-2 последние примерно 0.85s ZED-кадров выходят за опубликованный диапазон ADIS. Они сохранены и отмечены предупреждением. В runner выбирайте общий input interval из validation **одинаково для всех методов**, без экстраполяции IMU. Для оценки reference дополнительно нужна общая маска качества, построенная из covariance/quality и gaps, а не из ошибок метода.
-
-Структурная проверка не доказывает физическую точность reference, корректность временной калибровки или успешность VIO. До benchmark нужно проверить реальный playback, timestamps/exposure, noise parameters и сформировать общий evaluation protocol. Данные полного image/bag recording при разработке не скачивались; тестировались синтетические записи обоих форматов, реальные небольшие ZARR sensor/reference archives и corrected GT bag.
-
-## Первичные источники
-
-- GrandTour: https://grand-tour.leggedrobotics.com/dataset
-- Поставка: https://huggingface.co/datasets/leggedrobotics/grand_tour_dataset
-- Примеры: https://github.com/leggedrobotics/grand_tour_dataset/tree/main/examples_hugging_face
-- Metadata transforms: https://github.com/leggedrobotics/grand_tour_box/blob/main/box_utils/box_converter/huggingface-dataset-conversion/dataset_builder/build_metadata.py
-- BotanicGarden: https://github.com/robot-pesg/BotanicGarden
-- SJTU: https://scidata.sjtu.edu.cn/records/kfjy8-ex881
-
-Условия использования исходных датасетов остаются авторскими. Скрипт не меняет лицензию данных; проверяйте её перед дальнейшим распространением.
+Адаптер BotanicGarden пока находится в рабочем дереве submodule. Публикация,
+commit и обновление pin ещё не выполнены: чистый checkout пока его не получает.
+Старый EuRoC-like exporter, manifest, storage YAML и его тесты удалены после
+проверки BotanicGarden, KÄB-1 и ALB-1. `zarr`, `numcodecs`, `rosbags`, `requests`,
+`scipy`, `Pillow` удалены из bootstrap requirements; подготовка использует Pixi,
+а зависимости evo/viewer остаются отдельными. Уже установленные окружения и
+данные не удалялись. Историческая инструкция — [здесь](docs/legacy-dataset-preparation.md).
 
 ## Оценка и просмотр результатов через evo
 
