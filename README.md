@@ -51,7 +51,7 @@ OneDrive, без обращений к SJTU. Подписанный download URL
 
 Адаптер BotanicGarden и необходимые исправления ROS/download helpers находятся
 в нашем [fork VSLAM-LAB](https://github.com/dyepine/VSLAM-LAB/tree/vio-research-datasets).
-Submodule закреплён на commit `126e1aac8df1e4d832ed22bbe2072b3aa05fa8b7`;
+Submodule закреплён на commit `9ba879d1a002d84a3dd768144dfbf5ed2653fb2e`;
 ветка fork — `vio-research-datasets`. Чистый checkout сразу содержит адаптер,
 патч и его применение при bootstrap удалены. Bootstrap читает pin из Git,
 при несовпадении ревизии сохраняет checkout и останавливается.
@@ -85,7 +85,7 @@ Methods:
     Settings: {loopClosing: 0}
 NumRuns: 1
 Evaluation:
-  align: SE3
+  align: origin
   correct_scale: false
   max_time_difference_s: 0.01
 ```
@@ -180,7 +180,7 @@ RPE all_pairs показывается точками. Таблица содер
 Допуск 10 мс сохранён; он не увеличивается автоматически при низком покрытии.
 Метрики описывают сохранённые позы, а не все входные изображения. Native YAML без
 `Evaluation` сохраняет прежний benchmark-путь VSLAM-LAB с Sim(3); наши сгенерированные
-эксперименты всегда содержат явный протокол SE(3) без коррекции масштаба.
+эксперименты всегда содержат явный протокол без коррекции масштаба.
 `make run` сохраняет протокол, а оценка запускается отдельной командой.
 
 Прежние research runs сохранены и оцениваются тем же кодом `Evaluate`:
@@ -250,11 +250,17 @@ make evaluate RUN_DIR=/path/to/comparison_or_research_run
 Оценка и её тесты используют окружение Pixi VSLAM-LAB; `make evaluate`
 создаёт PNG/PDF и таблицы сравнения. Отдельного окружения просмотрщика нет.
 
-`Evaluation` в YAML эксперимента сохраняется в `run_provenance.json` при запуске.
-Оценка читает этот снимок, а не текущий конфиг. Для старого запуска без снимка
-или отдельного протокола используйте `EVAL_ARGS="--protocol /path/to/evaluation.yaml"`:
-файл содержит только mapping полей `Evaluation`. Другой GT можно явно задать
-через `EVAL_ARGS="--gt /path/to/groundtruth.csv"`.
+Для native comparison `make evaluate` читает параметры сравнения из `Evaluation`
+текущего конфига (`CONFIG=...` или `VIO_EXPERIMENT_CONFIG`), включая настройки
+`Methods.<variant>.Evaluation`. Семантика экспортированной позы (`estimate_frame`,
+`camera`), траектории, GT и калибровка берутся из сохранённого запуска.
+Команда печатает путь запуска, конфиг, выравнивание и допуск времени.
+Каждая версия оценки сохраняет фактически использованный протокол.
+`EVAL_ARGS="--saved-protocol"` воспроизводит настройки запуска;
+`--protocol /path/to/protocol.yaml` задаёт явные переопределения поверх выбранных настроек.
+Research runs продолжают использовать сохранённый `run_provenance.json`;
+для старого запуска без протокола требуется явный `--protocol`.
+Другой GT можно задать через `EVAL_ARGS="--gt /path/to/gt.csv"` для research run.
 
 Каждая оценка создаёт отдельный `evaluations/<date>/` с `protocol.yaml`,
 `summary.json` и стандартными ZIP evo: `ape_position_m`, `ape_orientation_deg`,
@@ -262,8 +268,13 @@ make evaluate RUN_DIR=/path/to/comparison_or_research_run
 APE ZIP также содержит сопоставленные выровненные траектории. Их можно читать
 через evo и сравнивать через `evo_res`. Повторная оценка не перезаписывает прежнюю.
 
-Протокол: SE(3) либо отсутствие выравнивания, без scale correction;
-Стандартный `evo.sync.associate_trajectories` с допуском 0.01 s: для каждой
+В текущем эксперименте `align: origin`: штатный evo совмещает первую
+сопоставленную body-позу с GT по положению и ориентации после association.
+Преобразование фиксируется для всего участка; последующий дрейф не подгоняется.
+Также доступны `align: SE3` (fit по всем позициям) и `align: none`.
+Начало означает первую сопоставленную позу, а не первый входной кадр.
+Масштаб не корректируется; origin требует полноценной ориентации GT.
+Стандартный `evo.sync.associate_trajectories` с заданным `max_time_difference_s`: для каждой
 позы траектории с меньшим числом поз выбирается ближайшая поза другой траектории.
 Повторное использование поз допускается. Отчёт разделяет число пар и число
 уникальных сопоставленных estimate/GT-поз; доля оценённых сохранённых поз

@@ -72,6 +72,22 @@ class ComparisonTests(unittest.TestCase):
                 p.write_text(yaml.safe_dump(dict(base, **change)))
                 with self.assertRaises(ValueError): load_comparison(p)
 
+    def test_current_evaluation_changes_metrics_but_preserves_saved_frame(self):
+        from evaluate_result import current_evaluation_overrides
+        with tempfile.TemporaryDirectory() as tmp:
+            config = Path(tmp)/'comparison.yaml'
+            config.write_text(yaml.safe_dump(dict(Datasets={'d':['s']},
+                Methods={'method':dict(Module='orbslam3', Evaluation=dict(estimate_frame='body', align='origin'))},
+                Evaluation=dict(max_time_difference_s=.1))))
+            recipes = {'method_0':dict(Module='orbslam3', Evaluation=dict(estimate_frame='camera', camera='rgb_0'))}
+            _, overrides = current_evaluation_overrides(recipes, config)
+            self.assertEqual(overrides['method_0']['align'], 'origin')
+            self.assertEqual(overrides['method_0']['max_time_difference_s'], .1)
+            self.assertNotIn('estimate_frame', overrides['method_0'])
+            self.assertNotIn('camera', overrides['method_0'])
+            with self.assertRaisesRegex(ValueError, 'variant absent'):
+                current_evaluation_overrides({'other_0':recipes['method_0']}, config)
+
     def test_latest_comparison_uses_nested_logs_and_ignores_plans(self):
         from evaluate_result import latest_comparison
         with tempfile.TemporaryDirectory() as tmp:

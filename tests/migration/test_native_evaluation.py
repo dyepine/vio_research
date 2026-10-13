@@ -76,12 +76,16 @@ class NativeEvaluationTests(unittest.TestCase):
             exp = self.fixture(root)
             with patch.object(native, 'VSLAMLAB_EVALUATION', root / 'results'):
                 native.update_experiment_csv_logs(exp)
-                native.evaluate_exp(exp, protocol_override={'max_time_difference_s': .02})
+                native.evaluate_exp(exp, protocol_override={'max_time_difference_s': .02},
+                                    evaluation_overrides={'body': {'align': 'origin'}})
                 native.compare_exp(exp)
                 records = list(csv.DictReader((root/'comparison.csv').open()))
             self.assertEqual(len(records), 8)
             self.assertTrue(all(r['status'] == 'evaluated' for r in records))
             for record in records:
+                summary = json.loads((Path(record['evaluation_directory'])/'summary.json').read_text())
+                self.assertEqual(summary['protocol']['align'],
+                                 'origin' if record['experiment']=='body' else 'SE3')
                 self.assertLess(float(record['ape_position_m_rmse']), 1e-10)
                 self.assertLess(float(record['ape_orientation_deg_rmse']), 1e-10)
                 self.assertEqual(float(record['matched_fraction_of_saved_poses']), 1)

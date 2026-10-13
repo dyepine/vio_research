@@ -60,4 +60,4 @@ run-research: bootstrap
 
 evaluate: bootstrap
 	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && "$$PIXI_BIN" run --frozen -e vslamlab python "$(ROOT)scripts/evaluate_result.py" \
-		$(if $(RUN_DIR),--run-dir "$(RUN_DIR)",) $(if $(EXPERIMENT),--experiment "$(EXPERIMENT)",) $(EVAL_ARGS)
+		$(ARGS) $(if $(RUN_DIR),--run-dir "$(RUN_DIR)",) $(if $(EXPERIMENT),--experiment "$(EXPERIMENT)",) $(EVAL_ARGS)
