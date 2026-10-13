@@ -1,3 +1,5 @@
+Текущая схема конфигурации: `configs/datasets/selected.yaml` для скачивания; `configs/experiments/comparison.yaml` для записей и вариантов методов эксперимента. Старые конфиги отдельных пар удалены; описание ниже сохраняет историю работы.
+
 # План экспериментов outdoor stereo–VIO
 
 ## Цель
@@ -149,9 +151,6 @@ PR в upstream не планируется. BotanicGarden
 ## Основные файлы
 
 - `configs/datasets/prepare.yaml` — прежние настройки хранения и пользовательского экспортера (удалены при миграции). Его текущий ALB-2 относится к ZED2i, а не к Alphasense; это другой путь подготовки.
-- `configs/experiments/grandtour_alb2_sequences.yaml` — выбор Alphasense-последовательности для VSLAM-LAB.
-- `configs/experiments/grandtour_alb2_orbslam3.yaml` — настройки первого эксперимента.
-- `configs/methods/orbslam3_stereo_vi.yaml` — настройки ORB-SLAM3, включая отключение loop closure.
 - `scripts/run_grandtour_alb2.py` — внешняя обвязка VSLAM-LAB без изменений его исходников и глобальных путей; `make run` запускает её с настройкой окружения.
 - `scripts/check_vio_inputs.py` — проверки камер/IMU и выбор общего временного окна. Режим обвязки `audit` только проверяет входные CSV; точное совпадение выходного `rgb_exp.csv` проверяется при запуске.
 - `results/grandtour-alb2/` — аудит входов, provenance и логи незавершённой попытки.

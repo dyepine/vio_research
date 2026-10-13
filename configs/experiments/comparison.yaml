@@ -1,0 +1,26 @@
+# Every Methods variant runs on every sequence in Datasets.
+# Download selection lives separately in configs/datasets/selected.yaml.
+Datasets:
+  grandtour-alphasense: [kaeb_1]
+  botanicgarden: ['1018_00']
+
+Methods:
+  orbslam3_default:
+    Module: orbslam3
+    Parameters: {mode: stereo-vi, verbose: 0}
+  orbslam3_no_loop:
+    Module: orbslam3
+    Parameters: {mode: stereo-vi, verbose: 0}
+    Settings: {loopClosing: 0}
+
+NumRuns: 1
+Evaluation:
+  align: SE3
+  correct_scale: false
+  max_time_difference_s: 0.01
+  estimate_frame: camera
+  camera: rgb_0
+  evaluate_orientation: true
+  max_pose_gap_s: 1.0
+  rpe_delta_m: 1.0
+  rpe_relative_tolerance: 0.1
