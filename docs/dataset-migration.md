@@ -5,7 +5,7 @@
 KÄB-1, ALB-1 и BotanicGarden 1018_00 подготовлены; 1018_13 ещё загружается.
 По последнему решению пользователя от 2026-10-13 адаптер поставляется через
 fork `dyepine/VSLAM-LAB`, ветка `vio-research-datasets`, submodule commit
-`1a8a33a32a036076da24e7dd6e305df446226562`. Патч и его применение удалены.
+`6657e8ccd1c3ac166375bffe1581610cf8c4eb68`. Патч и его применение удалены.
 Отправка изменений в upstream не планируется.
 Этот документ определяет целевую подготовку данных; старые попытки ALB-2 в
 `PLAN.md` остаются историей эксперимента, а не обязательным выбором новых записей.
@@ -481,3 +481,13 @@ MD5 d64f15d54afdbfc972414947b068185a. Также полностью провер
 обработка обрыва и докачка. Активный 1018_13 transfer уже идёт с OneDrive и
 не перезапускается ради изменения выбора источника. Full bag MD5/import ожидается.
 Evidence: results/onedrive-resume-check/verification.json.
+
+
+## Прогресс загрузки — 2026-10-13
+
+Submodule pin: `6657e8ccd1c3ac166375bffe1581610cf8c4eb68`. Общий verified downloader использует уже
+установленный tqdm: terminal bar показывает процент, байты, скорость и ETA,
+initial соответствует фактическому .part после принятия HTTP Range. Проверка
+полного checksum тоже имеет progress bar. В non-TTY динамический вывод отключён.
+PTY smoke download начался с 24% сохранённых байтов и завершился с правильным MD5;
+transfer recovery и checksum contracts проверяются существующим regression suite.
