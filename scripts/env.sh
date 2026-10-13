@@ -5,8 +5,6 @@
 
 export ROOT_DIR="${ROOT_DIR:-$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)}"
 
-# Bootstrap interpreter only; VSLAM-LAB uses the Python from its Pixi environment.
-export PYTHON="${PYTHON:-python3}"
 # Select an experiment; algorithm parameters remain in the selected YAML.
 export VIO_EXPERIMENT_CONFIG="${VIO_EXPERIMENT_CONFIG:-$ROOT_DIR/configs/experiments/comparison.yaml}"
 export VIO_DATASET_CONFIG="${VIO_DATASET_CONFIG:-$ROOT_DIR/configs/datasets/selected.yaml}"
