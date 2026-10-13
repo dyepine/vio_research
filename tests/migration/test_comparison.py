@@ -43,6 +43,8 @@ class ComparisonTests(unittest.TestCase):
                  patch('run_catalog.camera_imu_window', side_effect=audit):
                 exp = materialize(cfg, root / 'run/inputs', lambda _: Baseline(), 200)
             data = yaml.safe_load(exp.read_text())
+            self.assertEqual(exp, root / 'run/experiment.yaml')
+            self.assertEqual(set(data), {'stock_0', 'stock_1', 'no_loop_0', 'no_loop_1'})
             self.assertEqual(len(data), 4)
             for entry in data.values():
                 self.assertEqual(entry['NumRuns'], 2)
@@ -57,8 +59,8 @@ class ComparisonTests(unittest.TestCase):
             self.assertEqual(effective['loopClosing'], 0)
             self.assertEqual(effective['ORBextractor.nFeatures'], 1000)
             self.assertNotIn('loopClosing', yaml.safe_load(stock.read_text()))
-            self.assertEqual((exp.parent / 'stock_settings.yaml').read_bytes(), stock.read_bytes())
-            self.assertEqual(yaml.safe_load((exp.parent/'evaluation.yaml').read_text())['align'], 'SE3')
+            self.assertEqual((exp.parent / 'inputs/stock_settings.yaml').read_bytes(), stock.read_bytes())
+            self.assertEqual(yaml.safe_load((exp.parent/'inputs/evaluation.yaml').read_text())['align'], 'SE3')
 
     def test_invalid_comparisons_fail_before_execution(self):
         base = {'Datasets': {'d': ['s']}, 'Methods': {'m': {'Module': 'm'}}}
@@ -69,3 +71,17 @@ class ComparisonTests(unittest.TestCase):
                 p = Path(tmp) / 'c.yaml'
                 p.write_text(yaml.safe_dump(dict(base, **change)))
                 with self.assertRaises(ValueError): load_comparison(p)
+
+    def test_latest_comparison_uses_nested_logs_and_ignores_plans(self):
+        from evaluate_result import latest_comparison
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            run = root / 'comparison_run'
+            run.mkdir()
+            (run / 'experiment.yaml').write_text('method_0: {Module: orbslam3}\n')
+            (run / 'method_0').mkdir()
+            (run / 'method_0/vslamlab_exp_log.csv').write_text('native log')
+            plan = root / 'comparison_plan'
+            plan.mkdir()
+            (plan / 'experiment.yaml').write_text('method_0: {Module: orbslam3}\n')
+            self.assertEqual(latest_comparison(root), run / 'experiment.yaml')

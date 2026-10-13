@@ -51,7 +51,7 @@ def materialize(config, inputs, get_baseline, rgb_max=None):
         overrides = method.get('Settings', {})
         settings_path = write_method_settings(baseline, overrides, inputs / f'{variant}_settings.yaml')
         for index, (dataset_name, sequence) in enumerate(pairs):
-            name = f'{inputs.parent.name}_{variant}_{index}'
+            name = f'{variant}_{index}'
             selection = inputs / f'sequences_{index}.yaml'
             selection.write_text(yaml.safe_dump({dataset_name: [sequence]}))
             audit = audits[(dataset_name, sequence)]
@@ -61,7 +61,7 @@ def materialize(config, inputs, get_baseline, rgb_max=None):
                       'Evaluation': dict(protocol)}
             recipe['MethodSettings'] = str(settings_path)
             native[name] = recipe
-    experiment = inputs / 'experiment.yaml'
+    experiment = inputs.parent / 'experiment.yaml'
     experiment.write_text(yaml.safe_dump(native, sort_keys=False))
     (inputs / 'evaluation.yaml').write_text(yaml.safe_dump(settings.get('Evaluation', {})))
     (inputs / 'input_audits.json').write_text(json.dumps(
@@ -75,12 +75,14 @@ def main():
     parser.add_argument('--rgb-max', type=int, help='Override frame limit for every method')
     parser.add_argument('--plan', action='store_true', help='Generate native configs without running methods')
     args = parser.parse_args()
+    name = f'comparison_{datetime.now(timezone.utc):%Y%m%dT%H%M%S}_{uuid.uuid4().hex[:8]}'
+    run = Path(os.environ['VSLAMLAB_EVALUATION']) / name
+    # Framework modules read this supported setting at import time.
+    os.environ['VSLAMLAB_EVALUATION'] = str(run)
     from Baselines.get_baseline import get_baseline
     from vslamlab_utilities import (validate_experiment_yaml, update_experiment_csv_logs,
                                   check_experiment_state, run_exp, load_experiments)
-    name = f'comparison_{datetime.now(timezone.utc):%Y%m%dT%H%M%S}_{uuid.uuid4().hex[:8]}'
-    experiment = materialize(args.config, Path(os.environ['VSLAMLAB_EVALUATION']) / name / 'inputs',
-                             get_baseline, args.rgb_max)
+    experiment = materialize(args.config, run / 'inputs', get_baseline, args.rgb_max)
     validate_experiment_yaml(experiment)
     print(f'Native experiment: {experiment}', flush=True)
     if args.plan:
