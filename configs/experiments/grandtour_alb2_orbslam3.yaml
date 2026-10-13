@@ -1,6 +1,5 @@
 orbslam3_stereo_vi_alb2_no_loop:
   Config: configs/experiments/grandtour_alb2_sequences.yaml
-  StorageConfig: configs/datasets/prepare.yaml
   ResultsDir: ${VIO_RESULTS_DIR}
   MethodSettings: configs/methods/orbslam3_stereo_vi.yaml
   NumRuns: 1

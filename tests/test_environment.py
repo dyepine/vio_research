@@ -43,6 +43,8 @@ class EnvironmentTests(unittest.TestCase):
     def test_make_run_sources_environment_without_direnv(self):
         with tempfile.TemporaryDirectory(prefix='vio-env-') as directory:
             root = Path(directory)
+            (root / 'scripts').mkdir()
+            (root / 'scripts/bootstrap.sh').write_text('#!/bin/bash\nexit 0\n')
             (root / 'external/VSLAM-LAB').mkdir(parents=True)
             shutil.copy(ROOT / 'Makefile', root / 'Makefile')
             pixi = root / 'fake pixi'
@@ -84,3 +86,20 @@ class EnvironmentTests(unittest.TestCase):
             subprocess.run(['make', 'env', f'PYTHON={override}'], cwd=root,
                            env=environment, check=True, capture_output=True)
             self.assertEqual((root / 'bootstrap-used').read_text(), str(override))
+
+    def test_make_config_override_reaches_both_prepare_and_run(self):
+        with tempfile.TemporaryDirectory(prefix='vio-env-') as directory:
+            root=Path(directory)
+            (root/'scripts').mkdir()
+            (root/'scripts/bootstrap.sh').write_text('#!/bin/bash\nexit 0\n')
+            (root/'external/VSLAM-LAB').mkdir(parents=True)
+            shutil.copy(ROOT/'Makefile',root/'Makefile')
+            pixi=root/'fake pixi'
+            pixi.write_text('#!/bin/bash\nprintf "%s\n" "$@"\n')
+            pixi.chmod(0o755)
+            (root/'.envrc').write_text(f'export PIXI_BIN="{pixi}"\n')
+            config=root/'chosen experiment.yaml'
+            for target in ['prepare','run']:
+                result=subprocess.run(['make',target,f'CONFIG={config}'],cwd=root,
+                                      check=True,capture_output=True,text=True)
+                self.assertIn('--config\n'+str(config)+'\n',result.stdout)

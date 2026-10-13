@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Feed one prepared standard-format recording to unmodified VSLAM-LAB APIs."""
+import argparse
 import csv
 import hashlib
 import json
@@ -14,6 +15,7 @@ import yaml
 
 from check_vio_inputs import camera_imu_window, csv_rows
 from config_paths import config_path
+from dataset_inputs import experiment_inputs, dataset_at_root
 from run_results import create_run_directory
 from evaluate_result import validate_protocol
 
@@ -45,30 +47,20 @@ def write_experiment_log(path, module, dataset, sequence, result):
 
 
 def main():
-    action = sys.argv[1:]
-    if action not in ([], ['audit']):
-        raise ValueError('Only optional "audit" is accepted; configure the experiment in YAML')
-    experiment_config = config_path('${VIO_EXPERIMENT_CONFIG}', ROOT)
-    config = yaml.safe_load(experiment_config.read_text())
-    if len(config) != 1:
-        raise ValueError('This adapter supports one experiment')
-    name, settings = next(iter(config.items()))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('action', nargs='?', choices=['audit'])
+    parser.add_argument('--config', help='Experiment YAML; defaults to VIO_EXPERIMENT_CONFIG')
+    args = parser.parse_args()
+    experiment_config, name, settings, pairs = experiment_inputs(args.config)
     evaluation_protocol = validate_protocol(settings['Evaluation'])
-    sequences = yaml.safe_load((ROOT / settings['Config']).read_text())
-    if len(sequences) != 1 or len(next(iter(sequences.values()))) != 1:
-        raise ValueError('This adapter supports one dataset/sequence')
-    dataset_name, names = next(iter(sequences.items()))
-    seq = str(names[0])
-    storage_path = ROOT / settings['StorageConfig']
-    storage = yaml.safe_load(storage_path.read_text())
-    data_root = config_path(storage['data_dir'], storage_path.parent)
-    dataset = get_dataset(dataset_name)
-    # Instance-local paths: no changes to path_constants or framework source files.
-    dataset.dataset_path = data_root / 'VSLAM-LAB-Benchmark' / dataset.dataset_folder
+    if len(pairs) != 1:
+        raise ValueError('Runner requires one dataset/sequence; choose a per-sequence experiment YAML')
+    dataset_name, seq = pairs[0]
+    dataset = dataset_at_root(dataset_name)
     folder = dataset.sequence_path(seq)
     selected, audit = camera_imu_window(folder)
     results_root = config_path(settings['ResultsDir'], ROOT)
-    if action == ['audit']:
+    if args.action == 'audit':
         print(json.dumps(audit, indent=2))
         return
     if settings.get('NumRuns', 1) != 1:
@@ -89,8 +81,19 @@ def main():
     write_json(report / 'input_audit.json', audit)
     create_calibration_exp_yaml(exp, dataset, seq, baseline.default_parameters)
     create_rgb_exp_csv(exp, dataset, seq, baseline.default_parameters)
-    if csv_rows(exp_folder / 'rgb_exp.csv') != selected:
-        raise RuntimeError('Framework camera selection differs from the audited interval')
+    actual_frames = csv_rows(exp_folder / 'rgb_exp.csv')
+    requested_max = exp.parameters.get('rgb_max')
+    if requested_max is not None:
+        if isinstance(requested_max, bool) or not isinstance(requested_max, int) or requested_max < 100:
+            raise ValueError('Explicit rgb_max must be an integer >= 100 for a VIO smoke run')
+        expected_frames = selected[:requested_max]
+    else:
+        expected_frames = selected
+    if actual_frames != expected_frames:
+        raise RuntimeError('Framework camera selection differs from the audited interval/cap')
+    audit['images_used_by_framework'] = len(actual_frames)
+    audit['duration_used_by_framework_s'] = (int(actual_frames[-1][0]) - int(actual_frames[0][0])) / 1e9
+    write_json(report / 'input_audit.json', audit)
     command = baseline.build_execute_command(0, exp, dataset, seq)
     exit_file = exp_folder / 'exit_code.txt'
     measured = '/usr/bin/time -v -o ' + shlex.quote(str(exp_folder / 'process_timing.txt')) + ' ' + command
@@ -108,6 +111,7 @@ def main():
         'evaluation_protocol': evaluation_protocol,
         'module': settings['Module'], 'dataset_name': dataset_name, 'sequence_name': seq,
         'reference_used_by_algorithm': False,
+        'preparation_report': json.loads((folder / 'preparation_report.json').read_text()) if (folder / 'preparation_report.json').exists() else None,
     })
     write_experiment_log(exp.log_csv, settings['Module'], dataset_name, seq, None)
     print('Command:', command, flush=True)
