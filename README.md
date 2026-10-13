@@ -183,23 +183,15 @@ RPE all_pairs показывается точками. Таблица содер
 эксперименты всегда содержат явный протокол SE(3) без коррекции масштаба.
 `make run` сохраняет протокол, а оценка запускается отдельной командой.
 
-Визуализация одной строки сравнения использует её `evaluation_directory`:
-
-```bash
-make visualize EVALUATION_DIR=/path/from/comparison.csv VIS_ARGS='--save /tmp/result.rrd'
-```
-
 Прежние research runs сохранены и оцениваются тем же кодом `Evaluate`:
 
 ```bash
 make run-research VARIANT=orbslam3_no_loop DATASET=grandtour-alphasense SEQUENCE=kaeb_1
 make evaluate RUN_DIR=/path/to/research_run
-make visualize RUN_DIR=/path/to/research_run
 ```
 
 Корневые `evaluate_result.py`, `trajectory_inputs.py` и `run_results.py` делегируют
 работу модулю `Evaluate`; независимой реализации метрик в корневом репозитории нет.
-Rerun остаётся в отдельном окружении визуализации.
 
 ## Формат и источники
 
@@ -244,24 +236,19 @@ commit и обновление pin ещё не выполнены: чистый 
 Старый EuRoC-like exporter, manifest, storage YAML и его тесты удалены после
 проверки BotanicGarden, KÄB-1 и ALB-1. `zarr`, `numcodecs`, `rosbags`, `requests`,
 `scipy`, `Pillow` удалены из bootstrap requirements; подготовка использует Pixi,
-а зависимости evo/viewer остаются отдельными. Уже установленные окружения и
+а оценка evo использует окружение Pixi VSLAM-LAB. Уже установленные окружения и
 данные не удалялись. Историческая инструкция — [здесь](docs/legacy-dataset-preparation.md).
 
-## Оценка и просмотр результатов через evo
+## Оценка результатов через evo
 
 ```bash
-make evaluate RUN_DIR=/path/to/run
-make visualize RUN_DIR=/path/to/run
-make visualize VIS_ARGS="--evaluation-dir /path/to/run/evaluations/<date> --save /tmp/comparison.rrd"
+make evaluate
+make evaluate RUN_DIR=/path/to/comparison_or_research_run
 ```
 
-Без `RUN_DIR` выбирается последний датированный запуск. Внутри него `visualize`
-выбирает последнюю завершённую оценку, пропуская папки прерванного сохранения.
-`evaluate` и `visualize`
-используют отдельное `.venv-rerun` с закреплёнными evo 1.35.2 и Rerun 0.31.4;
-окружение алгоритма VSLAM-LAB и его lockfile не меняются. Для этого окружения
-Makefile очищает `PYTHONPATH`, чтобы системные ROS-пакеты не попадали в оценку. `make test` проверяет
-также интеграцию оценки и headless-экспорт Rerun.
+Без `RUN_DIR` выбирается последняя запущенная native comparison.
+Оценка и её тесты используют окружение Pixi VSLAM-LAB; `make evaluate`
+создаёт PNG/PDF и таблицы сравнения. Отдельного окружения просмотрщика нет.
 
 `Evaluation` в YAML эксперимента сохраняется в `run_provenance.json` при запуске.
 Оценка читает этот снимок, а не текущий конфиг. Для старого запуска без снимка
@@ -273,8 +260,7 @@ Makefile очищает `PYTHONPATH`, чтобы системные ROS-паке
 `summary.json` и стандартными ZIP evo: `ape_position_m`, `ape_orientation_deg`,
 `rpe_position_m`, `rpe_orientation_deg`. ZIP сохраняют статистику и ошибки;
 APE ZIP также содержит сопоставленные выровненные траектории. Их можно читать
-через evo и сравнивать через `evo_res`. Rerun показывает сохранённые результаты
-без чтения исходных CSV и пересчёта. Повторная оценка не перезаписывает прежнюю.
+через evo и сравнивать через `evo_res`. Повторная оценка не перезаписывает прежнюю.
 
 Протокол: SE(3) либо отсутствие выравнивания, без scale correction;
 Стандартный `evo.sync.associate_trajectories` с допуском 0.01 s: для каждой
@@ -296,9 +282,8 @@ Quaternion CSV имеет порядок xyzw, evo — wxyz: это не EuRoC G
 
 RPE использует пары по расстоянию GT: `rpe_delta_m: 1.0`, относительный допуск
 `rpe_relative_tolerance: 0.1`, все подходящие пары. Пары не пересекают разрывы
-более `max_pose_gap_s: 1.0`. Rerun показывает полные статические ломаные через
-сопоставленные сохранённые позы, а длинные промежутки отмечает серыми маркерами.
-Интервалы, исключённые маской качества GT, ломаная не соединяет. Этот порог —
+более `max_pose_gap_s: 1.0`. На графиках траекторий не соединяются длинные
+разрывы и интервалы, исключённые маской качества GT. Этот порог —
 правило сегментации сохранённых keyframes, а не детектор tracking loss.
 При отсутствии подходящих пар RPE отмечается как недоступная, без фиктивных нулей.
 
@@ -317,8 +302,3 @@ Runner сохраняет журнал `vslamlab_exp_log.csv` в формате 
 он получает `EVALUATION=evo` и путь к артефактам. Встроенный evaluator VSLAM-LAB
 с захардкоженным Sim(3) не вызывается. Его старые plot/compare-команды не являются
 автоматически совместимыми с новым расположением оценок; сравнение метрик — через evo.
-
-Rerun использует мост evo для точек, линий, residuals и графиков ошибок.
-Отправка ориентаций — небольшой локальный адаптер: в evo 1.35.2 мост
-переставляет quaternion по плоскому массиву вместо оси каждой позы.
-Исправление представления проверяется отдельно; метрики остаются расчётом evo.
