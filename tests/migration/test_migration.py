@@ -51,12 +51,13 @@ class MigrationTests(unittest.TestCase):
             (local / '1018_13_VLIO.bag.part').write_bytes(b'partial')
             d = BotanicgardenDataset(); d.dataset_path = root / 'data'
             d.cfg['calibration_files'] = {}
+            d.cfg['bags']['1018_13'].pop('onedrive', None)
             with patch.dict(os.environ, {'BOTANICGARDEN_SOURCE_DIR': str(local)}), \
                  patch('Datasets.dataset_files.dataset_botanicgarden.downloadFile', side_effect=OSError('connection lost')):
                 with self.assertRaises(OSError):
                     d.download_sequence_data('1018_13')
             self.assertEqual(d.check_sequence_availability('1018_13', False), 'non-available')
-            def complete(url, destination, size, *, filename, checksum):
+            def complete(url, destination, size, *, filename, checksum, **kwargs):
                 path = Path(destination) / filename
                 path.write_bytes(b'complete')
                 path.with_name(path.name + '.part').unlink(missing_ok=True)
@@ -196,3 +197,104 @@ class MigrationTests(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError,'Storage preflight failed'):
                     preparation.main()
                 download.assert_not_called()
+
+    def test_interrupted_transfer_resumes_every_saved_byte(self):
+        import hashlib, threading
+        from http.server import HTTPServer, BaseHTTPRequestHandler
+        from utilities import downloadFile
+        payload = b'abcdefgh' * 40000
+        offsets = []
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                offset = int(self.headers.get('Range', 'bytes=0-').split('=')[1].split('-')[0])
+                offsets.append(offset)
+                self.send_response(206 if offset else 200)
+                if offset:
+                    self.send_header('Content-Range', f'bytes {offset}-{len(payload)-1}/{len(payload)}')
+                self.send_header('Content-Length', str(len(payload)-offset))
+                self.end_headers()
+                end = min(len(payload), offset + 12345)
+                self.wfile.write(payload[offset:end])
+                self.wfile.flush()
+                self.close_connection = True
+            def log_message(self, *args): pass
+        server = HTTPServer(('127.0.0.1', 0), Handler)
+        worker = threading.Thread(target=server.serve_forever, daemon=True); worker.start()
+        try:
+            with tempfile.TemporaryDirectory() as tmp, patch('utilities._DOWNLOAD_RETRY_DELAY_S', 0):
+                path = downloadFile(f'http://127.0.0.1:{server.server_port}/file', tmp, len(payload),
+                                    filename='bag', checksum='md5:'+hashlib.md5(payload).hexdigest(),
+                                    resume_required=True, attempts=2)
+                self.assertEqual(Path(path).read_bytes(), payload)
+                self.assertEqual(offsets, list(range(0, len(payload), 12345)))
+        finally:
+            server.shutdown(); worker.join(); server.server_close()
+
+    def test_range_ignored_preserves_partial_instead_of_restarting(self):
+        import io
+        from utilities import downloadFile, ResumeNotSupportedError
+        class Response(io.BytesIO):
+            status = 200
+            headers = {}
+        with tempfile.TemporaryDirectory() as tmp:
+            part = Path(tmp) / 'bag.part'; part.write_bytes(b'saved bytes')
+            with patch('utilities._open_download', return_value=Response(b'new bytes')):
+                with self.assertRaises(ResumeNotSupportedError):
+                    downloadFile('http://mirror/file', tmp, 1000, filename='bag',
+                                 checksum='md5:'+'0'*32, resume_required=True)
+            self.assertEqual(part.read_bytes(), b'saved bytes')
+
+    def test_onedrive_refreshes_url_and_checks_file_identity(self):
+        import io, json
+        from utilities import download_onedrive_file
+        requests = []
+        def open_json(request, timeout):
+            requests.append(request)
+            result = {'token': 'ephemeral'} if request.full_url.endswith('/token') else {
+                'name': 'bag', 'size': 1000, '@content.downloadUrl': 'https://download/file'}
+            return io.BytesIO(json.dumps(result).encode())
+        def download(resolver, directory, size, **kwargs):
+            self.assertTrue(kwargs['resume_required'])
+            self.assertEqual(resolver(), 'https://download/file')
+            self.assertEqual(resolver(), 'https://download/file')
+        with patch('utilities.urllib.request.urlopen', side_effect=open_json), \
+             patch('utilities.downloadFile', side_effect=download):
+            download_onedrive_file('https://1drv.ms/u/test', '/tmp', 1000,
+                                   filename='bag', checksum='md5:'+'0'*32)
+        self.assertEqual(len(requests), 4)
+        with patch('utilities.urllib.request.urlopen', side_effect=open_json), \
+             patch('utilities.downloadFile', side_effect=lambda resolver,*a,**k: resolver()):
+            with self.assertRaisesRegex(ValueError, 'metadata differs'):
+                download_onedrive_file('https://1drv.ms/u/test', '/tmp', 999,
+                                       filename='bag', checksum='md5:'+'0'*32)
+
+    def test_adapter_switches_to_official_source_on_unresumable_mirror(self):
+        from utilities import ResumeNotSupportedError
+        with tempfile.TemporaryDirectory() as tmp:
+            d = BotanicgardenDataset(); d.dataset_path = Path(tmp)
+            d.cfg['calibration_files'] = {}
+            with patch.dict(os.environ, {'BOTANICGARDEN_SOURCE_DIR': tmp}), \
+                 patch('Datasets.dataset_files.dataset_botanicgarden.downloadFile') as mirror, \
+                 patch('Datasets.dataset_files.dataset_botanicgarden.download_onedrive_file') as fallback:
+                mirror.side_effect = [ResumeNotSupportedError('no Range'), None]
+                d.download_sequence_data('1018_13')
+                self.assertEqual(fallback.call_count, 1)
+                self.assertEqual(fallback.call_args.kwargs['filename'], '1018_13_VLIO.bag')
+                self.assertEqual(fallback.call_args.kwargs['checksum'], 'md5:50ad55dc11d80c519f964a80dbeedf82')
+
+    def test_resume_prefers_larger_partial_on_dataset_disk(self):
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); local = root / 'downloads'; local.mkdir()
+            d = BotanicgardenDataset(); d.dataset_path = root / 'dataset'
+            d.cfg['calibration_files'] = {}
+            d._raw().mkdir(parents=True)
+            name = '1018_13_VLIO.bag'
+            (local / (name+'.part')).write_bytes(b'old')
+            (d._raw() / (name+'.part')).write_bytes(b'more progress')
+            with patch.dict(os.environ, {'BOTANICGARDEN_SOURCE_DIR': str(local)}), \
+                 patch('Datasets.dataset_files.dataset_botanicgarden.downloadFile'):
+                d.download_sequence_data('1018_13')
+            sources = json.loads((d.sequence_path('1018_13') / 'sources.json').read_text())
+            self.assertEqual(sources['files'][name], str(d._raw() / name))
+            self.assertEqual((local / (name+'.part')).read_bytes(), b'old')
