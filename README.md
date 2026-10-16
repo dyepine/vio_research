@@ -135,6 +135,17 @@ make evaluate RUN_DIR=/path/to/new/comparison EVAL_ARGS=--saved-protocol
 
 Сборка и поддерживаемые входы описаны в [docs/OKVIS1.md](docs/OKVIS1.md).
 
+Сравнение ORB-SLAM3, OKVIS 1 и Voxel-SVIO на GrandTour `kaeb_1`
+и BotanicGarden `1018_13`, без `FrameStart`:
+
+```bash
+make run CONFIG=configs/experiments/orbslam3_okvis1_voxel_svio.yaml JOBS=3
+make evaluate RUN_DIR=/absolute/path/to/new/comparison EVAL_ARGS=--saved-protocol
+```
+
+`JOBS=3` запускает методы параллельно. Общий протокол и интеграция Voxel-SVIO
+описаны в [docs/VOXEL_SVIO.md](docs/VOXEL_SVIO.md).
+
 Для сравнения ORB-SLAM3 и PyCuVSLAM со стереопарой и IMU используйте
 `configs/experiments/orbslam3_pycuvslam_stereo_vi.yaml`:
 
