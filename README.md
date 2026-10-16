@@ -105,6 +105,27 @@ make run PLAN=1                                # native YAML без запуск
 make prepare CONFIG=configs/experiments/comparison.yaml # только записи эксперимента
 ```
 
+Основной `comparison.yaml` сравнивает ORB-SLAM3 mono-vi, ORB-SLAM3 stereo-vi
+и OKVIS2 mono-vi без замыкания петель на GrandTour и BotanicGarden.
+ORB stereo-vi использует обе камеры; остальные варианты — `rgb_0` и IMU.
+
+Для текущих данных используйте подготовленные копии с исправлением парсинга OKVIS2:
+
+```bash
+python3 results/vio/orbslam3_okvis2_inputs_20261013/prepare.py
+VIO_DATA_DIR="$PWD/results/vio/orbslam3_okvis2_inputs_20261013" \
+  make run
+```
+
+В этом конфиге `Parameters.imu_noise_by_dataset` задаёт общий профиль шума
+для всех трёх вариантов: опубликованную Allan-калибровку GrandTour и рабочий
+профиль ORB-SLAM3 авторов BotanicGarden. Профиль фиксируется как `imu_noise`
+в каждом native recipe и применяется только к `calibration_exp.yaml` запуска.
+Скрипт подготовки сохраняет обход ошибки парсера OKVIS2 на семи субнормальных
+числах гироскопа BotanicGarden; исходные данные на T7 сохраняются.
+После запуска оценивайте новую папку командой
+`make evaluate RUN_DIR=/path/to/new/comparison EVAL_ARGS=--saved-protocol`.
+
 `METHOD`/`MODE` перенесены в файл эксперимента. Без `CONFIG` подготовка читает
 `VIO_DATASET_CONFIG` (`selected.yaml`), запуск — `VIO_EXPERIMENT_CONFIG`
 (`comparison.yaml`). Машинные пути остаются в `.envrc`.
@@ -122,10 +143,12 @@ comparison_<timestamp>_<id>/
   experiment.yaml
   comparison.csv
   inputs/
-  orbslam3_default_0/
-  orbslam3_default_1/
-  orbslam3_no_loop_0/
-  orbslam3_no_loop_1/
+  orbslam3_mono_no_loop_0/
+  orbslam3_mono_no_loop_1/
+  orbslam3_stereo_no_loop_0/
+  orbslam3_stereo_no_loop_1/
+  okvis2_no_loop_0/
+  okvis2_no_loop_1/
 ```
 
 Существующие матрицы на этой машине перенесены в эту структуру. Ранние одиночные
