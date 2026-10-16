@@ -126,6 +126,15 @@ VIO_DATA_DIR="$PWD/results/vio/orbslam3_okvis2_inputs_20261013" \
 После запуска оценивайте новую папку командой
 `make evaluate RUN_DIR=/path/to/new/comparison EVAL_ARGS=--saved-protocol`.
 
+Для оригинального **OKVIS 1 stereo-inertial** добавлен отдельный baseline и конфиг:
+
+```bash
+make run CONFIG=configs/experiments/okvis1_stereo_vi.yaml RGB_MAX=200
+make evaluate RUN_DIR=/path/to/new/comparison EVAL_ARGS=--saved-protocol
+```
+
+Сборка и поддерживаемые входы описаны в [docs/OKVIS1.md](docs/OKVIS1.md).
+
 DROID-SLAM подключён отдельным stereo-экспериментом
 `configs/experiments/droidslam_stereo.yaml` (GrandTour `kaeb_1`, BotanicGarden
 `1018_13`, старт BotanicGarden с кадра 20):
