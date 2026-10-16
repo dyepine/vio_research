@@ -56,6 +56,8 @@ def validate_dataset(dataset, sequence):
         if not (mission / 'data/cpt7_ie_tc_odometry.tar').is_file() and not (mission / 'data/cpt7_ie_tc_odometry').is_dir():
             raise ValueError('GNSS/INS source not retained; cannot accept provenance of this reference')
         audit['groundtruth_source'] = 'cpt7_ie_tc_odometry; body frame alphasense_imu'
+    elif dataset.dataset_name == 'fomo':
+        audit['groundtruth_source'] = 'PPK GNSS fusion; position only, identity quaternion placeholders'
     else:
         audit['groundtruth_source'] = json.loads((folder / 'reference_metadata.json').read_text())
     audit['groundtruth_count'] = len(poses)
@@ -87,6 +89,25 @@ def preparation_estimate(dataset, sequence):
         # Retained tar + native extraction + resized outputs; source compression varies.
         # Explicit conservative planning factor, not a guaranteed physical upper bound.
         return size * 12 + 100_000_000
+    if dataset.dataset_name == 'fomo':
+        from Datasets.dataset_files.dataset_fomo import RAW_FILES, RAW_PREFIXES, CAMERAS
+        prefix = dataset._recording_prefix(sequence)
+        objects = [item for item in dataset._s3_list(prefix, recursive=False)
+                   if item[0][len(prefix):] in RAW_FILES]
+        for sub in RAW_PREFIXES:
+            objects.extend(dataset._s3_list(prefix + sub + '/'))
+        missing = sum(size for key, size in objects
+                      if not (dataset._raw_path(sequence) / key[len(prefix):]).is_file()
+                      or (dataset._raw_path(sequence) / key[len(prefix):]).stat().st_size != size)
+        images = sum(key.startswith(tuple(prefix + cam + '/' for cam in CAMERAS))
+                     and key.endswith('.png') for key, _ in objects)
+        # Retained originals plus RGB outputs; allow lossless PNG overhead above raw RGB.
+        if dataset.target_resolution is None:
+            processed = sum(size for key, size in objects
+                            if key.startswith(tuple(prefix + cam + '/' for cam in CAMERAS)))
+        else:
+            processed = images * np.prod(dataset.target_resolution) * 3 * 1.05
+        return int(missing + processed + 100_000_000)
     raise ValueError(f'No storage estimate for supported migration target {dataset.dataset_name}')
 
 
@@ -137,7 +158,9 @@ def main():
                           'framework_dirty': bool(subprocess.check_output(['git', '-C', str(LAB), 'status', '--porcelain'], text=True)),
                           'dataset': dataset.dataset_name, 'sequence': seq, 'target_resolution': dataset.target_resolution,
                           'retention': 'STANDARD (BotanicGarden preserves sources)', 'experiment_config': str(config),
-                          'data_revision': 'HF unpinned' if dataset.dataset_name.startswith('grandtour') else 'Published MD5 + pinned calibration',
+                          'data_revision': ('HF unpinned' if dataset.dataset_name.startswith('grandtour') else
+                                            'Public S3, unpinned' if dataset.dataset_name == 'fomo' else
+                                            'Published MD5 + pinned calibration'),
                           'audit': audit}
             (dataset.sequence_path(seq) / 'preparation_report.json').write_text(json.dumps(provenance, indent=2))
             print(json.dumps(provenance, indent=2), flush=True)
