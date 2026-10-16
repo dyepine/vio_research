@@ -91,8 +91,8 @@ env -u LD_LIBRARY_PATH ctest --test-dir external/VSLAM-LAB/Baselines/Voxel-SVIO/
 Нативный тест проверяет заполнение voxel и JPL/Hamilton ориентацию;
 Python-тесты проверяют калибровку, плотности шума и преобразование IMU/body.
 Общие проверки представления stereo-входов вынесены в `stereo_vi_inputs.py`
-и используются также OKVIS 1. Изменения интеграции пока локальные в submodule,
-они ещё не входят в закреплённый fork commit.
+и используются также OKVIS 1. Интеграции включены в закреплённые локальные коммиты
+submodule; публикация новых коммитов fork пока не выполнена.
 
 ## Проверенный полный прогон
 
@@ -131,6 +131,7 @@ Stereo-inertial, loop closure выключен, одинаковые входн�
 Аудит upstream: 18 остальных вычислительных translation units неизменны;
 9 основных функций `stereoVio.cpp`, включая `run`, initialization и state update,
 совпадают с pinned upstream. Evidence — `validation/upstream_core_audit.json`.
-Известный отдельный сбой core bootstrap-теста на ранее изменённом
-`dataset_grandtour.py` сохраняется: текущая рабочая копия расходится с pinned fork.
-Полный clean-checkout bootstrap для новых локальных adapters пока не подтверждён.
+После разбиения по фичевым веткам gitlink закрепляет изменения адаптеров;
+core-тесты проходят в отдельном чистом локальном checkout с этим pin.
+Bootstrap-тест использует заглушку Pixi: это проверка поставки исходников,
+а не установки всех зависимостей и сборки оценивателей на новой машине.

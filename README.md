@@ -51,9 +51,12 @@ OneDrive, без обращений к SJTU. Подписанный download URL
 
 Адаптер BotanicGarden и необходимые исправления ROS/download helpers находятся
 в нашем [fork VSLAM-LAB](https://github.com/dyepine/VSLAM-LAB/tree/vio-research-datasets).
-Submodule закреплён на commit `9ba879d1a002d84a3dd768144dfbf5ed2653fb2e`;
-ветка fork — `vio-research-datasets`. Чистый checkout сразу содержит адаптер,
-патч и его применение при bootstrap удалены. Bootstrap читает pin из Git,
+Точная ревизия submodule хранится в gitlink `external/VSLAM-LAB`
+(`git rev-parse HEAD:external/VSLAM-LAB`). Новые интеграции собраны в локальной
+ветке `integration/feature-history` обоих репозиториев; они ещё не опубликованы.
+Для checkout на другой машине сначала нужно опубликовать коммиты fork, затем
+основного репозитория. Адаптеры входят в исходники fork; отдельные патчи
+при bootstrap не применяются. Bootstrap читает pin из Git,
 при несовпадении ревизии сохраняет checkout и останавливается.
 Исходный `VSLAM-LAB/VSLAM-LAB` остаётся источником обновлений. Отправка PR
 в upstream не входит в эту работу. Обновление fork и pin требует проверки
@@ -183,8 +186,8 @@ timestamps и разбор `upsample: 0`. Оценка использует `rgb
 Конфиг уменьшает буфер до 256 ключевых кадров для 6 GB GPU; это не скользящее
 окно. При заполнении буфера запуск явно завершается с ошибкой. Проверка
 на 100 кадрах не подтверждает работу полной записи; для длинного запуска
-могут понадобиться больший GPU/буфер. Изменения адаптера пока локальные
-в submodule и не входят в закреплённый fork commit.
+могут понадобиться больший GPU/буфер. Адаптер включён в закреплённый локальный коммит submodule;
+публикация новых коммитов fork пока не выполнена.
 
 `METHOD`/`MODE` перенесены в файл эксперимента. Без `CONFIG` подготовка читает
 `VIO_DATASET_CONFIG` (`selected.yaml`), запуск — `VIO_EXPERIMENT_CONFIG`

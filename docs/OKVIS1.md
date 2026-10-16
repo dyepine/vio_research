@@ -17,8 +17,9 @@ make evaluate RUN_DIR=/path/to/new/comparison EVAL_ARGS=--saved-protocol
 `orbslam3_okvis2_no_loop.yaml`; priors/limits заданы отдельно через
 `imu_overrides`. Оценка: `align: origin`, `correct_scale: false`.
 Это отдельный эксперимент; основной `comparison.yaml` не меняется.
-Интеграция пока локальная: изменения внутри submodule VSLAM-LAB ещё
-не входят в закреплённый commit fork, поэтому чистый checkout их не получит.
+Интеграция включена в закреплённый локальный коммит submodule VSLAM-LAB.
+Новые коммиты fork ещё не опубликованы; для клонирования на другой машине
+сначала требуется их публикация. Системные зависимости сборки остаются внешними.
 
 При первом запуске baseline собирается автоматически в `Baselines/OKVIS1/build`.
 Сборка использует системный toolchain Ubuntu 22.04: GCC 11, CMake 3.22,
