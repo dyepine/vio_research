@@ -34,7 +34,7 @@ def materialize(config, inputs, get_baseline, rgb_max=None):
         protocol = validate_protocol(protocol)
         baseline = get_baseline(method['Module'])
         if isinstance(baseline, str):
-            raise ValueError(f'Unknown catalog method {method["Module"]!r}; use make methods')
+            raise ValueError(f'Unknown catalog method {method["Module"]!r}; inspect the VSLAM-LAB baseline catalog')
         parameters = dict(baseline.default_parameters, **method.get('Parameters', {}))
         # Catalog default verbosity may open a viewer; unattended runs default to 0.
         if 'verbose' not in method.get('Parameters', {}):

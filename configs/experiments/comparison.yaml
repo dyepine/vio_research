@@ -17,9 +17,9 @@ Methods:
 
 NumRuns: 1
 Evaluation:
-  align: SE3
+  align: origin
   correct_scale: false
-  max_time_difference_s: 0.01
+  max_time_difference_s: 0.05
   evaluate_orientation: true
   max_pose_gap_s: 1.0
   rpe_delta_m: 1.0

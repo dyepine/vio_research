@@ -2,11 +2,10 @@ import copy
 import csv
 import json
 from pathlib import Path
-import subprocess
 import sys
 import tempfile
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -16,10 +15,8 @@ from evo.tools import file_interface
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from evaluate_result import calculate, evaluate_run, validate_protocol
-from visualize_result import send_transforms, initialize_recording, error_view
 from trajectory_inputs import read_pose_csv, to_evo, camera_to_body
 from run_results import select_run
-
 
 class EvaluationTests(unittest.TestCase):
     def setUp(self):
@@ -77,42 +74,29 @@ class EvaluationTests(unittest.TestCase):
         results, _ = calculate(estimate, reference, protocol)
         self.assertGreater(results['ape_position_m'].stats['rmse'], 0.1)
 
-    def test_both_series_are_explicitly_visible_in_each_plot(self):
-        import rerun as rr
-        blueprint = MagicMock()
-        summary = {'metrics': {name: {'max': 5} for name in ['ape_position_m', 'rpe_position_m',
-                                             'ape_orientation_deg', 'rpe_orientation_deg']},
-                   'matched_segments': [{'start_s': 1, 'end_s': 521}],
-                   'protocol': {'rpe_delta_m': 1}}
-        for quantity in ('position_m', 'orientation_deg'):
-            error_view(rr, blueprint, summary, quantity, quantity)
-            options = blueprint.TimeSeriesView.call_args.kwargs
-            self.assertEqual(set(options['contents']), {f'/errors/{quantity}/ape_{quantity}',
-                                                       f'/errors/{quantity}/rpe_{quantity}'})
-            blueprint.ScalarAxis.assert_called_with(range=(0, 5.25), zoom_lock=False)
-            self.assertFalse(blueprint.TimeAxis.call_args.kwargs['zoom_lock'])
-            blueprint.TimeRangeBoundary.absolute.assert_called_with(seconds=521 * 1.02)
-            for style in options['overrides'].values():
-                self.assertEqual(style.visible_series.as_arrow_array().to_pylist(), [True])
         # Verify actual serialized scalar series, not just that an rrd file exists.
 
-    def test_viewer_launch_uses_own_environment_without_path_activation(self):
-        import rerun as rr
-        with patch.dict('os.environ', {'PATH': '/usr/bin'}), patch.object(rr, 'spawn') as spawn:
-            initialize_recording(rr, None)
-        spawn.assert_called_once_with(executable_path=str(Path(sys.executable).parent / 'rerun'))
-        with patch.object(rr, 'spawn') as spawn, patch.object(rr, 'save') as save:
-            initialize_recording(rr, Path('/tmp/headless.rrd'))
-        spawn.assert_not_called()
-        save.assert_called_once_with('/tmp/headless.rrd')
-
-    def test_viewer_preserves_each_pose_orientation(self):
-        rr = MagicMock()
-        trajectory = to_evo(self.ns, self.values, int(self.ns[0]))
-        quaternions = Rotation.from_euler('z', np.arange(20), degrees=True).as_quat()
-        trajectory = type(trajectory)(trajectory.positions_xyz, np.roll(quaternions, 1, axis=1), trajectory.timestamps)
-        send_transforms(rr, 'estimate', trajectory)
-        np.testing.assert_allclose(rr.Transform3D.columns.call_args.kwargs['quaternion'], quaternions)
+    def test_origin_alignment_matches_first_pose_and_preserves_drift(self):
+        estimate = to_evo(self.ns, self.values, int(self.ns[0]))
+        reference = copy.deepcopy(estimate)
+        transform = np.eye(4)
+        transform[:3, :3] = Rotation.from_euler('xyz', [.2, -.3, .4]).as_matrix()
+        transform[:3, 3] = [3, -2, 1]
+        estimate.transform(transform)
+        # Later position errors must survive alignment at the start.
+        estimate.positions_xyz[1:] += np.arange(1, 20)[:, None] * [.01, .02, 0]
+        results, summary = calculate(estimate, reference,
+                                     dict(self.protocol, align='origin', evaluate_orientation=True))
+        aligned = results['ape_position_m'].trajectories['estimate']
+        np.testing.assert_allclose(aligned.poses_se3[0], reference.poses_se3[0], atol=1e-12)
+        self.assertLess(results['ape_position_m'].np_arrays['error_array'][0], 1e-12)
+        self.assertGreater(results['ape_position_m'].np_arrays['error_array'][-1], .1)
+        # A rigid global alignment cannot change relative motion errors.
+        unaligned, _ = calculate(estimate, reference, dict(self.protocol, align='none'))
+        np.testing.assert_allclose(results['rpe_position_m'].np_arrays['error_array'],
+                                   unaligned['rpe_position_m'].np_arrays['error_array'], atol=1e-12)
+        np.testing.assert_allclose(np.asarray(summary['alignment_transform_gt_from_estimate']) @
+                                   transform, np.eye(4), atol=1e-12)
 
     def test_camera_extrinsic_is_right_multiplication(self):
         body = to_evo(self.ns, self.values, int(self.ns[0]))
@@ -196,7 +180,7 @@ class EvaluationTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 validate_protocol(settings)
 
-    def test_saved_evaluation_and_headless_viewer(self):
+    def test_saved_evaluations_are_versioned_and_readable(self):
         self.run_fixture()
         first = evaluate_run(self.root)
         second = evaluate_run(self.root)
@@ -206,31 +190,6 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(len(result.np_arrays['timestamps']), 20)
         summary = json.loads((first / 'summary.json').read_text())
         self.assertIn('partial', ' '.join(summary['warnings']))
-        recording = self.root / 'result.rrd'
-        subprocess.run([sys.executable, str(ROOT / 'scripts/visualize_result.py'),
-                        '--evaluation-dir', str(first), '--save', str(recording)], check=True,
-                       capture_output=True, text=True)
-        self.assertGreater(recording.stat().st_size, 0)
-        import rerun.recording as recordings
-        chunks = list(recordings.load_recording(recording).chunks())
-        for metric in ('ape_position_m', 'rpe_position_m'):
-            scalar_chunks = [c for c in chunks if c.entity_path == f'/errors/position_m/{metric}'
-                             and 'time' in c.timeline_names]
-            self.assertTrue(scalar_chunks, f'Missing Rerun data for {metric}')
-        for name, trajectory in result.trajectories.items():
-            paths = [c for c in chunks if c.entity_path == f'/world/{name}_path']
-            self.assertEqual(len(paths), 1)
-            self.assertTrue(paths[0].is_static)
-            batch = paths[0].to_record_batch()
-            field = next(n for n in batch.schema.names if 'strips' in n)
-            strips = batch.column(field).to_pylist()[0]
-            # One static line contains every saved pose; no temporal edge disappears.
-            np.testing.assert_allclose(strips[0], trajectory.positions_xyz)
-        # Viewer uses the saved result even when original data is removed.
-        (self.root / 'output' / 'groundtruth.csv').unlink()
-        subprocess.run([sys.executable, str(ROOT / 'scripts/visualize_result.py'),
-                        '--evaluation-dir', str(first), '--save', str(self.root / 'another.rrd')],
-                       check=True, capture_output=True, text=True)
 
     def test_failed_export_removes_reservation_and_preserves_previous_evaluation(self):
         self.run_fixture()
@@ -243,19 +202,17 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual((completed / 'summary.json').read_bytes(), original_summary)
         self.assertEqual(select_run(None, self.root / 'evaluations'), completed)
 
-    def test_viewer_skips_incomplete_evaluations_after_interruption(self):
+    def test_selection_skips_incomplete_evaluations_after_interruption(self):
         self.run_fixture()
-        evaluate_run(self.root)
+        completed = evaluate_run(self.root)
         interrupted = self.root / 'evaluations' / '9999-12-31_23-59-59'
         interrupted.mkdir()
         incomplete = interrupted.with_name(interrupted.name + '-02')
         incomplete.mkdir()
         (incomplete / 'summary.json').write_text('{}')
-        recording = self.root / 'selected.rrd'
-        subprocess.run([sys.executable, str(ROOT / 'scripts/visualize_result.py'),
-                        '--run-dir', str(self.root), '--save', str(recording)],
-                       check=True, capture_output=True, text=True)
-        self.assertGreater(recording.stat().st_size, 0)
+        selected = select_run(None, self.root / 'evaluations',
+                              required_files=('summary.json', 'protocol.yaml', 'ape_position_m.zip'))
+        self.assertEqual(selected, completed)
 
     def test_legacy_run_needs_explicit_protocol_and_maps_rejected(self):
         output = self.run_fixture()

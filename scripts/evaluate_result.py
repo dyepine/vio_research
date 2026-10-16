@@ -22,10 +22,30 @@ def latest_comparison(root):
     return max(candidates, key=lambda p: p.stat().st_mtime_ns) if candidates else None
 
 
+def current_evaluation_overrides(recipes, config=None):
+    """Use current metric settings, retaining the saved trajectory's frame semantics."""
+    from dataset_inputs import load_comparison
+    path, _, settings, _ = load_comparison(config)
+    overrides = {}
+    for name, recipe in recipes.items():
+        variant = name.rsplit('_', 1)[0]
+        if variant not in settings['Methods']:
+            raise ValueError(f'{name}: variant absent in {path}; choose matching CONFIG or --saved-protocol')
+        method = settings['Methods'][variant]
+        if method['Module'] != recipe['Module']:
+            raise ValueError(f'{name}: method differs from the saved run; use --saved-protocol')
+        current = dict(settings.get('Evaluation', {}), **method.get('Evaluation', {}))
+        validate_protocol(current)
+        overrides[name] = {k:v for k,v in current.items() if k not in ('estimate_frame', 'camera')}
+    return path, overrides
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run-dir', help='Saved comparison directory or legacy research run')
     parser.add_argument('--experiment', type=Path, help='Exact saved native experiment YAML')
+    parser.add_argument('--config', help='Current experiment config for native metric settings')
+    parser.add_argument('--saved-protocol', action='store_true', help='Reuse saved evaluation settings')
     parser.add_argument('--protocol', type=Path, help='Explicit evaluation protocol override')
     parser.add_argument('--gt', type=Path, help='GT override for one legacy research run')
     args = parser.parse_args()
@@ -51,9 +71,19 @@ def main():
     from vslamlab_utilities import evaluate_exp
     recipes = yaml.safe_load(experiment.read_text())
     override = yaml.safe_load(args.protocol.read_text()) if args.protocol else None
+    current = None
+    if not args.saved_protocol:
+        path, current = current_evaluation_overrides(recipes, args.config)
+        print(f'Evaluation config: {path}', flush=True)
+    print(f'Saved run: {experiment.parent}', flush=True)
+    for name, recipe in recipes.items():
+        effective = validate_protocol({**recipe.get('Evaluation', {}),
+                                       **(current or {}).get(name, {}), **(override or {})})
+        print(f"{name}: align={effective['align']}, dt={effective['max_time_difference_s']:g}s, "
+              f"frame={effective['estimate_frame']}/{effective['camera']}", flush=True)
     if override is None and not all('Evaluation' in recipe for recipe in recipes.values()):
         raise ValueError('No saved protocol; pass --protocol explicitly')
-    evaluate_exp(experiment, protocol_override=override)
+    evaluate_exp(experiment, protocol_override=override, evaluation_overrides=current)
     print('Comparison:', experiment.parent / 'comparison.csv')
 
 

@@ -51,7 +51,7 @@ OneDrive, без обращений к SJTU. Подписанный download URL
 
 Адаптер BotanicGarden и необходимые исправления ROS/download helpers находятся
 в нашем [fork VSLAM-LAB](https://github.com/dyepine/VSLAM-LAB/tree/vio-research-datasets).
-Submodule закреплён на commit `126e1aac8df1e4d832ed22bbe2072b3aa05fa8b7`;
+Submodule закреплён на commit `9ba879d1a002d84a3dd768144dfbf5ed2653fb2e`;
 ветка fork — `vio-research-datasets`. Чистый checkout сразу содержит адаптер,
 патч и его применение при bootstrap удалены. Bootstrap читает pin из Git,
 при несовпадении ревизии сохраняет checkout и останавливается.
@@ -62,8 +62,8 @@ Submodule закреплён на commit `126e1aac8df1e4d832ed22bbe2072b3aa05fa8
 ## Конфигурация и запуск
 
 `configs/datasets/selected.yaml` — список скачиваемых записей в штатном формате
-VSLAM-LAB `dataset: [sequence, ...]`. Его читают `make prepare`, `make plan` и
-`make validate`. Запас места — 15 GB, лимит каталога данных — 125 GB;
+VSLAM-LAB `dataset: [sequence, ...]`. Его читает `make prepare`, который также
+проверяет подготовленные данные. Запас места — 15 GB, лимит каталога данных — 125 GB;
 проверка места не резервирует диск. При подготовке по файлу эксперимента можно
 переопределить бюджеты через необязательный `Preparation: {reserve_gb: 15, max_data_gb: 125}`.
 
@@ -85,7 +85,7 @@ Methods:
     Settings: {loopClosing: 0}
 NumRuns: 1
 Evaluation:
-  align: SE3
+  align: origin
   correct_scale: false
   max_time_difference_s: 0.01
 ```
@@ -98,14 +98,11 @@ Evaluation:
 (`verbose: 0`); при первом запуске VSLAM-LAB устанавливает метод и vocabulary/weights.
 
 ```bash
-make methods                                  # каталог методов
 make run                                      # вся матрица comparison.yaml
 make run CONFIG=configs/experiments/comparison.yaml
 make run RGB_MAX=200                           # короткая проверка всей матрицы
 make run PLAN=1                                # native YAML без запуска методов
-make plan                                     # место для selected.yaml
 make prepare CONFIG=configs/experiments/comparison.yaml # только записи эксперимента
-make validate CONFIG=configs/experiments/comparison.yaml
 ```
 
 `METHOD`/`MODE` перенесены в файл эксперимента. Без `CONFIG` подготовка читает
@@ -177,29 +174,26 @@ RPE all_pairs показывается точками. Таблица содер
 оценкам. Запуски разных последовательностей не усредняются в общий рейтинг.
 Повторная оценка сохраняет новую версию и обновляет ссылки в native логе.
 
-Допуск 10 мс сохранён; он не увеличивается автоматически при низком покрытии.
+Допуск времени задаётся в `Evaluation` и не увеличивается автоматически при низком покрытии.
 Метрики описывают сохранённые позы, а не все входные изображения. Native YAML без
 `Evaluation` сохраняет прежний benchmark-путь VSLAM-LAB с Sim(3); наши сгенерированные
-эксперименты всегда содержат явный протокол SE(3) без коррекции масштаба.
+эксперименты всегда содержат явный протокол без коррекции масштаба.
 `make run` сохраняет протокол, а оценка запускается отдельной командой.
 
-Визуализация одной строки сравнения использует её `evaluation_directory`:
+Старые research runs можно переоценивать тем же кодом `Evaluate`:
 
 ```bash
-make visualize EVALUATION_DIR=/path/from/comparison.csv VIS_ARGS='--save /tmp/result.rrd'
+make evaluate RUN_DIR=/path/to/research_run
 ```
 
-Прежние research runs сохранены и оцениваются тем же кодом `Evaluate`:
+Новые запуски создаёт только `make run`. Все тесты выполняются в Pixi:
 
 ```bash
-make run-research VARIANT=orbslam3_no_loop DATASET=grandtour-alphasense SEQUENCE=kaeb_1
-make evaluate RUN_DIR=/path/to/research_run
-make visualize RUN_DIR=/path/to/research_run
+make test
 ```
 
 Корневые `evaluate_result.py`, `trajectory_inputs.py` и `run_results.py` делегируют
 работу модулю `Evaluate`; независимой реализации метрик в корневом репозитории нет.
-Rerun остаётся в отдельном окружении визуализации.
 
 ## Формат и источники
 
@@ -239,45 +233,50 @@ BotanicGarden возобновляет hooks; неизвестные части�
 
 ## Состояние миграции
 
-Адаптер BotanicGarden пока находится в рабочем дереве submodule. Публикация,
-commit и обновление pin ещё не выполнены: чистый checkout пока его не получает.
+Адаптер BotanicGarden опубликован в закреплённом fork/submodule VSLAM-LAB;
+чистый checkout получает его через автоматический bootstrap.
 Старый EuRoC-like exporter, manifest, storage YAML и его тесты удалены после
 проверки BotanicGarden, KÄB-1 и ALB-1. `zarr`, `numcodecs`, `rosbags`, `requests`,
-`scipy`, `Pillow` удалены из bootstrap requirements; подготовка использует Pixi,
-а зависимости evo/viewer остаются отдельными. Уже установленные окружения и
+`scipy`, `Pillow` больше не устанавливаются отдельным bootstrap-окружением;
+подготовка, методы, оценка и тесты используют Pixi VSLAM-LAB. Уже установленные окружения и
 данные не удалялись. Историческая инструкция — [здесь](docs/legacy-dataset-preparation.md).
 
-## Оценка и просмотр результатов через evo
+## Оценка результатов через evo
 
 ```bash
-make evaluate RUN_DIR=/path/to/run
-make visualize RUN_DIR=/path/to/run
-make visualize VIS_ARGS="--evaluation-dir /path/to/run/evaluations/<date> --save /tmp/comparison.rrd"
+make evaluate
+make evaluate RUN_DIR=/path/to/comparison_or_research_run
 ```
 
-Без `RUN_DIR` выбирается последний датированный запуск. Внутри него `visualize`
-выбирает последнюю завершённую оценку, пропуская папки прерванного сохранения.
-`evaluate` и `visualize`
-используют отдельное `.venv-rerun` с закреплёнными evo 1.35.2 и Rerun 0.31.4;
-окружение алгоритма VSLAM-LAB и его lockfile не меняются. Для этого окружения
-Makefile очищает `PYTHONPATH`, чтобы системные ROS-пакеты не попадали в оценку. `make test` проверяет
-также интеграцию оценки и headless-экспорт Rerun.
+Без `RUN_DIR` выбирается последняя запущенная native comparison.
+Оценка и её тесты используют окружение Pixi VSLAM-LAB; `make evaluate`
+создаёт PNG/PDF и таблицы сравнения. Отдельного окружения просмотрщика нет.
 
-`Evaluation` в YAML эксперимента сохраняется в `run_provenance.json` при запуске.
-Оценка читает этот снимок, а не текущий конфиг. Для старого запуска без снимка
-или отдельного протокола используйте `EVAL_ARGS="--protocol /path/to/evaluation.yaml"`:
-файл содержит только mapping полей `Evaluation`. Другой GT можно явно задать
-через `EVAL_ARGS="--gt /path/to/groundtruth.csv"`.
+Для native comparison `make evaluate` читает параметры сравнения из `Evaluation`
+текущего конфига (`CONFIG=...` или `VIO_EXPERIMENT_CONFIG`), включая настройки
+`Methods.<variant>.Evaluation`. Семантика экспортированной позы (`estimate_frame`,
+`camera`), траектории, GT и калибровка берутся из сохранённого запуска.
+Команда печатает путь запуска, конфиг, выравнивание и допуск времени.
+Каждая версия оценки сохраняет фактически использованный протокол.
+`EVAL_ARGS="--saved-protocol"` воспроизводит настройки запуска;
+`--protocol /path/to/protocol.yaml` задаёт явные переопределения поверх выбранных настроек.
+Research runs продолжают использовать сохранённый `run_provenance.json`;
+для старого запуска без протокола требуется явный `--protocol`.
+Другой GT можно задать через `EVAL_ARGS="--gt /path/to/gt.csv"` для research run.
 
 Каждая оценка создаёт отдельный `evaluations/<date>/` с `protocol.yaml`,
 `summary.json` и стандартными ZIP evo: `ape_position_m`, `ape_orientation_deg`,
 `rpe_position_m`, `rpe_orientation_deg`. ZIP сохраняют статистику и ошибки;
 APE ZIP также содержит сопоставленные выровненные траектории. Их можно читать
-через evo и сравнивать через `evo_res`. Rerun показывает сохранённые результаты
-без чтения исходных CSV и пересчёта. Повторная оценка не перезаписывает прежнюю.
+через evo и сравнивать через `evo_res`. Повторная оценка не перезаписывает прежнюю.
 
-Протокол: SE(3) либо отсутствие выравнивания, без scale correction;
-Стандартный `evo.sync.associate_trajectories` с допуском 0.01 s: для каждой
+В текущем эксперименте `align: origin`: штатный evo совмещает первую
+сопоставленную body-позу с GT по положению и ориентации после association.
+Преобразование фиксируется для всего участка; последующий дрейф не подгоняется.
+Также доступны `align: SE3` (fit по всем позициям) и `align: none`.
+Начало означает первую сопоставленную позу, а не первый входной кадр.
+Масштаб не корректируется; origin требует полноценной ориентации GT.
+Стандартный `evo.sync.associate_trajectories` с заданным `max_time_difference_s`: для каждой
 позы траектории с меньшим числом поз выбирается ближайшая поза другой траектории.
 Повторное использование поз допускается. Отчёт разделяет число пар и число
 уникальных сопоставленных estimate/GT-поз; доля оценённых сохранённых поз
@@ -296,9 +295,8 @@ Quaternion CSV имеет порядок xyzw, evo — wxyz: это не EuRoC G
 
 RPE использует пары по расстоянию GT: `rpe_delta_m: 1.0`, относительный допуск
 `rpe_relative_tolerance: 0.1`, все подходящие пары. Пары не пересекают разрывы
-более `max_pose_gap_s: 1.0`. Rerun показывает полные статические ломаные через
-сопоставленные сохранённые позы, а длинные промежутки отмечает серыми маркерами.
-Интервалы, исключённые маской качества GT, ломаная не соединяет. Этот порог —
+более `max_pose_gap_s: 1.0`. На графиках траекторий не соединяются длинные
+разрывы и интервалы, исключённые маской качества GT. Этот порог —
 правило сегментации сохранённых keyframes, а не детектор tracking loss.
 При отсутствии подходящих пар RPE отмечается как недоступная, без фиктивных нулей.
 
@@ -317,8 +315,3 @@ Runner сохраняет журнал `vslamlab_exp_log.csv` в формате 
 он получает `EVALUATION=evo` и путь к артефактам. Встроенный evaluator VSLAM-LAB
 с захардкоженным Sim(3) не вызывается. Его старые plot/compare-команды не являются
 автоматически совместимыми с новым расположением оценок; сравнение метрик — через evo.
-
-Rerun использует мост evo для точек, линий, residuals и графиков ошибок.
-Отправка ориентаций — небольшой локальный адаптер: в evo 1.35.2 мост
-переставляет quaternion по плоскому массиву вместо оси каждой позы.
-Исправление представления проверяется отдельно; метрики остаются расчётом evo.

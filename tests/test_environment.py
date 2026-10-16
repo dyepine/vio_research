@@ -60,32 +60,27 @@ class EnvironmentTests(unittest.TestCase):
             self.assertIn('/tmp/custom data\n/tmp/custom results\n/tmp/custom experiment.yaml\nrun\n--frozen\n-e\nvslamlab\npython\n',
                           result.stdout)
 
-    def test_bootstrap_interpreter_from_envrc_and_make_override(self):
+    def test_make_test_uses_pixi_for_every_suite_after_bootstrap(self):
         with tempfile.TemporaryDirectory(prefix='vio-env-') as directory:
             root = Path(directory)
-            (root / 'scripts').mkdir()
-            shutil.copy(ROOT / 'Makefile', root / 'Makefile')
-            (root / 'requirements.txt').write_text('')
-            interpreter = root / 'custom python'
-            interpreter.write_text(
-                '#!/bin/bash\nset -e\n'
-                'mkdir -p "$3/bin"\n'
-                'printf "#!/bin/bash\\nexit 0\\n" > "$3/bin/python"\n'
-                'chmod +x "$3/bin/python"\n'
-                'printf "%s" "$0" > "$(dirname "$3")/bootstrap-used"\n')
-            interpreter.chmod(0o755)
-            (root / 'scripts/env.sh').write_text(f'export PYTHON="${{PYTHON:-{interpreter}}}"\n')
-            environment = {key: value for key, value in os.environ.items() if key != 'PYTHON'}
-            subprocess.run(['make', '-j2', 'env'], cwd=root, env=environment,
-                           check=True, capture_output=True)
-            self.assertEqual((root / 'bootstrap-used').read_text(), str(interpreter))
-            self.assertTrue((root / '.venv/.installed').exists())
-            override = root / 'override python'
-            shutil.copy(interpreter, override)
-            shutil.rmtree(root / '.venv')
-            subprocess.run(['make', 'env', f'PYTHON={override}'], cwd=root,
-                           env=environment, check=True, capture_output=True)
-            self.assertEqual((root / 'bootstrap-used').read_text(), str(override))
+            (root/'scripts').mkdir()
+            (root/'external/VSLAM-LAB').mkdir(parents=True)
+            shutil.copy(ROOT/'Makefile', root/'Makefile')
+            (root/'scripts/bootstrap.sh').write_text(
+                '#!/bin/bash\nsource "$(dirname "$0")/../.envrc"\n'
+                'printf "bootstrap\\n" >> "$ROOT_DIR/calls"\n')
+            pixi = root/'fake pixi'
+            pixi.write_text('#!/bin/bash\nprintf "%s\\n" "$*" >> "$ROOT_DIR/calls"\n')
+            pixi.chmod(0o755)
+            (root/'.envrc').write_text(f'export ROOT_DIR="{root}"\nexport PIXI_BIN="{pixi}"\n')
+            subprocess.run(['make', 'test'], cwd=root, check=True, capture_output=True)
+            calls = (root/'calls').read_text().splitlines()
+            self.assertEqual(calls[0], 'bootstrap')
+            self.assertEqual(len(calls), 4)
+            for line, suite in zip(calls[1:], ['tests/migration', 'tests', 'tests/evaluation']):
+                self.assertIn('run --frozen -e vslamlab python -m unittest discover', line)
+                self.assertIn(str(root/suite), line)
+            self.assertFalse((root/'.venv').exists())
 
     def test_make_config_override_reaches_both_prepare_and_run(self):
         with tempfile.TemporaryDirectory(prefix='vio-env-') as directory:
