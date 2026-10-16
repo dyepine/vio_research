@@ -126,6 +126,27 @@ VIO_DATA_DIR="$PWD/results/vio/orbslam3_okvis2_inputs_20261013" \
 После запуска оценивайте новую папку командой
 `make evaluate RUN_DIR=/path/to/new/comparison EVAL_ARGS=--saved-protocol`.
 
+DROID-SLAM подключён отдельным stereo-экспериментом
+`configs/experiments/droidslam_stereo.yaml` (GrandTour `kaeb_1`, BotanicGarden
+`1018_13`, старт BotanicGarden с кадра 20):
+
+```bash
+make run CONFIG=configs/experiments/droidslam_stereo.yaml RGB_MAX=100
+make evaluate RUN_DIR=/path/to/new/comparison EVAL_ARGS=--saved-protocol
+```
+
+Используется штатный Pixi-пакет `droidslam` 1.2 и веса VSLAM-LAB.
+Метод использует только стереокамеры, без IMU. Локальный stereo entry point
+в `external/VSLAM-LAB/Baselines/extra-files/droidslam/` исправляет fisheye
+ректификацию GrandTour, перевод внутренних единиц DROID (стереобаза 0,1 м)
+в метры по калибровке, ориентацию исходной левой камеры, сохранение int64
+timestamps и разбор `upsample: 0`. Оценка использует `rgb_0`, без подгонки масштаба.
+Конфиг уменьшает буфер до 256 ключевых кадров для 6 GB GPU; это не скользящее
+окно. При заполнении буфера запуск явно завершается с ошибкой. Проверка
+на 100 кадрах не подтверждает работу полной записи; для длинного запуска
+могут понадобиться больший GPU/буфер. Изменения адаптера пока локальные
+в submodule и не входят в закреплённый fork commit.
+
 `METHOD`/`MODE` перенесены в файл эксперимента. Без `CONFIG` подготовка читает
 `VIO_DATASET_CONFIG` (`selected.yaml`), запуск — `VIO_EXPERIMENT_CONFIG`
 (`comparison.yaml`). Машинные пути остаются в `.envrc`.

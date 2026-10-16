@@ -1,0 +1,31 @@
+# DROID-SLAM uses the stereo cameras only (no IMU).
+# Keep this separate from the stereo-inertial comparison.
+Datasets:
+  grandtour-alphasense: [kaeb_1]
+  botanicgarden: ['1018_13']
+FrameStart:
+  botanicgarden:
+    '1018_13': 20
+Methods:
+  droidslam_stereo:
+    Module: droidslam
+    Parameters:
+      mode: stereo
+      verbose: 0
+    Settings:
+      settings:
+        # Reduce persistent GPU buffers for the local 6 GB RTX 2060.
+        # Other settings use the adapter's stock defaults.
+        buffer: 256
+    Evaluation:
+      estimate_frame: camera
+      camera: rgb_0
+NumRuns: 1
+Evaluation:
+  align: origin
+  correct_scale: false
+  max_time_difference_s: 0.05
+  evaluate_orientation: true
+  max_pose_gap_s: 1.0
+  rpe_delta_m: 1.0
+  rpe_relative_tolerance: 0.1
