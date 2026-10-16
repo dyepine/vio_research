@@ -171,3 +171,71 @@ class NativeEvaluationTests(unittest.TestCase):
             self.assertEqual(benchmark.call_count, 4)
             self.assertTrue(all(call.args[0].evaluation is None for call in benchmark.call_args_list))
             self.assertFalse((root/'comparison.csv').exists())
+
+    def test_plots_use_all_saved_poses_and_do_not_modify_metrics(self):
+        import hashlib
+        from Evaluate.protocol import evaluate_files
+        from Evaluate.protocol_plots import full_paths, plot_comparison
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.fixture(root)
+            output = root/'results/body/BOTANICGARDEN/1018_00'
+            trajectory = output/'00000_KeyFrameTrajectory.csv'
+            with trajectory.open() as stream:
+                data = list(csv.reader(stream))
+            for index, row in enumerate(data[1:]):
+                if index % 2: row[0] = str(int(row[0]) + 50_000_000)
+            with trajectory.open('w') as stream:
+                csv.writer(stream).writerows(data)
+            protocol = validate_protocol({'estimate_frame':'body', 'rpe_delta_m': .4})
+            destination = evaluate_files(trajectory, output/'groundtruth.csv', output/'calibration_exp.yaml',
+                                         root/'evaluations', protocol, {})
+            summary = json.loads((destination/'summary.json').read_text())
+            self.assertLess(summary['unique_matched_estimate_poses'], 30)
+            estimate, reference = full_paths(summary)
+            self.assertEqual(estimate.num_poses, 30)
+            np.testing.assert_allclose(estimate.positions_xyz, reference.positions_xyz, atol=1e-10)
+            table = root/'comparison.csv'
+            record = dict(dataset='botanicgarden', sequence='1018_00', experiment='body', iteration=0,
+                          status='evaluated', evaluation_directory=str(destination),
+                          matched_fraction_of_saved_poses=summary['matched_fraction_of_saved_poses'],
+                          ape_position_m_rmse=summary['metrics']['ape_position_m']['rmse'])
+            with table.open('w') as stream:
+                writer = csv.DictWriter(stream, fieldnames=record);writer.writeheader();writer.writerow(record)
+            artifacts = [table, *destination.glob('*.zip')]
+            before = {p:hashlib.sha256(p.read_bytes()).hexdigest() for p in artifacts}
+            figures = plot_comparison(table)
+            self.assertEqual(len(list(figures.glob('*.png'))), 2)
+            self.assertEqual(len(list(figures.glob('*.pdf'))), 2)
+            self.assertEqual(before, {p:hashlib.sha256(p.read_bytes()).hexdigest() for p in artifacts})
+            # A larger matrix retains failed rows and comparable scales on all pages.
+            records = [dict(record, experiment=f'method_{i}', iteration=i) for i in range(5)]
+            records.append(dict(record, experiment='failed_method', status='failed',
+                                evaluation_directory='', ape_position_m_rmse=''))
+            with table.open('w') as stream:
+                writer = csv.DictWriter(stream, fieldnames=record)
+                writer.writeheader(); writer.writerows(records)
+            from Evaluate import protocol_plots
+            save = protocol_plots.save_figure
+            limits = {'trajectories': [], 'errors': []}
+            def capture(fig, path):
+                kind = 'trajectories' if '_trajectories' in path.name else 'errors'
+                axes = [ax for ax in fig.axes if ax.get_xlabel()]
+                limits[kind].append([(ax.get_xlim(), ax.get_ylim()) for ax in axes])
+                save(fig, path)
+            with patch.object(protocol_plots, 'save_figure', side_effect=capture):
+                plot_comparison(table)
+            self.assertEqual(len(list(figures.glob('*.png'))), 4)
+            self.assertEqual(len(list(figures.glob('*.pdf'))), 4)
+            for kind in limits:
+                self.assertEqual(len(limits[kind]), 2)
+                self.assertEqual(limits[kind][0], limits[kind][1])
+            with (figures/'botanicgarden_1018_00_summary.csv').open() as stream:
+                exported = list(csv.DictReader(stream))
+            self.assertEqual(len(exported), 6)
+            self.assertEqual(exported[-1]['status'], 'failed')
+            self.assertEqual({p:before[p] for p in destination.glob('*.zip')},
+                             {p:hashlib.sha256(p.read_bytes()).hexdigest() for p in destination.glob('*.zip')})
+            trajectory.write_text('changed')
+            with self.assertRaisesRegex(ValueError, 'changed since evaluation'):
+                full_paths(summary)
