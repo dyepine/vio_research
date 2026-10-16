@@ -21,6 +21,26 @@ def read_rows(path):
 
 
 class MigrationTests(unittest.TestCase):
+    def test_fomo_preflight_includes_retained_raw_and_resized_stereo(self):
+        import prepare_datasets as preparation
+        from Datasets.dataset_files.dataset_fomo import FomoDataset
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset = FomoDataset(); dataset.dataset_path = Path(tmp)
+            sequence = 'green_2025-06-26-11-20'
+            prefix = dataset._recording_prefix(sequence)
+            objects = {prefix: [(prefix + 'gt.txt', 100)],
+                       prefix + 'zedx_left/': [(prefix + 'zedx_left/1.png', 5000)],
+                       prefix + 'zedx_right/': [(prefix + 'zedx_right/1.png', 6000)],
+                       prefix + 'calib/': [(prefix + 'calib/imu.json', 200)]}
+            with patch.object(dataset, '_s3_list', side_effect=lambda key, **kw: objects[key]):
+                estimate = preparation.preparation_estimate(dataset, sequence)
+                expected_outputs = 2 * 640 * 480 * 3 * 1.05
+                self.assertEqual(estimate, int(11300 + expected_outputs + 100_000_000))
+                cached = dataset._raw_path(sequence) / 'zedx_left/1.png'
+                cached.parent.mkdir(parents=True); cached.write_bytes(bytes(5000))
+                self.assertEqual(preparation.preparation_estimate(dataset, sequence), estimate - 5000)
+
+
     def test_catalog_contains_all_public_sources_but_project_selects_two(self):
         d = BotanicgardenDataset()
         expected = {'1005_00', '1005_01', '1005_05', '1005_07', '1006_01',
