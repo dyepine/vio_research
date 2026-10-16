@@ -17,6 +17,7 @@ help:
 	  'make test # run all offline tests in Pixi' \
 	  'CONFIG=... # choose a dataset selection or experiment YAML' \
 	  'RGB_MAX=200 # limit make run to a short smoke test' \
+	  'JOBS=3 # run method variants concurrently (shared CPU/RAM)' \
 	  'RUN_DIR=... # choose a saved run for make evaluate' \
 	  'VIO_DATA_DIR=/path/to/ssd make prepare # choose storage'
 
@@ -42,7 +43,7 @@ $(foreach option,METHOD MODE,$(if $(filter command,$(origin $(option))),$(error 
 run: bootstrap
 	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && \
 		"$$PIXI_BIN" run --frozen -e vslamlab python "$(ROOT)scripts/run_catalog.py" \
-		$(ARGS) $(if $(RGB_MAX),--rgb-max "$(RGB_MAX)",) $(if $(PLAN),--plan,)
+		$(ARGS) $(if $(RGB_MAX),--rgb-max "$(RGB_MAX)",) $(if $(PLAN),--plan,) $(if $(JOBS),--jobs "$(JOBS)",)
 
 evaluate: bootstrap
 	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && "$$PIXI_BIN" run --frozen -e vslamlab python "$(ROOT)scripts/evaluate_result.py" \

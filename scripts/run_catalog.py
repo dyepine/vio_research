@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Expand a comparison and delegate method execution to VSLAM-LAB."""
 import argparse
+import csv
+from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime, timezone
 import json
 import os
+import multiprocessing
 from pathlib import Path
 import sys
 import uuid
@@ -80,33 +83,109 @@ def materialize(config, inputs, get_baseline, rgb_max=None):
     return experiment
 
 
+def partition_methods(recipes):
+    """Keep each variant's sequences/repeats together; never share experiment logs."""
+    groups = {}
+    for name, recipe in recipes.items():
+        variant = name.rsplit('_', 1)[0]
+        groups.setdefault(variant, {})[name] = recipe
+    return groups
+
+
+def _run_native_worker(experiment):
+    from vslamlab_utilities import run_exp
+    path = Path(experiment)
+    timing = {'pid': os.getpid(), 'start_utc': datetime.now(timezone.utc).isoformat()}
+    timing_path = path.with_suffix('.execution.json')
+    timing_path.write_text(json.dumps(timing, indent=2))
+    try:
+        run_exp(path)
+    finally:
+        timing['end_utc'] = datetime.now(timezone.utc).isoformat()
+        timing_path.write_text(json.dumps(timing, indent=2))
+
+
+def parallel_context():
+    # A single-threaded forkserver imports the framework once. Workers share its
+    # read-only pages instead of each allocating another ~200 MB with spawn.
+    if 'forkserver' in multiprocessing.get_all_start_methods():
+        multiprocessing.set_forkserver_preload(['__main__', 'vslamlab_utilities'])
+        return multiprocessing.get_context('forkserver')
+    return multiprocessing.get_context('spawn')
+
+
+def prepare_native(config, inputs, rgb_max, initialize):
+    from Baselines.get_baseline import get_baseline
+    from vslamlab_utilities import (validate_experiment_yaml, update_experiment_csv_logs,
+                                   check_experiment_state)
+    experiment = materialize(config, Path(inputs), get_baseline, rgb_max)
+    validate_experiment_yaml(experiment)
+    print(f'Native experiment: {experiment}', flush=True)
+    if initialize:
+        update_experiment_csv_logs(experiment)
+        check_experiment_state(experiment)
+    return str(experiment)
+
+
+def run_methods(experiment, jobs, context=None):
+    if jobs == 1:
+        _run_native_worker(experiment)
+        return
+    recipes = yaml.safe_load(experiment.read_text())
+    workers = experiment.parent / 'inputs' / 'workers'
+    workers.mkdir()
+    paths = []
+    for variant, group in partition_methods(recipes).items():
+        path = workers / f'{variant}.yaml'
+        path.write_text(yaml.safe_dump(group, sort_keys=False))
+        paths.append(path)
+    # Framework globals and CSV temp files are isolated by process and experiment.
+    # Methods run concurrently; sequences of one method remain sequential.
+    with ProcessPoolExecutor(max_workers=min(jobs, len(paths)),
+                             mp_context=context or parallel_context()) as pool:
+        futures = [pool.submit(_run_native_worker, str(path)) for path in paths]
+        for future in futures:
+            future.result()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', help='Comparison YAML; defaults to VIO_EXPERIMENT_CONFIG')
     parser.add_argument('--rgb-max', type=int, help='Override frame limit for every method')
     parser.add_argument('--plan', action='store_true', help='Generate native configs without running methods')
+    parser.add_argument('--jobs', type=int, default=1, help='Concurrent method variants (sequences stay sequential)')
     args = parser.parse_args()
+    if args.jobs < 1:
+        parser.error('--jobs must be positive')
     name = f'comparison_{datetime.now(timezone.utc):%Y%m%dT%H%M%S}_{uuid.uuid4().hex[:8]}'
     run = Path(os.environ['VSLAMLAB_EVALUATION']) / name
     # Framework modules read this supported setting at import time.
     os.environ['VSLAMLAB_EVALUATION'] = str(run)
-    from Baselines.get_baseline import get_baseline
-    from vslamlab_utilities import (validate_experiment_yaml, update_experiment_csv_logs,
-                                  check_experiment_state, run_exp, load_experiments)
-    experiment = materialize(args.config, run / 'inputs', get_baseline, args.rgb_max)
-    validate_experiment_yaml(experiment)
-    print(f'Native experiment: {experiment}', flush=True)
+    context = parallel_context() if args.jobs > 1 else None
+    preparation = (args.config, str(run / 'inputs'), args.rgb_max, not args.plan)
+    if context is None:
+        experiment = Path(prepare_native(*preparation))
+    else:
+        # Keep the coordinator lightweight. Importing the framework here would
+        # retain an unnecessary private copy for the whole parallel run.
+        with ProcessPoolExecutor(max_workers=1, mp_context=context) as pool:
+            experiment = Path(pool.submit(prepare_native, *preparation).result())
     if args.plan:
         return
-    update_experiment_csv_logs(experiment)
-    check_experiment_state(experiment)
-    run_exp(experiment)
-    from utilities import read_csv
+    (run / 'execution.json').write_text(json.dumps({
+        'concurrent_method_workers': args.jobs,
+        'start_method': context.get_start_method() if context else 'serial',
+        'timing_comparable_to_isolated_runs': args.jobs == 1}, indent=2))
+    run_methods(experiment, args.jobs, context)
     failed = []
-    for exp in load_experiments(experiment).values():
-        log = read_csv(exp.log_csv)
-        if not log['STATUS'].eq('completed').all() or not log['SUCCESS'].astype(str).str.lower().eq('true').all():
-            failed.append(str(exp.log_csv))
+    for name in yaml.safe_load(experiment.read_text()):
+        log_path = run / name / 'vslamlab_exp_log.csv'
+        rows = []
+        if log_path.exists():
+            with log_path.open() as stream:
+                rows = list(csv.DictReader(stream))
+        if not rows or any(row['STATUS'] != 'completed' or row['SUCCESS'].lower() != 'true' for row in rows):
+            failed.append(str(log_path))
     if failed:
         raise RuntimeError(f'Native methods failed; see {failed}')
 
