@@ -1,3 +1,4 @@
 [submodule "external/VSLAM-LAB"]
 	path = external/VSLAM-LAB
-	url = https://github.com/VSLAM-LAB/VSLAM-LAB.git
+	url = https://github.com/dyepine/VSLAM-LAB.git
+	branch = vio-research-datasets

@@ -5,18 +5,21 @@ ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 export PYTHON
 VENV ?= $(ROOT).venv
 VIS_VENV := $(ROOT).venv-rerun
-CONFIG ?= $(ROOT)configs/datasets/prepare.yaml
-SETUP = source "$(ROOT).envrc" &&
-# Sequence selection and limits live in YAML. Paths may reference .envrc variables.
-$(foreach option,DATA_DIR SEQUENCES MAX_DATA_GB RESERVE_GB,$(if $(filter command,$(origin $(option))),$(error $(option) is no longer supported; edit $(CONFIG) instead)))
-ARGS = --config "$(CONFIG)"
-RUN = "$(VENV)/bin/python" "$(ROOT)scripts/prepare.py"
+# CONFIG overrides selection for preparation or execution; defaults select all vs one.
+CONFIG ?=
+$(foreach option,DATA_DIR SEQUENCES MAX_DATA_GB RESERVE_GB,$(if $(filter command,$(origin $(option))),$(error $(option) is no longer supported; edit experiment YAML instead)))
+SETUP = source "$(ROOT).envrc" && export VSLAMLAB_BENCHMARK="$$VIO_DATA_DIR/VSLAM-LAB-Benchmark" VSLAMLAB_EVALUATION="$$VIO_RESULTS_DIR/VSLAM-LAB-Evaluation" PYTHONPATH= &&
+ARGS = $(if $(CONFIG),--config "$(CONFIG)",)
+RUN = "$$PIXI_BIN" run --frozen -e vslamlab python "$(ROOT)scripts/prepare_datasets.py"
 
-.PHONY: help configure env plan prepare download convert validate test run evaluate visualize visualize-env
+.PHONY: help configure bootstrap env plan prepare validate test run run-research methods evaluate visualize visualize-env
 help:
-	@printf '%s\n' 'make configure # create .envrc from scripts/env.sh without overwriting it' 'Edit .envrc: machine paths; edit YAML: experiment settings, sequences and limits' 'make plan    # estimate space for active YAML sequences; no dataset downloads' 'make prepare # download, convert and validate active YAML sequences' 'make download / convert / validate # separate stages' 'make test    # offline synthetic tests' 'make run     # ORB-SLAM3 stereo-VI via VSLAM-LAB; settings in experiment YAML' 'make evaluate [RUN_DIR=/path/to/run] # save evo APE/RPE evaluation' 'make visualize [RUN_DIR=/path/to/run] # compare estimate and GT in Rerun' 'make visualize VIS_ARGS="--save /tmp/comparison.rrd" # headless export' 'make plan CONFIG=/path/to/another.yaml # alternative configuration' 'YAML paths can reference variables exported by .envrc'
+	@printf '%s\n' 'make prepare # bootstrap, download and prepare all four selected recordings' 'make prepare CONFIG=... # prepare the selection from an experiment YAML' 'make plan # estimate storage without downloading recordings' 'make validate # validate the four selected recordings' 'make methods # list VSLAM-LAB catalog' 'make run METHOD=orbslam3 MODE=stereo-vi CONFIG=... # native pipeline; defaults to KAB-1' 'make run RGB_MAX=200 # short native smoke run' 'make run-research CONFIG=... # prior no-loop experiment and provenance for SE(3) evaluation' 'make evaluate [RUN_DIR=...] # evo evaluation of a research run' 'make visualize [RUN_DIR=...] # Rerun comparison of a research run' 'make test # offline tests (after bootstrap)' 'VIO_DATA_DIR=/path/to/ssd make prepare # use external storage; .envrc is preserved'
 
 configure: $(ROOT).envrc
+
+bootstrap: configure
+	@bash "$(ROOT)scripts/bootstrap.sh"
 
 # No dependency on env.sh: shared-default changes must not overwrite local edits.
 $(ROOT).envrc:
@@ -29,24 +32,32 @@ $(VENV)/.installed: $(ROOT)requirements.txt | configure
 	"$(VENV)/bin/python" -m pip install -r "$(ROOT)requirements.txt"
 	@touch "$@"
 
-plan: env
-	$(SETUP) $(RUN) plan $(ARGS)
-prepare: env
-	$(SETUP) $(RUN) prepare $(ARGS)
-download: env
-	$(SETUP) $(RUN) download $(ARGS)
-convert: env
-	$(SETUP) $(RUN) convert $(ARGS)
-validate: env
-	$(SETUP) $(RUN) validate $(ARGS)
+PREP_ARGS = --config "$(if $(CONFIG),$(CONFIG),$${VIO_DATASET_CONFIG:-$(ROOT)configs/experiments/prepare_all.yaml})"
+plan: bootstrap
+	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && $(RUN) plan $(PREP_ARGS)
+prepare: bootstrap
+	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && $(RUN) prepare $(PREP_ARGS)
+validate: bootstrap
+	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && $(RUN) validate $(PREP_ARGS)
 test: env visualize-env
+	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && "$$PIXI_BIN" run --frozen -e vslamlab python -m unittest discover -s "$(ROOT)tests/migration" -v
 	$(SETUP) cd "$(ROOT)" && "$(VENV)/bin/python" -m unittest discover -s tests -v
 	PYTHONPATH= "$(VIS_VENV)/bin/python" -m unittest discover -s "$(ROOT)tests/evaluation" -v
 
-run: configure
+METHOD ?= orbslam3
+MODE ?= stereo-vi
+run: bootstrap
+	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && \
+		"$$PIXI_BIN" run --frozen -e vslamlab python "$(ROOT)scripts/run_catalog.py" \
+		$(ARGS) --method "$(METHOD)" --mode "$(MODE)" $(if $(RGB_MAX),--rgb-max "$(RGB_MAX)",)
+
+methods: bootstrap
+	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && "$$PIXI_BIN" run --frozen -e vslamlab print-baselines
+
+run-research: bootstrap
 	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && \
 		"$$PIXI_BIN" run --frozen -e vslamlab \
-		python "$(ROOT)scripts/run_grandtour_alb2.py"
+		python "$(ROOT)scripts/run_vio.py" $(ARGS)
 
 visualize-env: $(VIS_VENV)/.installed
 $(VIS_VENV)/.installed: $(ROOT)requirements-visualize.txt | configure
