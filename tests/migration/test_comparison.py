@@ -8,7 +8,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from dataset_inputs import load_comparison, experiment_inputs
-from run_catalog import materialize
+from run_catalog import materialize, partition_methods
 
 
 class ComparisonTests(unittest.TestCase):
