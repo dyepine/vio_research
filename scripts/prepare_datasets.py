@@ -93,7 +93,7 @@ def preparation_estimate(dataset, sequence):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('action', choices=['plan', 'prepare', 'validate'])
-    parser.add_argument('--config', help='Experiment YAML; defaults to VIO_EXPERIMENT_CONFIG')
+    parser.add_argument('--config', help='Dataset selection YAML or experiment with Datasets')
     args = parser.parse_args()
     config, _, settings, pairs = experiment_inputs(args.config)
     data_root = config_path('${VIO_DATA_DIR}', ROOT)

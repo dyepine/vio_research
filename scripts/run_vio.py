@@ -15,7 +15,7 @@ import yaml
 
 from check_vio_inputs import camera_imu_window, csv_rows
 from config_paths import config_path
-from dataset_inputs import experiment_inputs, dataset_at_root
+from dataset_inputs import load_comparison, dataset_at_root, write_method_settings
 from run_results import create_run_directory
 from evaluate_result import validate_protocol
 
@@ -50,11 +50,35 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('action', nargs='?', choices=['audit'])
     parser.add_argument('--config', help='Experiment YAML; defaults to VIO_EXPERIMENT_CONFIG')
+    parser.add_argument('--rgb-max', type=int, help='Override frame limit for a research smoke run')
+    parser.add_argument('--variant', help='Variant name from Methods')
+    parser.add_argument('--dataset', help='Dataset from Datasets')
+    parser.add_argument('--sequence', help='Sequence from Datasets')
     args = parser.parse_args()
-    experiment_config, name, settings, pairs = experiment_inputs(args.config)
+    experiment_config, name, comparison, pairs = load_comparison(args.config)
+    if (args.dataset is None) != (args.sequence is None):
+        parser.error('Specify both --dataset and --sequence')
+    if args.dataset is not None:
+        selected_pair = (args.dataset, args.sequence)
+        if selected_pair not in pairs:
+            parser.error('Requested sequence is not in Datasets')
+        pairs = [selected_pair]
+    methods = comparison['Methods']
+    if args.variant is None and len(methods) != 1:
+        parser.error('Choose one research variant with VARIANT=...')
+    variant = args.variant or next(iter(methods))
+    if variant not in methods:
+        parser.error(f'Unknown variant {variant!r}')
+    settings = dict(methods[variant], Evaluation=dict(comparison.get('Evaluation', {}), **methods[variant].get('Evaluation', {})),
+                    NumRuns=comparison.get('NumRuns', 1), ResultsDir='${VIO_RESULTS_DIR}')
+    if args.rgb_max is not None:
+        if args.rgb_max < 100:
+            parser.error('--rgb-max must be >= 100')
+        settings['Parameters'] = dict(settings.get('Parameters', {}), rgb_max=args.rgb_max)
+    name = f'{name}_{variant}'
     evaluation_protocol = validate_protocol(settings['Evaluation'])
     if len(pairs) != 1:
-        raise ValueError('Runner requires one dataset/sequence; choose a per-sequence experiment YAML')
+        raise ValueError('Choose one research sequence with DATASET=... SEQUENCE=...')
     dataset_name, seq = pairs[0]
     dataset = dataset_at_root(dataset_name)
     folder = dataset.sequence_path(seq)
@@ -66,16 +90,26 @@ def main():
     if settings.get('NumRuns', 1) != 1:
         raise ValueError('This adapter supports NumRuns: 1')
     baseline = get_baseline(settings['Module'])
-    baseline.settings_yaml = ROOT / settings['MethodSettings']
+    if isinstance(baseline, str):
+        raise ValueError(f'Unknown catalog method {settings["Module"]!r}')
     os.chdir(LAB)
     baseline.ensure_installed()
     report = create_run_directory(results_root)
     print('Results:', report, flush=True)
-    exp = Experiment(name, settings)
+    (report / 'comparison.yaml').write_bytes(experiment_config.read_bytes())
+    baseline.settings_yaml = write_method_settings(
+        baseline, settings.get('Settings', {}), report / 'method_settings.yaml')
+    exp = Experiment(name, dict(settings, Config=str(report / 'sequences.yaml'),
+                                Parameters=settings.get('Parameters', {})))
     exp.folder = report / 'VSLAM-LAB-Evaluation' / name
     exp.log_csv = exp.folder / 'vslamlab_exp_log.csv'
-    exp.config_yaml = ROOT / settings['Config']
-    exp.parameters = dict(settings['Parameters'], rgb_idx=audit['framework_rgb_idx_inclusive'])
+    exp.config_yaml = report / 'sequences.yaml'
+    exp.config_yaml.write_text(yaml.safe_dump({dataset_name: [seq]}))
+    exp.parameters = dict(baseline.default_parameters, **settings.get('Parameters', {}))
+    if exp.parameters.get('mode') not in baseline.modes:
+        raise ValueError(f'Supported modes: {baseline.modes}')
+    exp.parameters['verbose'] = settings.get('Parameters', {}).get('verbose', 0)
+    exp.parameters['rgb_idx'] = audit['framework_rgb_idx_inclusive']
     exp_folder = exp.folder / dataset.dataset_folder / seq
     exp_folder.mkdir(parents=True)
     write_json(report / 'input_audit.json', audit)

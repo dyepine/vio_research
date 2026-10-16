@@ -236,7 +236,7 @@ class EvaluationTests(unittest.TestCase):
         self.run_fixture()
         completed = evaluate_run(self.root)
         original_summary = (completed / 'summary.json').read_bytes()
-        with patch('evaluate_result.file_interface.save_res_file', side_effect=OSError('disk full')):
+        with patch('Evaluate.protocol.file_interface.save_res_file', side_effect=OSError('disk full')):
             with self.assertRaisesRegex(OSError, 'disk full'):
                 evaluate_run(self.root)
         self.assertEqual(list((self.root / 'evaluations').iterdir()), [completed])

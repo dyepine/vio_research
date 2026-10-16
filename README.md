@@ -51,7 +51,7 @@ OneDrive, без обращений к SJTU. Подписанный download URL
 
 Адаптер BotanicGarden и необходимые исправления ROS/download helpers находятся
 в нашем [fork VSLAM-LAB](https://github.com/dyepine/VSLAM-LAB/tree/vio-research-datasets).
-Submodule закреплён на commit `219df9d6667817db42e7b7a1db902fc7825807ea`;
+Submodule закреплён на commit `ee2d562e9fd35e112e57e77e0db6feff0c81c1ff`;
 ветка fork — `vio-research-datasets`. Чистый checkout сразу содержит адаптер,
 патч и его применение при bootstrap удалены. Bootstrap читает pin из Git,
 при несовпадении ревизии сохраняет checkout и останавливается.
@@ -59,51 +59,134 @@ Submodule закреплён на commit `219df9d6667817db42e7b7a1db902fc7825807
 в upstream не входит в эту работу. Обновление fork и pin требует проверки
 совместимости адаптера и повторного запуска тестов.
 
-## Метод из каталога
+## Конфигурация и запуск
 
-```bash
-make methods
-make run METHOD=orbslam3 MODE=stereo-vi  # KAB-1 по умолчанию
-make run CONFIG=configs/experiments/botanicgarden_1018_00_orbslam3.yaml
-make run METHOD=orbslam2 MODE=stereo CONFIG=configs/experiments/botanicgarden_1018_00_orbslam3.yaml
-make run RGB_MAX=200                    # короткая проверка
+`configs/datasets/selected.yaml` — список скачиваемых записей в штатном формате
+VSLAM-LAB `dataset: [sequence, ...]`. Его читают `make prepare`, `make plan` и
+`make validate`. Запас места — 15 GB, лимит каталога данных — 125 GB;
+проверка места не резервирует диск. При подготовке по файлу эксперимента можно
+переопределить бюджеты через необязательный `Preparation: {reserve_gb: 15, max_data_gb: 125}`.
+
+`configs/experiments/comparison.yaml` — один файл эксперимента:
+
+```yaml
+Datasets:
+  grandtour-alphasense: [kaeb_1]
+  botanicgarden: ['1018_00']
+Methods:
+  orbslam3_default:
+    Module: orbslam3
+    Parameters: {mode: stereo-vi, verbose: 0}
+    Evaluation: {estimate_frame: camera, camera: rgb_0}
+  orbslam3_no_loop:
+    Module: orbslam3
+    Parameters: {mode: stereo-vi, verbose: 0}
+    Evaluation: {estimate_frame: camera, camera: rgb_0}
+    Settings: {loopClosing: 0}
+NumRuns: 1
+Evaluation:
+  align: SE3
+  correct_scale: false
+  max_time_difference_s: 0.01
 ```
 
-Метод должен поддерживать режим и модель камеры — проверяет VSLAM-LAB.
-При первом запуске фреймворк сам устанавливает метод и его vocabulary/weights.
-`run_catalog.py` только выбирает последовательность, проверяет окно IMU,
-формирует native YAML и вызывает **штатный `run_exp`/`run_sequence`**.
-Настройки метода берутся из каталога, viewer выключен native `verbose=0`.
-Каждый запуск получает отдельный experiment в
-`${VIO_RESULTS_DIR}/VSLAM-LAB-Evaluation/`, включая YAML, native logs и траекторию.
-`CONFIG` выбирает запись; `METHOD` и `MODE` выбирают метод независимо от имени YAML.
-Исследовательские `MethodSettings`/`Evaluation` при таком запуске не применяются.
+Каждый вариант `Methods` запускается на каждой записи `Datasets` с `NumRuns`
+повторами. В примере — четыре запуска. Варианты имеют отдельные логи и результаты.
+`Parameters` — параметры запуска VSLAM-LAB; `Settings` переопределяет только
+указанные ключи штатного YAML метода. Калибровка камер/IMU берётся из датасета.
+Без `Settings` применяется штатный файл метода. Viewer по умолчанию выключен
+(`verbose: 0`); при первом запуске VSLAM-LAB устанавливает метод и vocabulary/weights.
 
 ```bash
-make plan                              # оценка места для всего набора
-make prepare CONFIG=configs/experiments/grandtour_kaeb_1_orbslam3.yaml
-make validate CONFIG=configs/experiments/grandtour_kaeb_1_orbslam3.yaml
+make methods                                  # каталог методов
+make run                                      # вся матрица comparison.yaml
+make run CONFIG=configs/experiments/comparison.yaml
+make run RGB_MAX=200                           # короткая проверка всей матрицы
+make run PLAN=1                                # native YAML без запуска методов
+make plan                                     # место для selected.yaml
+make prepare CONFIG=configs/experiments/comparison.yaml # только записи эксперимента
+make validate CONFIG=configs/experiments/comparison.yaml
 ```
 
-Без `CONFIG` подготовка читает `VIO_DATASET_CONFIG` (`prepare_all.yaml`),
-запуск — `VIO_EXPERIMENT_CONFIG` (`grandtour_kaeb_1_orbslam3.yaml`).
-Оба читают одинаковый native формат `Config` dataset/sequence.
-`Preparation.reserve_gb` и `max_data_gb` задаются в YAML. Проверка места
-и блокировка параллельной подготовки сохраняются; оценка места не резервирует диск.
+`METHOD`/`MODE` перенесены в файл эксперимента. Без `CONFIG` подготовка читает
+`VIO_DATASET_CONFIG` (`selected.yaml`), запуск — `VIO_EXPERIMENT_CONFIG`
+(`comparison.yaml`). Машинные пути остаются в `.envrc`.
+`run_catalog.py` проверяет подготовленные входы и окно IMU, генерирует native YAML,
+затем вызывает штатные `run_exp`/`run_sequence`. Исходный файл эксперимента,
+эффективные настройки всех вариантов, протокол оценки и аудит входов сохраняются
+в `${VIO_RESULTS_DIR}/VSLAM-LAB-Evaluation/comparison_.../inputs/`.
+Каждый `make run` создаёт одну папку для всей матрицы: `experiment.yaml` и
+`comparison.csv` лежат в её корне, результаты вариантов — внутри этой же папки.
+Штатный `VSLAMLAB_EVALUATION` указывает на эту папку только для текущего процесса.
+Повторный запуск создаёт новую папку и сохраняет предыдущие результаты.
+
+```text
+comparison_<timestamp>_<id>/
+  experiment.yaml
+  comparison.csv
+  inputs/
+  orbslam3_default_0/
+  orbslam3_default_1/
+  orbslam3_no_loop_0/
+  orbslam3_no_loop_1/
+```
+
+Существующие матрицы на этой машине перенесены в эту структуру. Ранние одиночные
+проверки сохранены отдельно в `${VIO_RESULTS_DIR}/legacy-catalog-runs/`.
+Прежнее плоское расположение больше не поддерживается командами запуска и оценки.
+
+`PLAN=1` может установить метод для получения его штатного файла настроек.
 Конвертация выполняется в `dataset.download_sequence`, отдельной команды convert нет.
 
-Для прежнего эксперимента без loop closing, с provenance и SE(3)-метриками:
+Оценка всей сохранённой матрицы выполняется штатным `evaluate_exp` из нашего
+форка VSLAM-LAB, в том же Pixi-окружении, что и запуск:
 
 ```bash
-make run-research CONFIG=configs/experiments/grandtour_kaeb_1_orbslam3.yaml
-make evaluate
-make visualize
+make evaluate                                  # последняя запущенная матрица, PLAN пропускается
+make evaluate RUN_DIR=/path/to/comparison_...   # конкретная сохранённая матрица
+make evaluate EXPERIMENT=/path/to/comparison_.../experiment.yaml
 ```
 
-`make evaluate`/`make visualize` работают с research run. Встроенные native
-оценка/сравнение доступны через команды VSLAM-LAB с сохранённым native experiment YAML;
-их Sim(3)-протокол отличается от исследовательского SE(3), поэтому автоматически
-после `make run` они не вызываются.
+Протокол `Evaluation` задаёт выравнивание, допуск времени и APE/RPE.
+Общие настройки применяются ко всем вариантам; `Methods.<variant>.Evaluation`
+переопределяет их для конкретного метода. `estimate_frame: camera` вместе с
+`camera: rgb_0` означает экспорт позы камеры — оценщик переводит её в body/IMU
+через сохранённую калибровку. Для экспорта позы корпуса укажите
+`estimate_frame: body`; преобразование камеры тогда не применяется.
+Для ORB-SLAM3 в текущих вариантах явно указан экспорт камеры.
+
+Для каждого повтора сохраняются immutable `summary.json`, `protocol.yaml` и
+стандартные ZIP evo в `<native output>/evaluations/<iteration>/<timestamp>/`.
+Общая таблица — `<comparison>/comparison.csv`: отдельная строка для каждого
+запуска, ошибки позиции/ориентации, число пар, доля сопоставленных сохранённых поз
+и статус. Неудачные запуски остаются строками таблицы; команда возвращает ошибку.
+`compare_exp` для экспериментов с `Evaluation` собирает ту же таблицу по сохранённым
+оценкам. Запуски разных последовательностей не усредняются в общий рейтинг.
+Повторная оценка сохраняет новую версию и обновляет ссылки в native логе.
+
+Допуск 10 мс сохранён; он не увеличивается автоматически при низком покрытии.
+Метрики описывают сохранённые позы, а не все входные изображения. Native YAML без
+`Evaluation` сохраняет прежний benchmark-путь VSLAM-LAB с Sim(3); наши сгенерированные
+эксперименты всегда содержат явный протокол SE(3) без коррекции масштаба.
+`make run` сохраняет протокол, а оценка запускается отдельной командой.
+
+Визуализация одной строки сравнения использует её `evaluation_directory`:
+
+```bash
+make visualize EVALUATION_DIR=/path/from/comparison.csv VIS_ARGS='--save /tmp/result.rrd'
+```
+
+Прежние research runs сохранены и оцениваются тем же кодом `Evaluate`:
+
+```bash
+make run-research VARIANT=orbslam3_no_loop DATASET=grandtour-alphasense SEQUENCE=kaeb_1
+make evaluate RUN_DIR=/path/to/research_run
+make visualize RUN_DIR=/path/to/research_run
+```
+
+Корневые `evaluate_result.py`, `trajectory_inputs.py` и `run_results.py` делегируют
+работу модулю `Evaluate`; независимой реализации метрик в корневом репозитории нет.
+Rerun остаётся в отдельном окружении визуализации.
 
 ## Формат и источники
 
