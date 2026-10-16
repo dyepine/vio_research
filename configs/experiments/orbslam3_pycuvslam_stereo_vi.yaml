@@ -1,0 +1,57 @@
+# Stereo-inertial comparison, one trial per method/sequence.
+# Both methods use rgb_0 + rgb_1 + imu_0; loop closure is disabled.
+# These are shared working estimator noise profiles, not measured sensor noise.
+Datasets:
+  grandtour-alphasense: [kaeb_1]
+  botanicgarden: ['1018_13']
+# Shared camera start after initial exposure adaptation; zero-based original index.
+# IMU bracketing is still checked. The source images and IMU are not modified.
+FrameStart:
+  botanicgarden:
+    '1018_13': 20
+Methods:
+  orbslam3_stereo_vi_no_loop:
+    Module: orbslam3
+    Parameters:
+      mode: stereo-vi
+      verbose: 0
+      imu_noise_by_dataset: &working_imu_profiles
+        # Historical working profile; control recovered APE ~1.36 m on kaeb_1.
+        # Random walks are manufacturer-example values, not GrandTour Allan values.
+        grandtour-alphasense:
+          sigma_g_c: 0.0002020293
+          sigma_a_c: 0.001259392
+          sigma_gw_c: 0.000266
+          sigma_aw_c: 0.0043
+        # BotanicGarden @ 84c4806428ca16c154238e263a7f8bf828bf58e1:
+        # config/ORB-SLAM3/dalsa_gray_down_stereo_xsens.yaml
+        botanicgarden:
+          sigma_g_c: 0.002
+          sigma_a_c: 0.01
+          sigma_gw_c: 0.00008
+          sigma_aw_c: 0.00003
+    Settings:
+      loopClosing: 0
+    Evaluation:
+      estimate_frame: camera
+      camera: rgb_0
+  pycuvslam_stereo_vi_no_loop:
+    Module: pycuvslam
+    Parameters:
+      mode: stereo-vi
+      verbose: 0
+      imu_noise_by_dataset: *working_imu_profiles
+    # Adapter constructs odometry-only Tracker(..., OdometryMode.Inertial),
+    # without a SLAM configuration. Its rig origin is the left camera.
+    Evaluation:
+      estimate_frame: camera
+      camera: rgb_0
+NumRuns: 1
+Evaluation:
+  align: origin
+  correct_scale: false
+  max_time_difference_s: 0.05
+  evaluate_orientation: true
+  max_pose_gap_s: 1.0
+  rpe_delta_m: 1.0
+  rpe_relative_tolerance: 0.1

@@ -135,6 +135,25 @@ make evaluate RUN_DIR=/path/to/new/comparison EVAL_ARGS=--saved-protocol
 
 Сборка и поддерживаемые входы описаны в [docs/OKVIS1.md](docs/OKVIS1.md).
 
+Для сравнения ORB-SLAM3 и PyCuVSLAM со стереопарой и IMU используйте
+`configs/experiments/orbslam3_pycuvslam_stereo_vi.yaml`:
+
+```bash
+make run CONFIG=configs/experiments/orbslam3_pycuvslam_stereo_vi.yaml
+make evaluate RUN_DIR=/path/to/new/comparison EVAL_ARGS=--saved-protocol
+```
+
+Это четыре запуска: оба метода на GrandTour `kaeb_1` и BotanicGarden
+`1018_13`, по одному повтору, без loop closure. `FrameStart.botanicgarden.'1018_13': 20`
+задаёт общий старт с кадра 20 (индекс с нуля), после начальной адаптации экспозиции;
+окно по-прежнему ограничивается доступностью IMU. Исходные данные сохраняются.
+Рабочие профили шума IMU общие
+для обоих методов: исторический проверенный профиль GrandTour и профиль
+ORB-SLAM3 авторов BotanicGarden. Это настройки оценивателей, а не утверждение
+о измеренном шуме сенсоров. PyCuVSLAM экспортирует позу rig в системе левой
+камеры; оценка обоих методов использует `estimate_frame: camera`, `rgb_0`.
+Отказы и неполные траектории необходимо учитывать вместе с APE/RPE.
+
 DROID-SLAM подключён отдельным stereo-экспериментом
 `configs/experiments/droidslam_stereo.yaml` (GrandTour `kaeb_1`, BotanicGarden
 `1018_13`, старт BotanicGarden с кадра 20):
