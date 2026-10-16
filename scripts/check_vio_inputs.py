@@ -11,7 +11,9 @@ def csv_rows(path):
         return list(reader)
 
 
-def camera_imu_window(folder):
+def camera_imu_window(folder, start_frame=0):
+    if type(start_frame) is not int or start_frame < 0:
+        raise ValueError('start_frame must be a nonnegative integer')
     images = csv_rows(folder / 'rgb.csv')
     imu_rows = csv_rows(folder / 'imu_0.csv')
     if not images or len(imu_rows) < 2:
@@ -27,6 +29,7 @@ def camera_imu_window(folder):
         raise ValueError('Non-finite IMU measurements')
     keep = ((left > imu_t[0]) & (right > imu_t[0]) &
             (left < imu_t[-1]) & (right < imu_t[-1]))
+    keep[:start_frame] = False
     indices = np.flatnonzero(keep)
     if len(indices) < 100 or np.any(np.diff(indices) != 1):
         raise ValueError('Camera/IMU interval is too short or non-contiguous')
@@ -40,4 +43,6 @@ def camera_imu_window(folder):
         'stereo_max_timestamp_difference_ms': float(np.max(np.abs(left - right)) / 1e6),
         'imu_count': len(imu_t), 'imu_max_gap_ms': float(np.diff(imu_t).max() / 1e6),
     }
+    if start_frame:
+        audit['requested_start_frame'] = start_frame
     return images[start:end], audit

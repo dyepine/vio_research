@@ -40,7 +40,6 @@ class MigrationTests(unittest.TestCase):
                 cached.parent.mkdir(parents=True); cached.write_bytes(bytes(5000))
                 self.assertEqual(preparation.preparation_estimate(dataset, sequence), estimate - 5000)
 
-
     def test_catalog_contains_all_public_sources_but_project_selects_two(self):
         d = BotanicgardenDataset()
         expected = {'1005_00', '1005_01', '1005_05', '1005_07', '1006_01',
@@ -171,6 +170,21 @@ class MigrationTests(unittest.TestCase):
                 def ensure_installed(self): pass
                 def download_vslamlab_settings(self): return True
             changed = write_method_settings(Baseline(), {'loopClosing': 0}, root / 'changed.yaml')
+            legacy = root / 'legacy.yaml'
+            legacy.write_text('%YAML:1.0\ncam_mono: rgb_0\nestimator_parameters:\n  do_loop_closures: true\n')
+            class LegacyBaseline(Baseline):
+                settings_yaml = legacy
+            legacy_changed = write_method_settings(
+                LegacyBaseline(), {'estimator_parameters': {'do_loop_closures': False}},
+                root / 'legacy_changed.yaml')
+            legacy_reader = cv2.FileStorage(str(legacy_changed), cv2.FILE_STORAGE_READ)
+            try:
+                self.assertEqual(legacy_reader.getNode('cam_mono').string(), 'rgb_0')
+                self.assertFalse(legacy_reader.getNode('estimator_parameters').getNode('do_loop_closures').empty())
+                effective = yaml.safe_load(legacy_changed.read_text().split('\n', 1)[1])
+                self.assertIs(effective['estimator_parameters']['do_loop_closures'], False)
+            finally:
+                legacy_reader.release()
             reader = cv2.FileStorage(str(changed), cv2.FILE_STORAGE_READ)
             try:
                 self.assertEqual(reader.getNode('cam_stereo').at(1).string(), 'rgb_1')
@@ -196,6 +210,72 @@ class MigrationTests(unittest.TestCase):
                 native.run_exp(exp)
             self.assertCountEqual(seen, [('stock', stock), ('changed', changed)] * 2)
             self.assertNotIn('loopClosing', stock.read_text())
+
+    def test_shared_imu_noise_only_changes_run_calibration(self):
+        from types import SimpleNamespace
+        from Run.run_functions import create_calibration_exp_yaml
+        import cv2
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root/'calibration.yaml'
+            original = {'cameras': [{'cam_name':'rgb_0', 'T_BS':np.eye(4).reshape(-1).tolist()}],
+                        'imus': [{'imu_name':'imu_0','sigma_g_c':.0002,'sigma_a_c':.0005,
+                                  'sigma_gw_c':.000004,'sigma_aw_c':.00002,'g':9.80665}]}
+            source.write_text('%YAML 1.2\n---\n'+yaml.safe_dump(original))
+            before=source.read_bytes()
+            class Dataset:
+                dataset_folder='DATA'
+                def sequence_path(self, sequence):return root
+                def calibration_yaml_path(self, sequence):return source
+            noise={'sigma_g_c':.002,'sigma_a_c':.01,'sigma_gw_c':.00008,'sigma_aw_c':.00003}
+            for name in ['orbslam3', 'okvis2']:
+                folder=root/name/'DATA/sequence';folder.mkdir(parents=True)
+                exp=SimpleNamespace(folder=root/name,parameters={'imu_noise':noise})
+                copied=create_calibration_exp_yaml(exp,Dataset(),'sequence')
+                effective=yaml.safe_load(copied.read_text())
+                self.assertEqual(effective['cameras'],original['cameras'])
+                self.assertEqual(effective['imus'][0]['g'],9.80665)
+                self.assertEqual({key:effective['imus'][0][key] for key in noise},noise)
+                reader=cv2.FileStorage(str(copied),cv2.FILE_STORAGE_READ)
+                try:
+                    self.assertEqual(reader.getNode('imus').at(0).getNode('sigma_g_c').real(),.002)
+                finally:reader.release()
+            self.assertEqual(source.read_bytes(),before)
+            exp.parameters={'imu_noise':{'sigma_g_c':0}}
+            with self.assertRaisesRegex(ValueError,'positive'):
+                create_calibration_exp_yaml(exp,Dataset(),'sequence')
+
+    def test_okvis_bias_priors_are_explicit_and_only_change_run_calibration(self):
+        from types import SimpleNamespace
+        from Baselines.baseline_files.baseline_okvis2 import OKVIS2_baseline
+        from Baselines.BaselineVSLAMLAB import BaselineVSLAMLAB
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            folder = root/'run/DATA/sequence'
+            folder.mkdir(parents=True)
+            source = root/'source.yaml'
+            source.write_text(yaml.safe_dump({'cameras': [], 'imus': [dict(
+                imu_name='imu_0', sigma_bg=0., sigma_ba=0., sigma_g_c=.002,
+                a_max=176., g_max=7.8, a0=[0.,0.,0.], g0=[0.,0.,0.])]}))
+            copied = folder/'calibration_exp.yaml'
+            copied.write_bytes(source.read_bytes())
+            settings = root/'settings.yaml'
+            settings.write_text('%YAML:1.0\nimu: imu_0\n')
+            baseline = OKVIS2_baseline()
+            baseline.settings_yaml = settings
+            exp = SimpleNamespace(folder=root/'run', parameters={})
+            dataset = SimpleNamespace(dataset_folder='DATA')
+            with self.assertRaisesRegex(ValueError, 'positive sigma_bg'):
+                baseline.build_execute_command(0, exp, dataset, 'sequence')
+            exp.parameters['imu_overrides'] = {'sigma_bg': .01, 'sigma_ba': .1}
+            before = source.read_bytes()
+            with patch.object(BaselineVSLAMLAB, 'build_execute_command', return_value='command'):
+                self.assertEqual(baseline.build_execute_command(0, exp, dataset, 'sequence'), 'command')
+            self.assertEqual(source.read_bytes(), before)
+            effective = yaml.safe_load(copied.read_text())['imus'][0]
+            self.assertEqual(effective['sigma_bg'], .01)
+            self.assertEqual(effective['sigma_ba'], .1)
+            self.assertEqual(effective['sigma_g_c'], .002)
 
     def test_prepare_and_runner_share_selection_and_machine_path(self):
         with patch.dict(os.environ, {'VIO_DATA_DIR':'/tmp/custom data'}):

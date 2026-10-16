@@ -25,7 +25,10 @@ def materialize(config, inputs, get_baseline, rgb_max=None):
         dataset = dataset_at_root(dataset_name)
         if dataset.check_sequence_availability(sequence, verbose=False) != 'available':
             raise RuntimeError(f'{dataset_name}/{sequence} is not prepared; run make prepare first')
-        _, audits[(dataset_name, sequence)] = camera_imu_window(dataset.sequence_path(sequence))
+        start = settings.get('FrameStart', {}).get(dataset_name, {}).get(sequence, 0)
+        folder = dataset.sequence_path(sequence)
+        _, audits[(dataset_name, sequence)] = (camera_imu_window(folder, start_frame=start)
+                                              if start else camera_imu_window(folder))
     native = {}
     for variant, method in settings['Methods'].items():
         protocol = dict(settings.get('Evaluation', {}), **method.get('Evaluation', {}))
@@ -36,6 +39,12 @@ def materialize(config, inputs, get_baseline, rgb_max=None):
         if isinstance(baseline, str):
             raise ValueError(f'Unknown catalog method {method["Module"]!r}; inspect the VSLAM-LAB baseline catalog')
         parameters = dict(baseline.default_parameters, **method.get('Parameters', {}))
+        noise_profiles = parameters.pop('imu_noise_by_dataset', None)
+        if noise_profiles is not None:
+            if not isinstance(noise_profiles, dict) or any(dataset not in noise_profiles for dataset, _ in pairs):
+                raise ValueError(f'{variant}: imu_noise_by_dataset must cover every selected dataset')
+            if any(not isinstance(profile, dict) or not profile for profile in noise_profiles.values()):
+                raise ValueError(f'{variant}: IMU noise profiles must be nonempty mappings')
         # Catalog default verbosity may open a viewer; unattended runs default to 0.
         if 'verbose' not in method.get('Parameters', {}):
             parameters['verbose'] = 0
@@ -59,6 +68,8 @@ def materialize(config, inputs, get_baseline, rgb_max=None):
                       'NumRuns': settings.get('NumRuns', 1),
                       'Parameters': dict(parameters, rgb_idx=audit['framework_rgb_idx_inclusive']),
                       'Evaluation': dict(protocol)}
+            if noise_profiles is not None:
+                recipe['Parameters']['imu_noise'] = dict(noise_profiles[dataset_name])
             recipe['MethodSettings'] = str(settings_path)
             native[name] = recipe
     experiment = inputs.parent / 'experiment.yaml'

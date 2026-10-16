@@ -42,7 +42,7 @@ def experiment_inputs(path=None):
 
 def load_comparison(path=None):
     path, name, settings, pairs = experiment_inputs(path)
-    unknown = set(settings) - {'Datasets', 'Methods', 'NumRuns', 'Evaluation', 'Preparation'}
+    unknown = set(settings) - {'Datasets', 'Methods', 'NumRuns', 'Evaluation', 'Preparation', 'FrameStart'}
     if unknown:
         raise ValueError(f'Unknown experiment fields: {sorted(unknown)}')
     methods = settings.get('Methods')
@@ -52,6 +52,15 @@ def load_comparison(path=None):
         raise ValueError('NumRuns must be a positive integer')
     if not isinstance(settings.get('Evaluation', {}), dict):
         raise ValueError('Evaluation must be a mapping')
+    frame_starts = settings.get('FrameStart', {})
+    if not isinstance(frame_starts, dict):
+        raise ValueError('FrameStart must map datasets to sequence/frame mappings')
+    for dataset, sequences in frame_starts.items():
+        if not isinstance(sequences, dict) or not sequences:
+            raise ValueError('FrameStart must map datasets to nonempty sequence/frame mappings')
+        for sequence, start in sequences.items():
+            if (dataset, sequence) not in pairs or type(start) is not int or start < 0:
+                raise ValueError('FrameStart requires selected sequences and nonnegative integer frame indices')
     for variant, method in methods.items():
         if not isinstance(variant, str) or not re.fullmatch(r'[A-Za-z0-9_-]+', variant):
             raise ValueError('Method variant names must contain only letters, digits, _ or -')
@@ -74,7 +83,9 @@ def write_method_settings(baseline, overrides, destination):
     if not overrides:
         destination.write_bytes(baseline.settings_yaml.read_bytes())
         return destination
-    settings = yaml.safe_load(original)
+    # OpenCV's legacy directive is not standard YAML syntax (OKVIS2 uses it).
+    yaml_text = original.split('\n', 1)[1] if original.startswith('%YAML:') else original
+    settings = yaml.safe_load(yaml_text)
     if not isinstance(settings, dict):
         raise ValueError(f'{baseline.settings_yaml}: expected a YAML mapping')
     settings.update(overrides)

@@ -12,6 +12,20 @@ from run_catalog import materialize
 
 
 class ComparisonTests(unittest.TestCase):
+    def test_parallel_workers_own_disjoint_experiments_and_keep_sequences_together(self):
+        recipes = {f'{method}_{sequence}': {'Module': module, 'NumRuns': 2}
+                   for method, module in [('orb_default', 'orbslam3'), ('orb_no_loop', 'orbslam3'),
+                                          ('voxel_svio', 'voxel-svio')]
+                   for sequence in range(2)}
+        groups = partition_methods(recipes)
+        self.assertEqual(set(groups), {'orb_default', 'orb_no_loop', 'voxel_svio'})
+        owned = [name for group in groups.values() for name in group]
+        self.assertEqual(len(owned), len(set(owned)))
+        self.assertEqual(set(owned), set(recipes))
+        for variant, group in groups.items():
+            self.assertEqual(set(group), {f'{variant}_0', f'{variant}_1'})
+            self.assertTrue(all(recipe['NumRuns'] == 2 for recipe in group.values()))
+
     def test_selection_is_independent_of_experiment(self):
         _, _, _, downloaded = experiment_inputs(ROOT / 'configs/datasets/selected.yaml')
         _, _, _, used = load_comparison(ROOT / 'configs/experiments/comparison.yaml')
@@ -34,11 +48,15 @@ class ComparisonTests(unittest.TestCase):
             cfg = root / 'comparison.yaml'
             cfg.write_text(yaml.safe_dump({
                 'Datasets': {'d': ['s1', 's2']}, 'NumRuns': 2,
-                'Methods': {'stock': {'Module': 'm', 'Parameters': {'mode': 'stereo-vi'}},
-                            'no_loop': {'Module': 'm', 'Settings': {'loopClosing': 0}}},
+                'FrameStart': {'d': {'s2': 20}},
+                'Methods': {'stock': {'Module': 'm', 'Parameters': {'mode': 'stereo-vi',
+                                          'imu_noise_by_dataset': {'d': {'sigma_gw_c': .001}}}},
+                            'no_loop': {'Module': 'm', 'Settings': {'loopClosing': 0},
+                                        'Parameters': {'imu_noise_by_dataset': {'d': {'sigma_gw_c': .001}}}}},
                 'Evaluation': {'align': 'SE3', 'correct_scale': False, 'estimate_frame': 'body'}}))
-            def audit(folder):
-                return [], {'framework_rgb_idx_inclusive': [1 if folder.name == 's1' else 2, 300]}
+            def audit(folder, start_frame=0):
+                self.assertEqual(start_frame, 0 if folder.name == 's1' else 20)
+                return [], {'framework_rgb_idx_inclusive': [max(start_frame, 1 if folder.name == 's1' else 2), 300]}
             with patch('run_catalog.dataset_at_root', return_value=Dataset()), \
                  patch('run_catalog.camera_imu_window', side_effect=audit):
                 exp = materialize(cfg, root / 'run/inputs', lambda _: Baseline(), 200)
@@ -50,8 +68,10 @@ class ComparisonTests(unittest.TestCase):
                 self.assertEqual(entry['NumRuns'], 2)
                 self.assertEqual(entry['Parameters']['rgb_max'], 200)
                 self.assertEqual(entry['Parameters']['verbose'], 0)
+                self.assertEqual(entry['Parameters']['imu_noise'], {'sigma_gw_c': .001})
+                self.assertNotIn('imu_noise_by_dataset', entry['Parameters'])
                 selection = yaml.safe_load(Path(entry['Config']).read_text())
-                expected_start = 1 if selection['d'] == ['s1'] else 2
+                expected_start = 1 if selection['d'] == ['s1'] else 20
                 self.assertEqual(entry['Parameters']['rgb_idx'], [expected_start, 300])
             changed = [e for e in data.values() if 'no_loop' in Path(e['MethodSettings']).name]
             self.assertEqual(len(changed), 2)
@@ -66,6 +86,8 @@ class ComparisonTests(unittest.TestCase):
         base = {'Datasets': {'d': ['s']}, 'Methods': {'m': {'Module': 'm'}}}
         for change in [{'NumRuns': True}, {'Methods': {}}, {'Methods': {'../bad': {'Module': 'm'}}},
                        {'Datasets': {'d': ['s', 's']}}, {'Unknown': 1},
+                       {'FrameStart': []}, {'FrameStart': {'d': {'other': 20}}},
+                       {'FrameStart': {'d': {'s': True}}}, {'FrameStart': {'d': {'s': -1}}},
                        {'Methods': {'m': {'Module': 'm', 'Settings': []}}}]:
             with self.subTest(change=change), tempfile.TemporaryDirectory() as tmp:
                 p = Path(tmp) / 'c.yaml'
