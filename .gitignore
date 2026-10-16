@@ -1,4 +1,6 @@
 .venv/
+.venv-rerun/
+*.rrd
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -6,7 +8,7 @@ __pycache__/
 .tools/
 results/
 .pixi/
-*.local.yaml
+.envrc
 .env
 .env.*
 !.env.example

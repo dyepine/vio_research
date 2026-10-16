@@ -1,0 +1,6 @@
+# Separate environment: Rerun requires NumPy 2; do not upgrade the preparation venv.
+numpy==2.2.6
+scipy==1.14.1
+PyYAML==6.0.2
+rerun-sdk==0.31.4
+evo==1.35.2
