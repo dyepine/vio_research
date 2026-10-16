@@ -176,9 +176,42 @@ class EvaluationTests(unittest.TestCase):
         self.assertIn('rpe_position_m', summary['unavailable_metrics'])
 
     def test_protocol_rejects_scale_and_unknown_options(self):
-        for settings in [{'correct_scale': True}, {'max_time_difference_s': 0}, {'align': 'Sim3'}, {'typo': 1}]:
+        for settings in [{'correct_scale': True}, {'max_time_difference_s': 0}, {'align': 'Sim3'},
+                         {'typo': 1}, {'evaluate_rpe': 'false'}]:
             with self.assertRaises(ValueError):
                 validate_protocol(settings)
+
+    def test_position_only_reference_uses_se3_without_pose_rpe(self):
+        output = self.run_fixture()
+        protocol = dict(self.protocol, align='SE3', evaluate_rpe=False)
+        (self.root / 'protocol.yaml').write_text(yaml.safe_dump(protocol))
+        evaluation = evaluate_run(self.root, self.root / 'protocol.yaml')
+        summary = json.loads((evaluation / 'summary.json').read_text())
+        self.assertEqual(set(summary['metrics']), {'ape_position_m'})
+        self.assertLess(summary['metrics']['ape_position_m']['rmse'], 1e-10)
+        self.assertIn('rpe_position_m', summary['unavailable_metrics'])
+        self.assertFalse((evaluation / 'rpe_position_m.zip').exists())
+
+    def test_reference_point_offset_uses_estimated_orientation(self):
+        output = self.run_fixture()
+        estimate = self.values.copy()
+        rotations = Rotation.from_euler('z', np.linspace(0, 1.5, len(estimate))[:, None])
+        estimate[:, 3:] = rotations.as_quat()
+        offset = np.array([.6, -.3, .8])
+        reference = self.values.copy()
+        reference[:, :3] = estimate[:, :3] + rotations.apply(np.tile(offset, (len(estimate), 1)))
+        self.write_csv(output / '00000_KeyFrameTrajectory.csv', self.ns, estimate)
+        self.write_csv(output / 'groundtruth.csv', self.ns, reference)
+        transform = np.eye(4); transform[:3, 3] = offset
+        protocol = dict(self.protocol, evaluate_rpe=False, T_body_reference=transform.tolist())
+        (self.root / 'protocol.yaml').write_text(yaml.safe_dump(protocol))
+        evaluation = evaluate_run(self.root, self.root / 'protocol.yaml')
+        summary = json.loads((evaluation / 'summary.json').read_text())
+        self.assertLess(summary['metrics']['ape_position_m']['rmse'], 1e-10)
+        self.assertEqual(summary['compared_pose_frame'], 'reference')
+        from Evaluate.protocol_plots import full_paths
+        plotted, reference_path = full_paths(summary)
+        np.testing.assert_allclose(plotted.positions_xyz, reference_path.positions_xyz, atol=1e-10)
 
     def test_saved_evaluations_are_versioned_and_readable(self):
         self.run_fixture()
