@@ -208,7 +208,34 @@ class NativeEvaluationTests(unittest.TestCase):
                 writer = csv.DictWriter(stream, fieldnames=record);writer.writeheader();writer.writerow(record)
             artifacts = [table, *destination.glob('*.zip')]
             before = {p:hashlib.sha256(p.read_bytes()).hexdigest() for p in artifacts}
-            figures = plot_comparison(table)
+            from Evaluate import protocol_plots
+            saved_ape = protocol_plots.file_interface.load_res_file(
+                destination/'ape_position_m.zip', load_trajectories=True)
+            save = protocol_plots.save_figure
+            font_before = list(protocol_plots.plt.rcParams['font.family'])
+            def inspect_map(fig, path):
+                if '_ape_map' in path.name:
+                    ax = next(ax for ax in fig.axes if ax.get_xlabel() == 'X, м')
+                    points = next(collection for collection in ax.collections
+                                  if collection.get_array() is not None)
+                    np.testing.assert_allclose(points.get_offsets(),
+                                               saved_ape.trajectories['estimate'].positions_xyz[:,:2])
+                    np.testing.assert_allclose(points.get_array(), saved_ape.np_arrays['error_array'])
+                    self.assertLess(len(points.get_offsets()), estimate.num_poses)
+                    self.assertEqual(ax.xaxis.label.get_fontfamily(), ['sans-serif'])
+                save(fig, path)
+            # Regeneration retires old route sheets recorded by the report.
+            old_route = root/'figures/botanicgarden_1018_00_trajectories'
+            old_route.parent.mkdir()
+            for extension in ['.png', '.pdf']:
+                old_route.with_suffix(extension).write_bytes(b'old route')
+            (old_route.parent/'manifest.json').write_text(json.dumps([dict(
+                dataset='botanicgarden', sequence='1018_00', plots=[old_route.name+'.png'])]))
+            with patch.object(protocol_plots, 'save_figure', side_effect=inspect_map):
+                figures = plot_comparison(table)
+            self.assertFalse(old_route.with_suffix('.png').exists())
+            self.assertFalse(old_route.with_suffix('.pdf').exists())
+            self.assertEqual(protocol_plots.plt.rcParams['font.family'], font_before)
             self.assertEqual(len(list(figures.glob('*.png'))), 2)
             self.assertEqual(len(list(figures.glob('*.pdf'))), 2)
             self.assertEqual(before, {p:hashlib.sha256(p.read_bytes()).hexdigest() for p in artifacts})
@@ -219,13 +246,15 @@ class NativeEvaluationTests(unittest.TestCase):
             with table.open('w') as stream:
                 writer = csv.DictWriter(stream, fieldnames=record)
                 writer.writeheader(); writer.writerows(records)
-            from Evaluate import protocol_plots
-            save = protocol_plots.save_figure
-            limits = {'trajectories': [], 'errors': []}
+            limits = {'errors': [], 'ape_map': []}
+            color_limits = []
             def capture(fig, path):
-                kind = 'trajectories' if '_trajectories' in path.name else 'errors'
+                kind = next(kind for kind in limits if '_'+kind in path.name)
                 axes = [ax for ax in fig.axes if ax.get_xlabel()]
                 limits[kind].append([(ax.get_xlim(), ax.get_ylim()) for ax in axes])
+                if kind == 'ape_map':
+                    color_limits.extend(collection.get_clim() for ax in axes
+                                        for collection in ax.collections if collection.get_array() is not None)
                 save(fig, path)
             with patch.object(protocol_plots, 'save_figure', side_effect=capture):
                 plot_comparison(table)
@@ -233,7 +262,13 @@ class NativeEvaluationTests(unittest.TestCase):
             self.assertEqual(len(list(figures.glob('*.pdf'))), 4)
             for kind in limits:
                 self.assertEqual(len(limits[kind]), 2)
-                self.assertEqual(limits[kind][0], limits[kind][1])
+                if kind == 'ape_map':
+                    self.assertTrue(all(value == limits[kind][0][0]
+                                        for page in limits[kind] for value in page))
+                else:
+                    self.assertEqual(limits[kind][0], limits[kind][1])
+            self.assertTrue(color_limits)
+            self.assertTrue(all(value == color_limits[0] for value in color_limits))
             with (figures/'botanicgarden_1018_00_summary.csv').open() as stream:
                 exported = list(csv.DictReader(stream))
             self.assertEqual(len(exported), 6)
