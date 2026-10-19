@@ -1,6 +1,6 @@
 # Report experiment: three stereo-inertial methods on three outdoor sequences.
 # Historical table combines saved runs; this recipe creates a NEW run with current fixes.
-# GEODE reference orientation convention and limitations: docs/GEODE.md.
+# GEODE reference orientation convention and limitations: docs/DATASETS.md.
 Datasets:
   grandtour-alphasense:
   - kaeb_1
