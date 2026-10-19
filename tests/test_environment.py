@@ -19,6 +19,7 @@ class EnvironmentTests(unittest.TestCase):
         environment.start()
         self.addCleanup(environment.stop)
         os.environ.pop('VIO_ENV_FILE', None)
+        os.environ['VIO_NATIVE'] = '1'
 
     def test_explicit_environment_path(self):
         with patch.dict(os.environ, {'VIO_DATA_DIR': '/tmp/data with spaces'}):

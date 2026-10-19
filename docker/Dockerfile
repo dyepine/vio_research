@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && git config --system --add safe.directory /workspace/external/VSLAM-LAB
 
 ENV HOME=/home/vio \
+    VIO_NATIVE=1 \
     GIT_OPTIONAL_LOCKS=0 \
     ROOT_DIR=/workspace \
     VIO_ENV_FILE=/opt/vio/env.sh \

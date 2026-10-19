@@ -3,7 +3,8 @@
 set -euo pipefail
 container_uid=$(stat -c '%u' /workspace/.git)
 container_gid=$(stat -c '%g' /workspace/.git)
-for container_cache in /home/vio /workspace/.tools \
+mkdir -p /home/vio/.cache/pixi
+for container_cache in /home/vio /home/vio/.cache /home/vio/.cache/pixi /workspace/.tools \
     /workspace/external/VSLAM-LAB/.pixi \
     /workspace/external/VSLAM-LAB/Baselines/OKVIS1 \
     /workspace/external/VSLAM-LAB/Baselines/Voxel-SVIO \

@@ -4,6 +4,11 @@ services:
       context: .
       dockerfile: docker/Dockerfile
     platform: linux/amd64
+    environment:
+      VIO_EXPERIMENT_CONFIG: ${VIO_CONTAINER_EXPERIMENT_CONFIG:-/workspace/configs/experiments/report.yaml}
+      VIO_DATASET_CONFIG: ${VIO_CONTAINER_DATASET_CONFIG:-/workspace/configs/datasets/selected.yaml}
+      OMP_NUM_THREADS: ${OMP_NUM_THREADS:-2}
+      OPENBLAS_NUM_THREADS: ${OPENBLAS_NUM_THREADS:-1}
     init: true
     shm_size: 2gb
     volumes:
@@ -21,10 +26,10 @@ services:
       - orbslam3:/workspace/external/VSLAM-LAB/Baselines/ORB-SLAM3
       - home:/home/vio
       - type: bind
-        source: ${VIO_DOCKER_DATA_DIR:-./datasets}
+        source: ${VIO_DATA_DIR:-./datasets}
         target: /data
       - type: bind
-        source: ${VIO_DOCKER_RESULTS_DIR:-./results/vio}
+        source: ${VIO_RESULTS_DIR:-./results/vio}
         target: /results
 
 volumes:
