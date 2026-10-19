@@ -2,7 +2,7 @@
 # Minimal Linux x86_64 bootstrap; environments and methods are managed by Pixi/VSLAM-LAB.
 set -euo pipefail
 task_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
-source "$task_root/.envrc"
+source "${VIO_ENV_FILE:-$task_root/.envrc}"
 task_lab="$task_root/external/VSLAM-LAB"
 # Git's submodule entry is the single source of the framework revision.
 task_revision=$(git -C "$task_root" rev-parse :external/VSLAM-LAB)

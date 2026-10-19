@@ -3,8 +3,9 @@ SHELL := /bin/bash
 ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # CONFIG overrides the download selection or comparison experiment.
 CONFIG ?=
+ENV_FILE ?= $(if $(VIO_ENV_FILE),$(VIO_ENV_FILE),$(ROOT).envrc)
 $(foreach option,DATA_DIR SEQUENCES MAX_DATA_GB RESERVE_GB,$(if $(filter command,$(origin $(option))),$(error $(option) is no longer supported; edit dataset selection or experiment YAML instead)))
-SETUP = source "$(ROOT).envrc" && export VSLAMLAB_BENCHMARK="$$VIO_DATA_DIR/VSLAM-LAB-Benchmark" VSLAMLAB_EVALUATION="$$VIO_RESULTS_DIR/VSLAM-LAB-Evaluation" PYTHONPATH= &&
+SETUP = source "$(ENV_FILE)" && export VSLAMLAB_BENCHMARK="$$VIO_DATA_DIR/VSLAM-LAB-Benchmark" VSLAMLAB_EVALUATION="$$VIO_RESULTS_DIR/VSLAM-LAB-Evaluation" PYTHONPATH= &&
 ARGS = $(if $(CONFIG),--config "$(CONFIG)",)
 RUN = "$$PIXI_BIN" run --frozen -e vslamlab python "$(ROOT)scripts/prepare_datasets.py"
 
@@ -21,10 +22,10 @@ help:
 	  'RUN_DIR=... # choose a saved run for make evaluate' \
 	  'VIO_DATA_DIR=/path/to/ssd make prepare # choose storage'
 
-configure: $(ROOT).envrc
+configure: $(ENV_FILE)
 
 bootstrap: configure
-	@bash "$(ROOT)scripts/bootstrap.sh"
+	@VIO_ENV_FILE="$(ENV_FILE)" bash "$(ROOT)scripts/bootstrap.sh"
 
 # No dependency on env.sh: shared-default changes must not overwrite local edits.
 $(ROOT).envrc:

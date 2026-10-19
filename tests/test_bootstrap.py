@@ -1,14 +1,23 @@
 """Bootstrap checks against the pinned fork checkout, without network downloads."""
+import os
 from pathlib import Path
 import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class BootstrapTests(unittest.TestCase):
+    def setUp(self):
+        # Fixture Makefiles/bootstrap scripts select their own environment file.
+        environment = patch.dict(os.environ)
+        environment.start()
+        self.addCleanup(environment.stop)
+        os.environ.pop('VIO_ENV_FILE', None)
+
     def checkout(self, root):
         (root / 'scripts').mkdir()
         (root / 'external').mkdir()
@@ -44,6 +53,19 @@ class BootstrapTests(unittest.TestCase):
                 self.assertEqual((lab / path).read_bytes(), (ROOT / 'external/VSLAM-LAB' / path).read_bytes())
             self.assertEqual((root / 'pixi-args').read_text().splitlines(),
                              ['install', '--frozen', '-e', 'vslamlab', '-e', 'ros1'])
+
+    def test_explicit_environment_does_not_source_host_envrc(self):
+        with tempfile.TemporaryDirectory(prefix='vio selected bootstrap env ') as tmp:
+            root = Path(tmp)
+            self.checkout(root)
+            environment = root / 'container.env'
+            environment.write_bytes((root / '.envrc').read_bytes())
+            (root / '.envrc').write_text('exit 73\n')
+            result = subprocess.run(['bash', str(root / 'scripts/bootstrap.sh')],
+                                    cwd=root, capture_output=True, text=True,
+                                    env=dict(os.environ, VIO_ENV_FILE=str(environment)))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((root / 'pixi-args').exists())
 
     def test_wrong_revision_is_preserved_and_fails(self):
         with tempfile.TemporaryDirectory(prefix='vio conflicting checkout ') as tmp:
