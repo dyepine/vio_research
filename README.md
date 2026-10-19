@@ -25,7 +25,7 @@ CMake, компилятор, OpenCV, Ceres и остальные системн�
 ### 1. Скачать проект и выбрать место для данных
 
 ```bash
-git clone --branch integration/feature-history --recurse-submodules https://github.com/dyepine/vio_research.git
+git clone --branch main --recurse-submodules https://github.com/dyepine/vio_research.git
 cd vio_research
 make configure
 ```
