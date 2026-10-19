@@ -1,0 +1,126 @@
+{
+  "alignment_transform_gt_from_estimate": [
+    [
+      -0.9978534611586105,
+      0.06547806723087078,
+      -0.0010453542416000317,
+      0.6015121236796563
+    ],
+    [
+      -0.0654812573985848,
+      -0.9978480637369871,
+      0.003383286249371725,
+      0.8788872805829939
+    ],
+    [
+      -0.0008215736614022897,
+      0.0034444750041927544,
+      0.9999937302846778,
+      1.7697320821690372
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "matched_poses": 4708,
+  "matched_pairs": 4708,
+  "unique_matched_estimate_poses": 4708,
+  "unique_matched_gt_poses": 4708,
+  "max_matched_time_difference_s": 0.0024995839999988334,
+  "matched_segments": [
+    {
+      "start_s": 8.072955392,
+      "end_s": 478.968588544,
+      "poses": 4708
+    }
+  ],
+  "unavailable_metrics": {},
+  "protocol": {
+    "align": "SE3",
+    "correct_scale": false,
+    "max_time_difference_s": 0.05,
+    "estimate_frame": "body",
+    "camera": "rgb_0",
+    "evaluate_orientation": true,
+    "evaluate_rpe": true,
+    "max_pose_gap_s": 1.0,
+    "rpe_delta_m": 1.0,
+    "rpe_relative_tolerance": 0.1,
+    "gt_valid_intervals_ns": null,
+    "T_body_reference": null
+  },
+  "evo_version": "v1.34.3",
+  "time_origin_ns": 1731591382000000000,
+  "estimate_input_frame": "body",
+  "compared_pose_frame": "body",
+  "evaluation_code_sha256": "374fd726b7b26d6205c5c225286e2a0936c17943a95ae3ea88be43fa7edd5a01",
+  "input_adapter_sha256": "bf54e4790a04beb18c2461688caa5888972797ddb742a170fbb5f187cc00950c",
+  "run_directory": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations",
+  "trajectory": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/00000_KeyFrameTrajectory.csv",
+  "trajectory_sha256": "1d2489a1cdaa2580eb6799854bf8506c10183142d3ae9dfbfb886cafdd7a3dca",
+  "groundtruth": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/groundtruth.csv",
+  "groundtruth_sha256": "b286fa5b45f594d52b868502877c3523b9b031d50a5f9ca8911619d9b495e2f1",
+  "estimate_poses": 4708,
+  "matched_fraction_of_saved_poses": 1.0,
+  "saved_pose_span_s": 470.895633152,
+  "max_saved_pose_gap_s": 0.199998464,
+  "saved_pose_gaps": [],
+  "execution": {
+    "success": true,
+    "confirmation": "native STATUS/SUCCESS log",
+    "time_s": 190.27550077438357
+  },
+  "warnings": [
+    "GT quality is not certified; errors describe saved keyframes, not all input images.",
+    "Completion follows native STATUS/SUCCESS; process exit code was not recorded."
+  ],
+  "selected_input_images": 4788,
+  "metrics": {
+    "ape_position_m": {
+      "rmse": 1.0350433323254706,
+      "mean": 0.9197819138941405,
+      "median": 0.8625353685810232,
+      "std": 0.4746745523668252,
+      "min": 0.28761956872851396,
+      "max": 2.0589075436691338,
+      "sse": 5043.749606617979
+    },
+    "rpe_position_m": {
+      "rmse": 0.024296696586812164,
+      "mean": 0.021402442106622517,
+      "median": 0.019038334168688126,
+      "std": 0.01150064941228456,
+      "min": 0.0008262676410304597,
+      "max": 0.08673840946736741,
+      "sse": 2.343607976175491
+    },
+    "ape_orientation_deg": {
+      "rmse": 1.7603225922376042,
+      "mean": 1.7258237525584434,
+      "median": 1.6975965071746775,
+      "std": 0.34679677600463765,
+      "min": 0.644196492417349,
+      "max": 2.7615063380705274,
+      "sse": 14588.847340117896
+    },
+    "rpe_orientation_deg": {
+      "rmse": 0.47096035412104736,
+      "mean": 0.37440572371133907,
+      "median": 0.29854995809773444,
+      "std": 0.28569915856720823,
+      "min": 0.015135694800390656,
+      "max": 2.2853481072777737,
+      "sse": 880.5605109606746
+    }
+  },
+  "metric_sample_counts": {
+    "ape_position_m": 4708,
+    "rpe_position_m": 3970,
+    "ape_orientation_deg": 4708,
+    "rpe_orientation_deg": 3970
+  },
+  "association": "evo associate_trajectories; shorter trajectory queries longer; pose reuse allowed; no boundary extrapolation"
+}

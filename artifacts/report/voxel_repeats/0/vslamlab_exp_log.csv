@@ -1,0 +1,4 @@
+method_name,dataset_name,sequence_name,exp_it,STATUS,SUCCESS,TIME,RAM,SWAP,GPU,COMMENTS,EVALUATION,num_evaluated_frames,evaluation_directory,evaluation_error
+voxel-svio,geode-gamma,offroad1,0,completed,True,400.4003093242645,1.949909210205078,0.0002288818359375,0.0,,evo,3915,/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T210952_4db73a91/voxel_svio_stereo_vi_1/GEODE-GAMMA/offroad1/evaluations/00000/2026-10-19_08-16-26,
+voxel-svio,geode-gamma,offroad1,1,completed,True,400.1746792793274,1.9234886169433596,0.0001296997070312,0.0,,evo,3915,/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T210952_4db73a91/voxel_svio_stereo_vi_1/GEODE-GAMMA/offroad1/evaluations/00001/2026-10-19_08-16-28,
+voxel-svio,geode-gamma,offroad1,2,completed,False,27182.08911705017,2.3257064819335938,0.000560760498046875,0.0,,none,,,

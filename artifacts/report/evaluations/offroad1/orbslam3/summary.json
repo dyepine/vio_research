@@ -1,0 +1,256 @@
+{
+  "alignment_transform_gt_from_estimate": [
+    [
+      0.9713176479726617,
+      0.23778519305680493,
+      -0.00047822567367682904,
+      792096.1450066731
+    ],
+    [
+      -0.23778361801050843,
+      0.9713156486293034,
+      0.002204933937498761,
+      2565257.5866122986
+    ],
+    [
+      0.0009888087224242386,
+      -0.002027977015194007,
+      0.999997454780029,
+      1.916707167000931
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "matched_poses": 1603,
+  "matched_pairs": 1603,
+  "unique_matched_estimate_poses": 1603,
+  "unique_matched_gt_poses": 1603,
+  "max_matched_time_difference_s": 0.007728715999974156,
+  "matched_segments": [
+    {
+      "start_s": 25.46899232,
+      "end_s": 176.268700224,
+      "poses": 737
+    },
+    {
+      "start_s": 177.268769088,
+      "end_s": 344.468419648,
+      "poses": 735
+    },
+    {
+      "start_s": 345.86847392,
+      "end_s": 366.069306944,
+      "poses": 77
+    },
+    {
+      "start_s": 367.168446016,
+      "end_s": 374.2684432,
+      "poses": 16
+    },
+    {
+      "start_s": 376.068516928,
+      "end_s": 377.568855872,
+      "poses": 6
+    },
+    {
+      "start_s": 380.46885664,
+      "end_s": 380.46885664,
+      "poses": 1
+    },
+    {
+      "start_s": 383.169231424,
+      "end_s": 383.169231424,
+      "poses": 1
+    },
+    {
+      "start_s": 385.968193344,
+      "end_s": 385.968193344,
+      "poses": 1
+    },
+    {
+      "start_s": 388.369013568,
+      "end_s": 388.369013568,
+      "poses": 1
+    },
+    {
+      "start_s": 391.168298816,
+      "end_s": 391.168298816,
+      "poses": 1
+    },
+    {
+      "start_s": 394.069086272,
+      "end_s": 394.069086272,
+      "poses": 1
+    },
+    {
+      "start_s": 396.968805184,
+      "end_s": 396.968805184,
+      "poses": 1
+    },
+    {
+      "start_s": 399.76830496,
+      "end_s": 399.76830496,
+      "poses": 1
+    },
+    {
+      "start_s": 402.468970816,
+      "end_s": 402.468970816,
+      "poses": 1
+    },
+    {
+      "start_s": 405.268207168,
+      "end_s": 417.369491008,
+      "poses": 23
+    }
+  ],
+  "unavailable_metrics": {},
+  "protocol": {
+    "align": "SE3",
+    "correct_scale": false,
+    "max_time_difference_s": 0.05,
+    "estimate_frame": "camera",
+    "camera": "rgb_0",
+    "evaluate_orientation": true,
+    "evaluate_rpe": true,
+    "max_pose_gap_s": 1.0,
+    "rpe_delta_m": 1.0,
+    "rpe_relative_tolerance": 0.1,
+    "gt_valid_intervals_ns": null,
+    "T_body_reference": null
+  },
+  "evo_version": "v1.34.3",
+  "time_origin_ns": 1709436642126699200,
+  "estimate_input_frame": "camera",
+  "compared_pose_frame": "body",
+  "evaluation_code_sha256": "374fd726b7b26d6205c5c225286e2a0936c17943a95ae3ea88be43fa7edd5a01",
+  "input_adapter_sha256": "bf54e4790a04beb18c2461688caa5888972797ddb742a170fbb5f187cc00950c",
+  "run_directory": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/orbslam3_stereo_vi_0",
+  "trajectory": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/orbslam3_stereo_vi_0/GEODE-GAMMA/offroad1/00000_KeyFrameTrajectory.csv",
+  "trajectory_sha256": "2d482c9396057661603a9fd6fcfa3d1a6e6452981da040dc65dafe6249442aea",
+  "groundtruth": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/orbslam3_stereo_vi_0/groundtruth_orientation_candidate.csv",
+  "groundtruth_sha256": "dfb208d286e4fa1fe77f6cf01199da9a6ee276f333e77644514147f93b60f379",
+  "estimate_poses": 1603,
+  "matched_fraction_of_saved_poses": 1.0,
+  "saved_pose_span_s": 391.900498688,
+  "max_saved_pose_gap_s": 2.900787456,
+  "saved_pose_gaps": [
+    {
+      "start_ns": 1709436818395399424,
+      "end_ns": 1709436819395468288
+    },
+    {
+      "start_ns": 1709436986595118848,
+      "end_ns": 1709436987995173120
+    },
+    {
+      "start_ns": 1709437008196006144,
+      "end_ns": 1709437009295145216
+    },
+    {
+      "start_ns": 1709437016395142400,
+      "end_ns": 1709437018195216128
+    },
+    {
+      "start_ns": 1709437019695555072,
+      "end_ns": 1709437022595555840
+    },
+    {
+      "start_ns": 1709437022595555840,
+      "end_ns": 1709437025295930624
+    },
+    {
+      "start_ns": 1709437025295930624,
+      "end_ns": 1709437028094892544
+    },
+    {
+      "start_ns": 1709437028094892544,
+      "end_ns": 1709437030495712768
+    },
+    {
+      "start_ns": 1709437030495712768,
+      "end_ns": 1709437033294998016
+    },
+    {
+      "start_ns": 1709437033294998016,
+      "end_ns": 1709437036195785472
+    },
+    {
+      "start_ns": 1709437036195785472,
+      "end_ns": 1709437039095504384
+    },
+    {
+      "start_ns": 1709437039095504384,
+      "end_ns": 1709437041895004160
+    },
+    {
+      "start_ns": 1709437041895004160,
+      "end_ns": 1709437044595670016
+    },
+    {
+      "start_ns": 1709437044595670016,
+      "end_ns": 1709437047394906368
+    }
+  ],
+  "execution": {
+    "success": true,
+    "confirmation": "native STATUS/SUCCESS log",
+    "time_s": 560.3086140155792
+  },
+  "warnings": [
+    "GT quality is not certified; errors describe saved keyframes, not all input images.",
+    "Completion follows native STATUS/SUCCESS; process exit code was not recorded.",
+    "Fail to track local map!: 125 occurrences"
+  ],
+  "selected_input_images": null,
+  "metrics": {
+    "ape_position_m": {
+      "rmse": 0.5780010127100637,
+      "mean": 0.48014623643858567,
+      "median": 0.41812997090305176,
+      "std": 0.3217837197990616,
+      "min": 0.005322171402277434,
+      "max": 1.5380659907391876,
+      "sse": 535.5385286222563
+    },
+    "rpe_position_m": {
+      "rmse": 0.0984364834959185,
+      "mean": 0.09133447421882433,
+      "median": 0.08362032408754383,
+      "std": 0.03671178424175472,
+      "min": 0.01716051324595721,
+      "max": 0.2540621245148566,
+      "sse": 10.416471879270404
+    },
+    "ape_orientation_deg": {
+      "rmse": 4.386420474045885,
+      "mean": 4.1977921766038175,
+      "median": 4.1224632420805865,
+      "std": 1.2724878848824919,
+      "min": 1.2027167684360207,
+      "max": 9.778955110101101,
+      "sse": 30842.817373931677
+    },
+    "rpe_orientation_deg": {
+      "rmse": 2.1906723201564513,
+      "mean": 1.9062175673907784,
+      "median": 1.726184516260274,
+      "std": 1.079527581894244,
+      "min": 0.11249437788696431,
+      "max": 6.736206500195355,
+      "sse": 5158.9736053721235
+    }
+  },
+  "metric_sample_counts": {
+    "ape_position_m": 1603,
+    "rpe_position_m": 1075,
+    "ape_orientation_deg": 1603,
+    "rpe_orientation_deg": 1075
+  },
+  "association": "evo associate_trajectories; shorter trajectory queries longer; pose reuse allowed; no boundary extrapolation",
+  "calibration": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/orbslam3_stereo_vi_0/GEODE-GAMMA/offroad1/calibration_exp.yaml",
+  "calibration_sha256": "40b330d652d97d6694e7811ac1000b788c3182d27721ce12dd5fa29d91b5ec5a"
+}

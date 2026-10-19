@@ -1,0 +1,126 @@
+{
+  "alignment_transform_gt_from_estimate": [
+    [
+      -0.6077225341304676,
+      0.7274320756004601,
+      -0.3186155942474395,
+      625.6872637697071
+    ],
+    [
+      0.2619627834589423,
+      0.5623728089941117,
+      0.784290968828862,
+      333.31672329545245
+    ],
+    [
+      0.7496991540561355,
+      0.3931658671498316,
+      -0.5323267599095834,
+      7.3125481120203055
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "matched_poses": 3915,
+  "matched_pairs": 3915,
+  "unique_matched_estimate_poses": 3915,
+  "unique_matched_gt_poses": 3915,
+  "max_matched_time_difference_s": 0.00833064800002603,
+  "matched_segments": [
+    {
+      "start_s": 26.368538627,
+      "end_s": 417.768767604,
+      "poses": 3915
+    }
+  ],
+  "unavailable_metrics": {},
+  "protocol": {
+    "align": "SE3",
+    "correct_scale": false,
+    "max_time_difference_s": 0.05,
+    "estimate_frame": "body",
+    "camera": "rgb_0",
+    "evaluate_orientation": true,
+    "evaluate_rpe": true,
+    "max_pose_gap_s": 1.0,
+    "rpe_delta_m": 1.0,
+    "rpe_relative_tolerance": 0.1,
+    "gt_valid_intervals_ns": null,
+    "T_body_reference": null
+  },
+  "evo_version": "v1.34.3",
+  "time_origin_ns": 1709436642126699200,
+  "estimate_input_frame": "body",
+  "compared_pose_frame": "body",
+  "evaluation_code_sha256": "374fd726b7b26d6205c5c225286e2a0936c17943a95ae3ea88be43fa7edd5a01",
+  "input_adapter_sha256": "bf54e4790a04beb18c2461688caa5888972797ddb742a170fbb5f187cc00950c",
+  "run_directory": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T210952_4db73a91/voxel_svio_stereo_vi_1/GEODE-GAMMA/offroad1/evaluations",
+  "trajectory": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T210952_4db73a91/voxel_svio_stereo_vi_1/GEODE-GAMMA/offroad1/00001_KeyFrameTrajectory.csv",
+  "trajectory_sha256": "f5b372da276ed41cba2058309e2314e1177da37cd3fceabc420a1d6656e50b78",
+  "groundtruth": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T210952_4db73a91/voxel_svio_stereo_vi_1/GEODE-GAMMA/offroad1/groundtruth.csv",
+  "groundtruth_sha256": "85fac3101f3b35863af6cbfa594c5c3d0f66143af51278349f56247039371199",
+  "estimate_poses": 3915,
+  "matched_fraction_of_saved_poses": 1.0,
+  "saved_pose_span_s": 391.400228977,
+  "max_saved_pose_gap_s": 0.1015203,
+  "saved_pose_gaps": [],
+  "execution": {
+    "success": true,
+    "confirmation": "native STATUS/SUCCESS log",
+    "time_s": 400.1746792793274
+  },
+  "warnings": [
+    "GT quality is not certified; errors describe saved keyframes, not all input images.",
+    "Completion follows native STATUS/SUCCESS; process exit code was not recorded."
+  ],
+  "selected_input_images": 4048,
+  "metrics": {
+    "ape_position_m": {
+      "rmse": 1812.535001578766,
+      "mean": 1135.2441366160156,
+      "median": 710.541372360657,
+      "std": 1412.9769574296304,
+      "min": 44.48284581795515,
+      "max": 8435.037777643001,
+      "sse": 12861883461.57696
+    },
+    "rpe_position_m": {
+      "rmse": 220.5992062484284,
+      "mean": 23.96650783876621,
+      "median": 1.287184503995582,
+      "std": 219.29344791728508,
+      "min": 0.036149844882868536,
+      "max": 5918.990147781444,
+      "sse": 172854562.800495
+    },
+    "ape_orientation_deg": {
+      "rmse": 134.30443427975368,
+      "mean": 133.78324845834337,
+      "median": 130.98333511806277,
+      "std": 11.820469497352539,
+      "min": 116.66768911733612,
+      "max": 179.9541307175863,
+      "sse": 70617521.3781063
+    },
+    "rpe_orientation_deg": {
+      "rmse": 15.957511864906946,
+      "mean": 9.99301976828186,
+      "median": 5.1143466562552975,
+      "std": 12.441131010859662,
+      "min": 0.34595764331962464,
+      "max": 71.52000708734076,
+      "sse": 904489.0408310305
+    }
+  },
+  "metric_sample_counts": {
+    "ape_position_m": 3915,
+    "rpe_position_m": 3552,
+    "ape_orientation_deg": 3915,
+    "rpe_orientation_deg": 3552
+  },
+  "association": "evo associate_trajectories; shorter trajectory queries longer; pose reuse allowed; no boundary extrapolation"
+}

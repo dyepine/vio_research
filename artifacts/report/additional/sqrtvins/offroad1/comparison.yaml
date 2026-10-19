@@ -1,0 +1,29 @@
+# Pinned sqrtVINS stereo-VI on GEODE Offroad1 gamma, rectified images.
+Datasets:
+  geode-gamma: [offroad1]
+Methods:
+  sqrtvins_stereo_vi:
+    Module: sqrtvins
+    Parameters:
+      mode: stereo-vi
+      verbose: 0
+      imu_noise_by_dataset:
+        geode-gamma:
+          sigma_g_c: 5.1441059541810427e-03
+          sigma_a_c: 5.5741025513357766e-03
+          sigma_gw_c: 1.0881627554710405e-04
+          sigma_aw_c: 1.2078671772058479e-04
+    Evaluation:
+      estimate_frame: body
+    Settings:
+      # GEODE: average a longer stationary interval before initialization.
+      init_window_time: 2.0
+NumRuns: 1
+Evaluation:
+  align: SE3
+  correct_scale: false
+  max_time_difference_s: 0.05
+  evaluate_orientation: true
+  max_pose_gap_s: 1.0
+  rpe_delta_m: 1.0
+  rpe_relative_tolerance: 0.1
