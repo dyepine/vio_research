@@ -279,10 +279,10 @@ class MigrationTests(unittest.TestCase):
 
     def test_prepare_and_runner_share_selection_and_machine_path(self):
         with patch.dict(os.environ, {'VIO_DATA_DIR':'/tmp/custom data'}):
-            _,_,_,pairs=experiment_inputs(ROOT/'configs/experiments/comparison.yaml')
-            self.assertEqual(pairs,[('grandtour-alphasense','kaeb_1'), ('botanicgarden','1018_00')])
+            _,_,_,pairs=experiment_inputs(ROOT/'configs/experiments/report.yaml')
+            self.assertEqual(pairs,[('grandtour-alphasense','kaeb_1'), ('botanicgarden','1018_13'), ('geode-gamma','offroad1')])
             d=dataset_at_root(pairs[1][0])
-            self.assertEqual(d.sequence_path(pairs[1][1]),Path('/tmp/custom data/VSLAM-LAB-Benchmark/BOTANICGARDEN/1018_00'))
+            self.assertEqual(d.sequence_path(pairs[1][1]),Path('/tmp/custom data/VSLAM-LAB-Benchmark/BOTANICGARDEN/1018_13'))
 
     def test_only_owned_incomplete_import_can_resume(self):
         with tempfile.TemporaryDirectory() as tmp:

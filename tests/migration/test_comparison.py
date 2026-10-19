@@ -35,9 +35,9 @@ class ComparisonTests(unittest.TestCase):
     def test_selection_is_independent_of_experiment(self):
         with tempfile.TemporaryDirectory() as tmp:
             selection = Path(tmp) / 'selected.yaml'
-            selection.write_text("grandtour-alphasense: [kaeb_1, alb_1]\nbotanicgarden: ['1018_00', '1018_13']\n")
+            selection.write_text("grandtour-alphasense: [kaeb_1, alb_1]\nbotanicgarden: ['1018_00', '1018_13']\ngeode-gamma: [offroad1]\n")
             _, _, _, downloaded = experiment_inputs(selection)
-        _, _, _, used = load_comparison(ROOT / 'configs/experiments/comparison.yaml')
+        _, _, _, used = load_comparison(ROOT / 'configs/experiments/report.yaml')
         self.assertTrue(set(used) < set(downloaded))
 
     def test_variants_sequences_repeats_and_settings_are_materialized(self):

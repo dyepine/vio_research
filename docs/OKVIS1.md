@@ -1,12 +1,17 @@
 # OKVIS 1 stereo-inertial в VSLAM-LAB
 
+Основной запуск сдачи — `configs/experiments/report.yaml`. Команды частных
+исторических проверок ниже сначала восстанавливают удалённый конфиг из Git;
+они сохранены для проверки происхождения результатов.
+
 Метод каталога: `Module: okvis1`, `Parameters.mode: stereo-vi`.
 Реализация оценивателя — [авторский OKVIS 1.1.3, ветка fix/modernise](https://github.com/ethz-asl/okvis/tree/33ac70b4d95df98cd662086dc897b90a6f35d5a9),
 revision `33ac70b4d95df98cd662086dc897b90a6f35d5a9`.
 Свой код отвечает за входы VSLAM-LAB и экспорт; алгоритм OKVIS не переписан.
 
 ```bash
-make run CONFIG=configs/experiments/okvis1_stereo_vi.yaml RGB_MAX=200
+git show 57913a2:configs/experiments/okvis1_stereo_vi.yaml > /tmp/okvis1_stereo_vi.yaml
+make run CONFIG=/tmp/okvis1_stereo_vi.yaml RGB_MAX=200
 make evaluate RUN_DIR=/path/to/new/comparison EVAL_ARGS=--saved-protocol
 ```
 

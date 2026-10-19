@@ -7,13 +7,16 @@
 Лицензия авторского кода — LGPL-3.0; исходные notices сохраняются в checkout.
 
 ```bash
-make run CONFIG=configs/experiments/geode_sqrtvins.yaml JOBS=1
-make evaluate CONFIG=configs/experiments/geode_sqrtvins.yaml EVAL_ARGS="--saved-protocol"
+make run CONFIG=configs/experiments/sqrtvins.yaml JOBS=1
+make evaluate CONFIG=configs/experiments/sqrtvins.yaml EVAL_ARGS="--saved-protocol"
 ```
 
-Конфиг запускает один полный stereo-VI прогон на ректифицированном GEODE
-`offroad1` с отдельным GEODE override `Settings.init_window_time: 2.0`.
-Общий профиль сохраняет авторское значение 0.15 s. Нативная сборка использует установленные системные CMake, Eigen3,
+Конфиг запускает по одному stereo-VI прогону на GrandTour `kaeb_1`,
+BotanicGarden `1018_13` и ректифицированном GEODE `offroad1`. Профили IMU
+и протокол совпадают с основной матрицей `report.yaml`. Для всех трёх записей
+задано `Settings.init_window_time: 2.0`, как в успешном контроле GrandTour
+и прежнем GEODE-конфиге. В штатном профиле адаптера остаётся 0.15 s.
+На BotanicGarden этот новый эксперимент ещё не проверен. Нативная сборка использует установленные системные CMake, Eigen3,
 OpenCV и Boost filesystem/system/thread/date_time. При отсутствии бинарника
 сборка запускается автоматически; системные пакеты скрипт не устанавливает.
 Сборка последовательная (`-j1`), Release `-O1 -DNDEBUG`, float32 как

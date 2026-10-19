@@ -1,5 +1,9 @@
 # GEODE Offroad γ
 
+Основной запуск сдачи — `configs/experiments/report.yaml`. Команды частных
+исторических проверок ниже сначала восстанавливают удалённый конфиг из Git;
+они сохранены для проверки происхождения результатов.
+
 Адаптер находится в submodule VSLAM-LAB: `Datasets/dataset_files/dataset_geode.py`.
 Имя датасета — `geode-gamma`; подготовлены `offroad1` и `offroad1_raw_radtan4`.
 Поддерживаются `mono`, `stereo`, `mono-vi`, `stereo-vi`.
@@ -12,9 +16,10 @@
 Для сравнения ORB-SLAM3, OKVIS 1 и Voxel-SVIO в stereo-inertial режиме:
 
 ```bash
-make run CONFIG=configs/experiments/geode_orbslam3_okvis1_voxel_svio.yaml
+git show 57913a2:configs/experiments/geode_orbslam3_okvis1_voxel_svio.yaml > /tmp/geode_orbslam3_okvis1_voxel_svio.yaml
+make run CONFIG=/tmp/geode_orbslam3_okvis1_voxel_svio.yaml
 # Короткая проверка на 200 кадрах:
-make run CONFIG=configs/experiments/geode_orbslam3_okvis1_voxel_svio.yaml RGB_MAX=200
+make run CONFIG=/tmp/geode_orbslam3_okvis1_voxel_svio.yaml RGB_MAX=200
 ```
 
 Конфиг задаёт один прогон каждого метода, общий IMU noise profile из gamma
@@ -22,7 +27,7 @@ calibration, отключённый loop closure и оценку с SE3 alignmen
 масштаба. Общий интервал camera–IMU определяется загрузчиком автоматически.
 
 ```bash
-make prepare CONFIG=configs/experiments/geode_orbslam3_okvis1_voxel_svio.yaml
+make prepare CONFIG=/tmp/geode_orbslam3_okvis1_voxel_svio.yaml
 ```
 
 По умолчанию запись сохраняется в
@@ -30,7 +35,7 @@ make prepare CONFIG=configs/experiments/geode_orbslam3_okvis1_voxel_svio.yaml
 `GEODE-GAMMA/raw`. Можно переиспользовать уже скачанные исходники без копирования:
 
 ```bash
-GEODE_SOURCE_DIR=/path/to/geode/raw make prepare CONFIG=configs/experiments/geode_orbslam3_okvis1_voxel_svio.yaml
+GEODE_SOURCE_DIR=/path/to/geode/raw make prepare CONFIG=/tmp/geode_orbslam3_okvis1_voxel_svio.yaml
 ```
 
 Каталог исходников должен содержать `Offroad1_gamma.bag`, `gamma_config.yaml` и
@@ -208,8 +213,9 @@ GNSS/INS независимо не подтверждено. Пересчёт с
 из ректифицированных изображений этот путь не пытается.
 
 ```bash
-make prepare CONFIG=configs/experiments/geode_raw_radtan5_orbslam3_okvis1.yaml
-make run CONFIG=configs/experiments/geode_raw_radtan5_orbslam3_okvis1.yaml JOBS=1
+git show 57913a2:configs/experiments/geode_raw_radtan5_orbslam3_okvis1.yaml > /tmp/geode_raw_radtan5_orbslam3_okvis1.yaml
+make prepare CONFIG=/tmp/geode_raw_radtan5_orbslam3_okvis1.yaml
+make run CONFIG=/tmp/geode_raw_radtan5_orbslam3_okvis1.yaml JOBS=1
 ```
 
 Проверка первых 500 пар выполнена в
@@ -239,8 +245,9 @@ timestamps, IMU, reference и исходные camera–IMU transforms. JPEG д�
 собственная ректификация; например, её выполняет стереофронтенд ORB-SLAM3.
 
 ```bash
-make prepare CONFIG=configs/experiments/geode_raw_radtan4_orbslam3_okvis1_voxel_svio.yaml
-make run CONFIG=configs/experiments/geode_raw_radtan4_orbslam3_okvis1_voxel_svio.yaml
+git show 57913a2:configs/experiments/geode_raw_radtan4_orbslam3_okvis1_voxel_svio.yaml > /tmp/geode_raw_radtan4_orbslam3_okvis1_voxel_svio.yaml
+make prepare CONFIG=/tmp/geode_raw_radtan4_orbslam3_okvis1_voxel_svio.yaml
+make run CONFIG=/tmp/geode_raw_radtan4_orbslam3_okvis1_voxel_svio.yaml
 ```
 
 Это отдельная подготовка рядом с ректифицированной `offroad1`. Bag и небольшие
@@ -294,6 +301,12 @@ MD5 и подготовлены 1840 стереопар, 18410 IMU samples и 15
 прежние ограничения GNSS/INS-калибровки остаются. Контрольный конфиг —
 `configs/experiments/geode_offroad7_sqrtvins_voxel_svio.yaml`: Voxel-SVIO и
 sqrtVINS (окно 2 с), прежние GEODE шумы, SE3 без коррекции масштаба.
-Подготовка и запуск: `make prepare CONFIG=...`, затем `make run CONFIG=... JOBS=1`.
+Для повторения восстановите исторический конфиг:
+
+```bash
+git show 57913a2:configs/experiments/geode_offroad7_sqrtvins_voxel_svio.yaml > /tmp/geode_offroad7.yaml
+make prepare CONFIG=/tmp/geode_offroad7.yaml
+make run CONFIG=/tmp/geode_offroad7.yaml JOBS=1
+```
 Подробности доступа и возобновления —
 `results/vio/diagnostics/geode_offroad7_20261019/README.md`.

@@ -1,12 +1,17 @@
 # Voxel-SVIO и сравнение трёх stereo-inertial методов
 
+Основной запуск сдачи — `configs/experiments/report.yaml`. Команды частных
+исторических проверок ниже сначала восстанавливают удалённый конфиг из Git;
+они сохранены для проверки происхождения результатов.
+
 Авторская реализация: https://github.com/ZikangYuan/voxel_svio,
 commit `eac6b87d0f925b96ddd5c5c6b0dcda3d36c7ab5f`.
 Baseline VSLAM-LAB — `Module: voxel-svio`, режим `stereo-vi`.
 
 ```bash
-make run CONFIG=configs/experiments/orbslam3_okvis1_voxel_svio.yaml JOBS=3 RGB_MAX=200
-make run CONFIG=configs/experiments/orbslam3_okvis1_voxel_svio.yaml JOBS=3
+git show 57913a2:configs/experiments/orbslam3_okvis1_voxel_svio.yaml > /tmp/orbslam3_okvis1_voxel_svio.yaml
+make run CONFIG=/tmp/orbslam3_okvis1_voxel_svio.yaml JOBS=3 RGB_MAX=200
+make run CONFIG=/tmp/orbslam3_okvis1_voxel_svio.yaml JOBS=3
 make evaluate RUN_DIR=/absolute/path/to/comparison EVAL_ARGS=--saved-protocol
 ```
 

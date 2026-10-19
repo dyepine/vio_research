@@ -1,12 +1,17 @@
 # SchurVINS в VSLAM-LAB
 
+Основной запуск сдачи — `configs/experiments/report.yaml`. Команды частных
+исторических проверок ниже сначала восстанавливают удалённый конфиг из Git;
+они сохранены для проверки происхождения результатов.
+
 Источник: [bytedance/SchurVINS](https://github.com/bytedance/SchurVINS), ревизия
 `d8ab6dff20860694d8d879d716d7fd6cb2c2530e`. Локальная интеграция запускает
 авторский stereo-inertial фильтр, без Ceres backend и loop closure.
 Исходный checkout сохраняет авторские лицензионные notices (GPL-3.0).
 
 ```bash
-make run CONFIG=configs/experiments/geode_schurvins.yaml JOBS=1
+git show 57913a2:configs/experiments/geode_schurvins.yaml > /tmp/geode_schurvins.yaml
+make run CONFIG=/tmp/geode_schurvins.yaml JOBS=1
 make evaluate RUN_DIR=/absolute/path/to/comparison_directory EVAL_ARGS="--saved-protocol"
 ```
 
@@ -114,7 +119,8 @@ RPE считается по GT-интервалам 1 m ±10%, 3685 пар.
 ## Другие локальные ROS1-записи
 
 ```bash
-make run CONFIG=configs/experiments/ros1_schurvins.yaml JOBS=1
+git show 57913a2:configs/experiments/ros1_schurvins.yaml > /tmp/ros1_schurvins.yaml
+make run CONFIG=/tmp/ros1_schurvins.yaml JOBS=1
 ```
 
 Матрица включает BotanicGarden `1018_00`, `1018_13` и GEODE `offroad7`.
