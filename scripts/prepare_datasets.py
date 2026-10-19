@@ -67,6 +67,14 @@ def validate_dataset(dataset, sequence):
 def preparation_estimate(dataset, sequence):
     if dataset.check_sequence_availability(sequence, verbose=False) == 'available':
         return 0
+    if dataset.dataset_name == 'geode-gamma':
+        missing = sum(asset['size'] for asset in dataset.assets_for(sequence).values()
+                      if not (dataset._raw() / asset['name']).is_file()
+                      or (dataset._raw() / asset['name']).stat().st_size != asset['size'])
+        # Full-resolution grayscale PNGs, both cameras, 500 s at 10 Hz plus
+        # overhead. Retain source bag; no intermediate native/color extraction.
+        image_bound = dataset.cfg.get('image_count_bounds', {}).get(sequence, 5000)
+        return int(missing + image_bound * 2 * 1224 * 1024 * 1.1 + 100_000_000)
     if dataset.dataset_name == 'botanicgarden':
         # Upper bound based on published 10 Hz image counts/durations, grayscale PNG,
         # including conservative overhead. Both retained source and output are included.
@@ -157,9 +165,11 @@ def main():
             provenance = {'framework_revision': subprocess.check_output(['git', '-C', str(LAB), 'rev-parse', 'HEAD'], text=True).strip(),
                           'framework_dirty': bool(subprocess.check_output(['git', '-C', str(LAB), 'status', '--porcelain'], text=True)),
                           'dataset': dataset.dataset_name, 'sequence': seq, 'target_resolution': dataset.target_resolution,
-                          'retention': 'STANDARD (BotanicGarden preserves sources)', 'experiment_config': str(config),
+                          'retention': ('STANDARD (GEODE preserves sources)' if dataset.dataset_name == 'geode-gamma'
+                                        else 'STANDARD (BotanicGarden preserves sources)'), 'experiment_config': str(config),
                           'data_revision': ('HF unpinned' if dataset.dataset_name.startswith('grandtour') else
                                             'Public S3, unpinned' if dataset.dataset_name == 'fomo' else
+                                            'Pinned Drive MD5/SHA256; explicit GT timestamp sort; local origin translation v1; orientation convention v1' if dataset.dataset_name == 'geode-gamma' else
                                             'Published MD5 + pinned calibration'),
                           'audit': audit}
             (dataset.sequence_path(seq) / 'preparation_report.json').write_text(json.dumps(provenance, indent=2))

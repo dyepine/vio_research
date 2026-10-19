@@ -77,9 +77,33 @@ class OKVIS1AdapterTests(unittest.TestCase):
 
     def test_unsupported_distortion_is_not_truncated(self):
         calibration, settings, overrides = self.inputs()
-        calibration['cameras'][0]['distortion_type'] = 'radtan5'
-        calibration['cameras'][0]['distortion_coefficients'] = [0., 0., 0., 0., 0.1]
+        calibration['cameras'][0]['distortion_type'] = 'radtan6'
+        calibration['cameras'][0]['distortion_coefficients'] = [0.] * 6
         with self.assertRaisesRegex(ValueError, 'Unsupported'):
+            adapter.native_settings(calibration, settings, overrides)
+
+    def test_radtan5_is_exactly_embedded_in_rational8(self):
+        import cv2
+        calibration, settings, overrides = self.inputs()
+        D = [-0.058079349939181, 0.134502746395860,
+             1.310282988798364e-05, 6.216594495554388e-04, -0.067349697730475]
+        for camera in calibration['cameras']:
+            camera.update(distortion_type='radtan5', distortion_coefficients=D.copy())
+        original = copy.deepcopy(calibration)
+        native, _, _ = adapter.native_settings(calibration, settings, overrides)
+        self.assertEqual(original, calibration)
+        xy = np.stack(np.meshgrid(np.linspace(-.7, .7, 31), np.linspace(-.6, .6, 29)), axis=-1).reshape(-1, 2)
+        points = np.column_stack((xy, np.ones(len(xy))))
+        K = np.array([[1174., 0., 602.], [0., 1174., 506.], [0., 0., 1.]])
+        expected = cv2.projectPoints(points, np.zeros(3), np.zeros(3), K, np.array(D))[0]
+        for camera in native['cameras']:
+            self.assertEqual(camera['distortion_type'], 'radialtangential8')
+            self.assertEqual(camera['distortion_coefficients'], D + [0., 0., 0.])
+            actual = cv2.projectPoints(points, np.zeros(3), np.zeros(3), K,
+                                       np.array(camera['distortion_coefficients']))[0]
+            np.testing.assert_allclose(actual, expected, atol=1e-12, rtol=0)
+        calibration['cameras'][0]['distortion_coefficients'] = D[:-1]
+        with self.assertRaisesRegex(ValueError, 'coefficient count'):
             adapter.native_settings(calibration, settings, overrides)
 
     def test_manifest_keeps_exact_nanosecond_timestamps_and_rejects_desync(self):

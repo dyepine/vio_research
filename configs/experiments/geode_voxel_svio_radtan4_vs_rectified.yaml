@@ -1,0 +1,27 @@
+# Six sequential full-sequence runs: three per image geometry.
+# Same Voxel-SVIO parameters, IMU noise and evaluation for both sequences.
+Datasets:
+  geode-gamma: [offroad1_raw_radtan4, offroad1]
+Methods:
+  voxel_svio_stereo_vi:
+    Module: voxel-svio
+    Parameters:
+      mode: stereo-vi
+      verbose: 0
+      imu_noise_by_dataset:
+        geode-gamma:
+          sigma_g_c: 5.1441059541810427e-03
+          sigma_a_c: 5.5741025513357766e-03
+          sigma_gw_c: 1.0881627554710405e-04
+          sigma_aw_c: 1.2078671772058479e-04
+    Evaluation:
+      estimate_frame: body
+NumRuns: 3
+Evaluation:
+  align: SE3
+  correct_scale: false
+  max_time_difference_s: 0.05
+  evaluate_orientation: true
+  max_pose_gap_s: 1.0
+  rpe_delta_m: 1.0
+  rpe_relative_tolerance: 0.1
