@@ -13,6 +13,14 @@ from config_paths import config_path
 
 
 class EnvironmentTests(unittest.TestCase):
+    def setUp(self):
+        # Fixture Makefiles/bootstrap scripts select their own environment file.
+        environment = patch.dict(os.environ)
+        environment.start()
+        self.addCleanup(environment.stop)
+        os.environ.pop('VIO_ENV_FILE', None)
+        os.environ['VIO_NATIVE'] = '1'
+
     def test_explicit_environment_path(self):
         with patch.dict(os.environ, {'VIO_DATA_DIR': '/tmp/data with spaces'}):
             self.assertEqual(config_path('${VIO_DATA_DIR}/recording', ROOT),
@@ -39,6 +47,25 @@ class EnvironmentTests(unittest.TestCase):
             envrc.write_text(local)
             subprocess.run(['make', '-B', 'configure'], cwd=root, check=True, capture_output=True)
             self.assertEqual(envrc.read_text(), local)
+
+    def test_make_uses_explicit_environment_without_creating_local_envrc(self):
+        with tempfile.TemporaryDirectory(prefix='vio-container-env-') as directory:
+            root = Path(directory)
+            (root / 'scripts').mkdir()
+            (root / 'external/VSLAM-LAB').mkdir(parents=True)
+            shutil.copy(ROOT / 'Makefile', root / 'Makefile')
+            (root / 'scripts/bootstrap.sh').write_text('#!/bin/bash\nexit 0\n')
+            pixi = root / 'fake pixi'
+            pixi.write_text('#!/bin/bash\nprintf "%s\\n" "$VIO_DATA_DIR" "$@"\n')
+            pixi.chmod(0o755)
+            environment = root / 'container.env'
+            environment.write_text(f'export PIXI_BIN="{pixi}"\nexport VIO_DATA_DIR=/data\n')
+            env = dict(os.environ, VIO_ENV_FILE=str(environment))
+            for target in ['configure', 'run']:
+                result = subprocess.run(['make', target], cwd=root, env=env,
+                                        check=True, capture_output=True, text=True)
+            self.assertIn('/data\nrun\n--frozen\n', result.stdout)
+            self.assertFalse((root / '.envrc').exists())
 
     def test_make_run_sources_environment_without_direnv(self):
         with tempfile.TemporaryDirectory(prefix='vio-env-') as directory:
