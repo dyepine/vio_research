@@ -7,7 +7,7 @@ export ROOT_DIR="${ROOT_DIR:-$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse
 
 # Select an experiment; algorithm parameters remain in the selected YAML.
 export VIO_EXPERIMENT_CONFIG="${VIO_EXPERIMENT_CONFIG:-$ROOT_DIR/configs/experiments/report.yaml}"
-export VIO_DATASET_CONFIG="${VIO_DATASET_CONFIG:-$ROOT_DIR/configs/experiments/report.yaml}"
+export VIO_DATASET_CONFIG="${VIO_DATASET_CONFIG:-$ROOT_DIR/configs/datasets/selected.yaml}"
 
 # Machine-specific paths, not algorithm parameters.
 export VIO_DATA_DIR="${VIO_DATA_DIR:-$HOME/datasets/vio_research}"

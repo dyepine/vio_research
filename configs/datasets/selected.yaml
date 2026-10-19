@@ -1,2 +1,4 @@
-grandtour-alphasense: [kaeb_1, alb_1]
-botanicgarden: ['1018_00', '1018_13']
+# Dataset-only preparation for the report experiment.
+grandtour-alphasense: [kaeb_1]
+botanicgarden: ['1018_13']
+geode-gamma: [offroad1]

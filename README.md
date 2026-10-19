@@ -45,7 +45,8 @@ Pixi 0.81.0 с SHA-256 и среды из `external/VSLAM-LAB/pixi.lock`, зат
 или сохраните путь в `.envrc`, созданной `make configure`.
 `.envrc` исполняется как shell-код и автоматически не перезаписывается.
 Приведённые команды явно задают `CONFIG`, поэтому подходят и для старой `.envrc`.
-На новом checkout defaults из `scripts/env.sh` также выбирают `report.yaml`.
+На новом checkout подготовка по умолчанию читает `configs/datasets/selected.yaml`,
+а запуск — `configs/experiments/report.yaml`: оба выбирают те же три записи.
 
 ```bash
 make run CONFIG=configs/experiments/report.yaml PLAN=1       # материализация без VIO
@@ -77,7 +78,7 @@ GEODE требует отдельной оговорки: используетс
 а качество GNSS/INS и внешней калибровки независимо не подтверждено.
 `×` для Voxel-SVIO означает, что устойчивое прохождение не подтверждено по истории
 попыток; исходные численные метрики опорной попытки сохранены.
-Подробнее — [GEODE](docs/GEODE.md) и [источники таблицы](artifacts/report/README.md).
+Подробнее — [GEODE](docs/DATASETS.md#geode) и [источники таблицы](artifacts/report/README.md).
 
 Авторский текст отчёта и итоговый PDF остаются отдельной работой автора.
 
@@ -86,16 +87,15 @@ GEODE требует отдельной оговорки: используетс
 ## Устройство репозитория
 
 - `configs/experiments/report.yaml` — основная матрица 3 × 3 с общими профилями IMU.
+- `configs/experiments/sqrtvins.yaml` — дополнительный метод из отчёта на тех же записях.
 - `scripts/` — подготовка, материализация экспериментов и вызовы штатного evaluator.
 - `external/VSLAM-LAB` — submodule с адаптерами датасетов, методов и модулем `Evaluate`.
 - `tests/` — проверки подготовки, калибровки, запуска и стандартных метрик evo.
-- [Дополнительные эксперименты](docs/EXPERIMENTS.md) — sqrtVINS и остальные варианты.
-- Документация интеграций: [OKVIS1](docs/OKVIS1.md), [Voxel-SVIO](docs/VOXEL_SVIO.md),
-  [sqrtVINS](docs/SQRTVINS.md), [SchurVINS](docs/SCHURVINS.md).
+- [Датасеты и системы координат](docs/DATASETS.md).
+- [Методы и адаптеры](docs/METHODS.md), включая дополнительный sqrtVINS.
 
 Точную ревизию fork задаёт gitlink `external/VSLAM-LAB`, а не имя ветки в `.gitmodules`.
 Bootstrap сохраняет checkout и останавливается при несовпадении ревизии.
 При публикации изменений сначала должны быть доступны коммиты fork, затем
-основного репозитория. Исследовательские конфиги и исторические результаты
-сохраняются отдельно от основного сценария; прежняя подробная инструкция —
-[legacy-workflow.md](docs/legacy-workflow.md).
+основного репозитория. Исторические конфиги и документы доступны в Git; ссылки на ревизии —
+в [VALIDATION.md](docs/VALIDATION.md#исторические-материалы).
