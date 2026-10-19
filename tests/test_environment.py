@@ -13,6 +13,14 @@ from config_paths import config_path
 
 
 class EnvironmentTests(unittest.TestCase):
+    def setUp(self):
+        # Fixture Makefiles/bootstrap scripts select their own environment file.
+        environment = patch.dict(os.environ)
+        environment.start()
+        self.addCleanup(environment.stop)
+        os.environ.pop('VIO_ENV_FILE', None)
+        os.environ['VIO_NATIVE'] = '1'
+
     def test_explicit_environment_path(self):
         with patch.dict(os.environ, {'VIO_DATA_DIR': '/tmp/data with spaces'}):
             self.assertEqual(config_path('${VIO_DATA_DIR}/recording', ROOT),
@@ -40,9 +48,30 @@ class EnvironmentTests(unittest.TestCase):
             subprocess.run(['make', '-B', 'configure'], cwd=root, check=True, capture_output=True)
             self.assertEqual(envrc.read_text(), local)
 
+    def test_make_uses_explicit_environment_without_creating_local_envrc(self):
+        with tempfile.TemporaryDirectory(prefix='vio-container-env-') as directory:
+            root = Path(directory)
+            (root / 'scripts').mkdir()
+            (root / 'external/VSLAM-LAB').mkdir(parents=True)
+            shutil.copy(ROOT / 'Makefile', root / 'Makefile')
+            (root / 'scripts/bootstrap.sh').write_text('#!/bin/bash\nexit 0\n')
+            pixi = root / 'fake pixi'
+            pixi.write_text('#!/bin/bash\nprintf "%s\\n" "$VIO_DATA_DIR" "$@"\n')
+            pixi.chmod(0o755)
+            environment = root / 'container.env'
+            environment.write_text(f'export PIXI_BIN="{pixi}"\nexport VIO_DATA_DIR=/data\n')
+            env = dict(os.environ, VIO_ENV_FILE=str(environment))
+            for target in ['configure', 'run']:
+                result = subprocess.run(['make', target], cwd=root, env=env,
+                                        check=True, capture_output=True, text=True)
+            self.assertIn('/data\nrun\n--frozen\n', result.stdout)
+            self.assertFalse((root / '.envrc').exists())
+
     def test_make_run_sources_environment_without_direnv(self):
         with tempfile.TemporaryDirectory(prefix='vio-env-') as directory:
             root = Path(directory)
+            (root / 'scripts').mkdir()
+            (root / 'scripts/bootstrap.sh').write_text('#!/bin/bash\nexit 0\n')
             (root / 'external/VSLAM-LAB').mkdir(parents=True)
             shutil.copy(ROOT / 'Makefile', root / 'Makefile')
             pixi = root / 'fake pixi'
@@ -58,29 +87,41 @@ class EnvironmentTests(unittest.TestCase):
             self.assertIn('/tmp/custom data\n/tmp/custom results\n/tmp/custom experiment.yaml\nrun\n--frozen\n-e\nvslamlab\npython\n',
                           result.stdout)
 
-    def test_bootstrap_interpreter_from_envrc_and_make_override(self):
+    def test_make_test_uses_pixi_for_every_suite_after_bootstrap(self):
         with tempfile.TemporaryDirectory(prefix='vio-env-') as directory:
             root = Path(directory)
-            (root / 'scripts').mkdir()
-            shutil.copy(ROOT / 'Makefile', root / 'Makefile')
-            (root / 'requirements.txt').write_text('')
-            interpreter = root / 'custom python'
-            interpreter.write_text(
-                '#!/bin/bash\nset -e\n'
-                'mkdir -p "$3/bin"\n'
-                'printf "#!/bin/bash\\nexit 0\\n" > "$3/bin/python"\n'
-                'chmod +x "$3/bin/python"\n'
-                'printf "%s" "$0" > "$(dirname "$3")/bootstrap-used"\n')
-            interpreter.chmod(0o755)
-            (root / 'scripts/env.sh').write_text(f'export PYTHON="${{PYTHON:-{interpreter}}}"\n')
-            environment = {key: value for key, value in os.environ.items() if key != 'PYTHON'}
-            subprocess.run(['make', '-j2', 'env'], cwd=root, env=environment,
-                           check=True, capture_output=True)
-            self.assertEqual((root / 'bootstrap-used').read_text(), str(interpreter))
-            self.assertTrue((root / '.venv/.installed').exists())
-            override = root / 'override python'
-            shutil.copy(interpreter, override)
-            shutil.rmtree(root / '.venv')
-            subprocess.run(['make', 'env', f'PYTHON={override}'], cwd=root,
-                           env=environment, check=True, capture_output=True)
-            self.assertEqual((root / 'bootstrap-used').read_text(), str(override))
+            (root/'scripts').mkdir()
+            (root/'external/VSLAM-LAB').mkdir(parents=True)
+            shutil.copy(ROOT/'Makefile', root/'Makefile')
+            (root/'scripts/bootstrap.sh').write_text(
+                '#!/bin/bash\nsource "$(dirname "$0")/../.envrc"\n'
+                'printf "bootstrap\\n" >> "$ROOT_DIR/calls"\n')
+            pixi = root/'fake pixi'
+            pixi.write_text('#!/bin/bash\nprintf "%s\\n" "$*" >> "$ROOT_DIR/calls"\n')
+            pixi.chmod(0o755)
+            (root/'.envrc').write_text(f'export ROOT_DIR="{root}"\nexport PIXI_BIN="{pixi}"\n')
+            subprocess.run(['make', 'test'], cwd=root, check=True, capture_output=True)
+            calls = (root/'calls').read_text().splitlines()
+            self.assertEqual(calls[0], 'bootstrap')
+            self.assertEqual(len(calls), 4)
+            for line, suite in zip(calls[1:], ['tests/migration', 'tests', 'tests/evaluation']):
+                self.assertIn('run --frozen -e vslamlab python -m unittest discover', line)
+                self.assertIn(str(root/suite), line)
+            self.assertFalse((root/'.venv').exists())
+
+    def test_make_config_override_reaches_both_prepare_and_run(self):
+        with tempfile.TemporaryDirectory(prefix='vio-env-') as directory:
+            root=Path(directory)
+            (root/'scripts').mkdir()
+            (root/'scripts/bootstrap.sh').write_text('#!/bin/bash\nexit 0\n')
+            (root/'external/VSLAM-LAB').mkdir(parents=True)
+            shutil.copy(ROOT/'Makefile',root/'Makefile')
+            pixi=root/'fake pixi'
+            pixi.write_text('#!/bin/bash\nprintf "%s\n" "$@"\n')
+            pixi.chmod(0o755)
+            (root/'.envrc').write_text(f'export PIXI_BIN="{pixi}"\n')
+            config=root/'chosen experiment.yaml'
+            for target in ['prepare','run']:
+                result=subprocess.run(['make',target,f'CONFIG={config}'],cwd=root,
+                                      check=True,capture_output=True,text=True)
+                self.assertIn('--config\n'+str(config)+'\n',result.stdout)

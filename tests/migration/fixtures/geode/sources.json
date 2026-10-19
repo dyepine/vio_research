@@ -1,0 +1,17 @@
+{
+  "bag_md5": "a34676476f176faf8e4606ca0f17e942",
+  "bag_url": "https://drive.google.com/file/d/1v70uMx5GcjSpvLxA0YsEN6_wX7zK7yHT/view",
+  "calibration_sha256": "f67eaba499306f08d81a2f8dfe8459bb0246d4ee7294b03478f28affb56cc47a",
+  "images": {
+    "right.jpg": {
+      "topic": "/right_camera/image/compressed",
+      "timestamp_ns": 1709436655095747470,
+      "sha256": "9a439ffe73ff956a29d7b1f57f9f985025db27321232b005195dca865c233bf8"
+    },
+    "left.jpg": {
+      "topic": "/left_camera/image/compressed",
+      "timestamp_ns": 1709436655095945596,
+      "sha256": "194a00a1df9c65f71d7050cfe1bb39d0401cc13d98bc397c7973c5c7128de87a"
+    }
+  }
+}

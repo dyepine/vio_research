@@ -1,0 +1,48 @@
+# Additional report method on the same outdoor sequences and IMU profiles.
+# BotanicGarden is an unverified experiment: no saved sqrtVINS result was found.
+# init_window_time=2.0 retains the successful kaeb_1 control and GEODE profile.
+Datasets:
+  grandtour-alphasense:
+  - kaeb_1
+  botanicgarden:
+  - '1018_13'
+  geode-gamma:
+  - offroad1
+Methods:
+  sqrtvins_stereo_vi:
+    Module: sqrtvins
+    Parameters:
+      mode: stereo-vi
+      verbose: 0
+      imu_noise_by_dataset:
+        grandtour-alphasense:
+          sigma_g_c: 0.00020202932517334086
+          sigma_a_c: 0.0012593921763625943
+          sigma_gw_c: 0.000266
+          sigma_aw_c: 0.0043
+        botanicgarden:
+          sigma_g_c: 0.002
+          sigma_a_c: 0.01
+          sigma_gw_c: 8.0e-05
+          sigma_aw_c: 3.0e-05
+        geode-gamma:
+          sigma_g_c: 0.005144105954181043
+          sigma_a_c: 0.0055741025513357766
+          sigma_gw_c: 0.00010881627554710405
+          sigma_aw_c: 0.00012078671772058479
+    Evaluation:
+      estimate_frame: body
+    Settings:
+      init_window_time: 2.0
+NumRuns: 1
+Evaluation:
+  align: SE3
+  correct_scale: false
+  max_time_difference_s: 0.05
+  evaluate_orientation: true
+  max_pose_gap_s: 1.0
+  rpe_delta_m: 1.0
+  rpe_relative_tolerance: 0.1
+Preparation:
+  reserve_gb: 15
+  max_data_gb: 30

@@ -1,0 +1,126 @@
+{
+  "alignment_transform_gt_from_estimate": [
+    [
+      0.9995968805667873,
+      -0.028208542231477722,
+      -0.00321784187359506,
+      0.7558226550924552
+    ],
+    [
+      0.028132343133478975,
+      0.9993691914137832,
+      -0.021674651618473168,
+      0.3544109988268467
+    ],
+    [
+      0.0038272223568443786,
+      0.021575388713460396,
+      0.9997598986611206,
+      -0.144638445546412
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "matched_poses": 1586,
+  "matched_pairs": 1586,
+  "unique_matched_estimate_poses": 1586,
+  "unique_matched_gt_poses": 1586,
+  "max_matched_time_difference_s": 0.04996509400000093,
+  "matched_segments": [
+    {
+      "start_s": 9.035584963,
+      "end_s": 168.935581959,
+      "poses": 1586
+    }
+  ],
+  "unavailable_metrics": {},
+  "protocol": {
+    "align": "SE3",
+    "correct_scale": false,
+    "max_time_difference_s": 0.05,
+    "estimate_frame": "body",
+    "camera": "rgb_0",
+    "evaluate_orientation": true,
+    "evaluate_rpe": true,
+    "max_pose_gap_s": 1.0,
+    "rpe_delta_m": 1.0,
+    "rpe_relative_tolerance": 0.1,
+    "gt_valid_intervals_ns": null,
+    "T_body_reference": null
+  },
+  "evo_version": "v1.34.3",
+  "time_origin_ns": 1666066357789669000,
+  "estimate_input_frame": "body",
+  "compared_pose_frame": "body",
+  "evaluation_code_sha256": "374fd726b7b26d6205c5c225286e2a0936c17943a95ae3ea88be43fa7edd5a01",
+  "input_adapter_sha256": "bf54e4790a04beb18c2461688caa5888972797ddb742a170fbb5f187cc00950c",
+  "run_directory": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations",
+  "trajectory": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_1/BOTANICGARDEN/1018_13/00000_KeyFrameTrajectory.csv",
+  "trajectory_sha256": "ac591a683cadffedf8aea5959cfb89b595bd510e0439a652be16f67b7a098bbb",
+  "groundtruth": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_1/BOTANICGARDEN/1018_13/groundtruth.csv",
+  "groundtruth_sha256": "aa216a7c95b01ee05a3aece94a4d045412e3c9e18dffce52c0d2575c37229772",
+  "estimate_poses": 1600,
+  "matched_fraction_of_saved_poses": 0.99125,
+  "saved_pose_span_s": 159.899996996,
+  "max_saved_pose_gap_s": 0.100052118,
+  "saved_pose_gaps": [],
+  "execution": {
+    "success": true,
+    "confirmation": "native STATUS/SUCCESS log",
+    "time_s": 130.11583828926086
+  },
+  "warnings": [
+    "GT quality is not certified; errors describe saved keyframes, not all input images.",
+    "Completion follows native STATUS/SUCCESS; process exit code was not recorded."
+  ],
+  "selected_input_images": 1600,
+  "metrics": {
+    "ape_position_m": {
+      "rmse": 1.7869714953687403,
+      "mean": 1.6646529997258392,
+      "median": 1.637617577809939,
+      "std": 0.6497672781574627,
+      "min": 0.18713814997667988,
+      "max": 2.7748789291205527,
+      "sse": 5064.521660662982
+    },
+    "rpe_position_m": {
+      "rmse": 0.09261156907774071,
+      "mean": 0.0814145416664528,
+      "median": 0.06675649437034041,
+      "std": 0.04414266793344688,
+      "min": 0.006193777028368564,
+      "max": 0.25790471627735695,
+      "sse": 13.2598916160056
+    },
+    "ape_orientation_deg": {
+      "rmse": 1.1190019063786711,
+      "mean": 1.0421143060605456,
+      "median": 0.9366043554284584,
+      "std": 0.4076310091038806,
+      "min": 0.23973141387477803,
+      "max": 2.4260123193400753,
+      "sse": 1985.9341126358534
+    },
+    "rpe_orientation_deg": {
+      "rmse": 0.4935054897188104,
+      "mean": 0.33388631168932614,
+      "median": 0.20330237976117416,
+      "std": 0.36341106098893167,
+      "min": 0.004238609854848813,
+      "max": 3.33694119099769,
+      "sse": 376.5246953195041
+    }
+  },
+  "metric_sample_counts": {
+    "ape_position_m": 1586,
+    "rpe_position_m": 1546,
+    "ape_orientation_deg": 1586,
+    "rpe_orientation_deg": 1546
+  },
+  "association": "evo associate_trajectories; shorter trajectory queries longer; pose reuse allowed; no boundary extrapolation"
+}

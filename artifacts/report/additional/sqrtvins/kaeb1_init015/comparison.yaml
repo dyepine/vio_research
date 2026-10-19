@@ -1,0 +1,34 @@
+# Cross-dataset adapter control using prepared data only; no GEODE tuning.
+Datasets:
+  grandtour-alphasense: [kaeb_1]
+Methods:
+  voxel_svio_stereo_vi:
+    Module: voxel-svio
+    Parameters:
+      mode: stereo-vi
+      verbose: 0
+      imu_noise_by_dataset: &imu_noise_profiles
+        grandtour-alphasense:
+          sigma_g_c: 0.00020202932517334086
+          sigma_a_c: 0.0012593921763625943
+          sigma_gw_c: 0.000266
+          sigma_aw_c: 0.0043
+    Evaluation:
+      estimate_frame: body
+  sqrtvins_stereo_vi:
+    Module: sqrtvins
+    Parameters:
+      mode: stereo-vi
+      verbose: 0
+      imu_noise_by_dataset: *imu_noise_profiles
+    Evaluation:
+      estimate_frame: body
+NumRuns: 1
+Evaluation:
+  align: SE3
+  correct_scale: false
+  max_time_difference_s: 0.05
+  evaluate_orientation: true
+  max_pose_gap_s: 1.0
+  rpe_delta_m: 1.0
+  rpe_relative_tolerance: 0.1

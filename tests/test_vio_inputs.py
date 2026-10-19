@@ -37,6 +37,22 @@ class VioInputTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Non-monotonic'):
             camera_imu_window(self.folder)
 
+    def test_requested_start_intersects_imu_window_and_keeps_sources(self):
+        self.images = [[i, f'l/{i}', i, f'r/{i}'] for i in range(220)]
+        self.imu = [[i, 0, 0, 0, 0, 0, 9.8] for i in range(10, 220)]
+        self.save()
+        original = (self.folder / 'rgb.csv').read_bytes()
+        selected, audit = camera_imu_window(self.folder, start_frame=20)
+        self.assertEqual(audit['frame_interval'], [20, 219])
+        self.assertEqual(audit['framework_rgb_idx_inclusive'], [20, 218])
+        self.assertEqual(audit['images_selected'], 199)
+        self.assertEqual(int(selected[0][0]), 20)
+        self.assertEqual((self.folder / 'rgb.csv').read_bytes(), original)
+        _, bracketed = camera_imu_window(self.folder, start_frame=5)
+        self.assertEqual(bracketed['frame_interval'][0], 11)
+        with self.assertRaisesRegex(ValueError, 'too short'):
+            camera_imu_window(self.folder, start_frame=150)
+
     def test_nonfinite(self):
         self.imu[5][1] = 'nan'
         self.save()
