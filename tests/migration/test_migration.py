@@ -40,7 +40,7 @@ class MigrationTests(unittest.TestCase):
                 cached.parent.mkdir(parents=True); cached.write_bytes(bytes(5000))
                 self.assertEqual(preparation.preparation_estimate(dataset, sequence), estimate - 5000)
 
-    def test_catalog_contains_all_public_sources_but_project_selects_two(self):
+    def test_catalog_contains_all_public_sources_but_report_selects_one(self):
         d = BotanicgardenDataset()
         expected = {'1005_00', '1005_01', '1005_05', '1005_07', '1006_01',
                     '1006_03', '1008_01', '1008_03', '1018_00', '1018_13'}
@@ -48,7 +48,7 @@ class MigrationTests(unittest.TestCase):
         for kind in ['bags', 'groundtruth_bags', 'durations_s']:
             self.assertEqual(set(d.cfg[kind]), expected)
         selection = yaml.safe_load((ROOT/'configs/datasets/selected.yaml').read_text())
-        self.assertEqual(selection['botanicgarden'], ['1018_00', '1018_13'])
+        self.assertEqual(selection['botanicgarden'], ['1018_13'])
 
     def test_new_public_sequence_uses_sha256_and_only_its_own_assets(self):
         import hashlib

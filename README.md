@@ -45,7 +45,8 @@ Pixi 0.81.0 с SHA-256 и среды из `external/VSLAM-LAB/pixi.lock`, зат
 или сохраните путь в `.envrc`, созданной `make configure`.
 `.envrc` исполняется как shell-код и автоматически не перезаписывается.
 Приведённые команды явно задают `CONFIG`, поэтому подходят и для старой `.envrc`.
-На новом checkout defaults из `scripts/env.sh` также выбирают `report.yaml`.
+На новом checkout подготовка по умолчанию читает `configs/datasets/selected.yaml`,
+а запуск — `configs/experiments/report.yaml`: оба выбирают те же три записи.
 
 ```bash
 make run CONFIG=configs/experiments/report.yaml PLAN=1       # материализация без VIO

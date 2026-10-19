@@ -31,9 +31,10 @@ make evaluate RUN_DIR=/absolute/path/to/new/comparison EVAL_ARGS=--saved-protoco
 В частности, опорная матрица GrandTour/BotanicGarden запускалась с `origin`,
 а таблица отчёта использует её последующую оценку с `SE3`.
 
-`configs/datasets/selected.yaml` сохраняет ранний выбор из четырёх записей;
-он больше не является default подготовки на новом checkout. Отдельные selections
-GEODE нужны для подготовки без запуска методов.
+`configs/datasets/selected.yaml` — единственный dataset-only выбор: три записи
+основного отчёта. Он используется при `make prepare` без `CONFIG` на новом checkout.
+Для подготовки отдельного варианта GEODE передавайте соответствующий experiment YAML;
+`make prepare CONFIG=...` читает только его `Datasets`, методы при этом не запускаются.
 
 sqrtVINS включён как дополнительная проверка; это не четвёртая строка основной
 таблицы. Её источники не подтверждают автоматически все результаты sqrtVINS.

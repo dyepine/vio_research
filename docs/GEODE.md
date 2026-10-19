@@ -22,7 +22,7 @@ calibration, отключённый loop closure и оценку с SE3 alignmen
 масштаба. Общий интервал camera–IMU определяется загрузчиком автоматически.
 
 ```bash
-make prepare CONFIG=configs/datasets/geode.yaml
+make prepare CONFIG=configs/experiments/geode_orbslam3_okvis1_voxel_svio.yaml
 ```
 
 По умолчанию запись сохраняется в
@@ -30,7 +30,7 @@ make prepare CONFIG=configs/datasets/geode.yaml
 `GEODE-GAMMA/raw`. Можно переиспользовать уже скачанные исходники без копирования:
 
 ```bash
-GEODE_SOURCE_DIR=/path/to/geode/raw make prepare CONFIG=configs/datasets/geode.yaml
+GEODE_SOURCE_DIR=/path/to/geode/raw make prepare CONFIG=configs/experiments/geode_orbslam3_okvis1_voxel_svio.yaml
 ```
 
 Каталог исходников должен содержать `Offroad1_gamma.bag`, `gamma_config.yaml` и
@@ -239,7 +239,7 @@ timestamps, IMU, reference и исходные camera–IMU transforms. JPEG д�
 собственная ректификация; например, её выполняет стереофронтенд ORB-SLAM3.
 
 ```bash
-make prepare CONFIG=configs/datasets/geode_raw_radtan4.yaml
+make prepare CONFIG=configs/experiments/geode_raw_radtan4_orbslam3_okvis1_voxel_svio.yaml
 make run CONFIG=configs/experiments/geode_raw_radtan4_orbslam3_okvis1_voxel_svio.yaml
 ```
 

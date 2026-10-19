@@ -31,7 +31,7 @@ $(ROOT).envrc:
 	@cp -n "$(ROOT)scripts/env.sh" "$@"
 	@printf '%s\n' 'Created .envrc; edit machine paths there.'
 
-PREP_ARGS = --config "$(if $(CONFIG),$(CONFIG),$${VIO_DATASET_CONFIG:-$(ROOT)configs/experiments/report.yaml})"
+PREP_ARGS = --config "$(if $(CONFIG),$(CONFIG),$${VIO_DATASET_CONFIG:-$(ROOT)configs/datasets/selected.yaml})"
 prepare: bootstrap
 	$(SETUP) cd "$(ROOT)external/VSLAM-LAB" && $(RUN) prepare $(PREP_ARGS)
 test: bootstrap

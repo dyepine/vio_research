@@ -12,7 +12,7 @@
 
 ## Выполненные проверки
 
-- `make test`: 58 migration + 34 основных + 18 evaluation тестов, все 110 прошли.
+- `make test`: 59 migration + 34 основных + 18 evaluation тестов, все 111 прошли.
 - `ctest --test-dir external/VSLAM-LAB/Baselines/Voxel-SVIO/build --output-on-failure`
   с очищенным `LD_LIBRARY_PATH`: все 3 теста прошли, включая Valgrind Memcheck.
 - `make run CONFIG=configs/experiments/report.yaml PLAN=1`: на подготовленных
@@ -47,6 +47,10 @@ memory fix; результаты старого бинарника не прип
 Для sqrtVINS подтверждены сохранённые проверки GrandTour и GEODE. Источник утверждения
 об аналогичных результатах на BotanicGarden в проверенных каталогах не найден;
 это остаётся пробелом в подтверждении авторского текста.
+
+После сокращения dataset selections оставлен один `configs/datasets/selected.yaml`
+с теми же тремя записями, что и в `report.yaml`. Совпадение выборов проверяет
+отдельный migration-тест; для GEODE-вариантов подготовка читает experiment YAML.
 
 ## Группы коммитов
 
