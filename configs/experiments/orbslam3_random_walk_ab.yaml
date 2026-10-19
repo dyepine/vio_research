@@ -1,0 +1,40 @@
+# Single-factor A/B: only gyro/accelerometer bias random walks differ.
+# VSLAM-LAB serial run_exp alternates A0, B0, A1, B1, A2, B2.
+Datasets:
+  grandtour-alphasense: [kaeb_1]
+Methods:
+  orbslam3_rw_old:
+    Module: orbslam3
+    Parameters:
+      mode: stereo-vi
+      verbose: 0
+      imu_noise_by_dataset:
+        grandtour-alphasense:
+          sigma_g_c: 0.00020202932517334086
+          sigma_a_c: 0.0012593921763625943
+          sigma_gw_c: 0.000266
+          sigma_aw_c: 0.0043
+    Settings: {loopClosing: 0}
+    Evaluation: {estimate_frame: camera, camera: rgb_0}
+  orbslam3_rw_new:
+    Module: orbslam3
+    Parameters:
+      mode: stereo-vi
+      verbose: 0
+      imu_noise_by_dataset:
+        grandtour-alphasense:
+          sigma_g_c: 0.00020202932517334086
+          sigma_a_c: 0.0012593921763625943
+          sigma_gw_c: 0.0000018672379701877664
+          sigma_aw_c: 0.00004317454918100831
+    Settings: {loopClosing: 0}
+    Evaluation: {estimate_frame: camera, camera: rgb_0}
+NumRuns: 3
+Evaluation:
+  align: origin
+  correct_scale: false
+  max_time_difference_s: 0.05
+  evaluate_orientation: true
+  max_pose_gap_s: 1.0
+  rpe_delta_m: 1.0
+  rpe_relative_tolerance: 0.1
