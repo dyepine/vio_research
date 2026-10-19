@@ -138,12 +138,12 @@ def main():
                 raise ValueError(f'Unknown sequence {dataset.dataset_name}/{seq}')
         if args.action != 'validate':
             prep = settings.get('Preparation', {})
-            for key, default in [('reserve_gb', 15), ('max_data_gb', 125)]:
+            for key, default in [('reserve_gb', 15), ('max_data_gb', 30)]:
                 value = prep.get(key, default)
                 if isinstance(value, bool) or not isinstance(value, (int, float)) or not np.isfinite(value) or value < 0:
                     raise ValueError(f'Preparation.{key} must be a finite nonnegative number')
             reserve = float(prep.get('reserve_gb', 15)) * GB
-            limit = float(prep.get('max_data_gb', 125)) * GB
+            limit = float(prep.get('max_data_gb', 30)) * GB
             estimate = sum(preparation_estimate(ds, seq) for ds, seq in datasets)
             used = sum(p.stat().st_size for p in data_root.rglob('*') if p.is_file())
             free = shutil.disk_usage(data_root).free

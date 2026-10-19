@@ -45,4 +45,4 @@ Evaluation:
   rpe_relative_tolerance: 0.1
 Preparation:
   reserve_gb: 15
-  max_data_gb: 125
+  max_data_gb: 30

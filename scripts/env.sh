@@ -10,7 +10,7 @@ export VIO_EXPERIMENT_CONFIG="${VIO_EXPERIMENT_CONFIG:-$ROOT_DIR/configs/experim
 export VIO_DATASET_CONFIG="${VIO_DATASET_CONFIG:-$ROOT_DIR/configs/datasets/selected.yaml}"
 
 # Machine-specific paths, not algorithm parameters.
-export VIO_DATA_DIR="${VIO_DATA_DIR:-$HOME/datasets/vio_research}"
+export VIO_DATA_DIR="${VIO_DATA_DIR:-$ROOT_DIR/datasets}"
 # Each run gets a dated subdirectory here; no need to change this path per run.
 export VIO_RESULTS_DIR="${VIO_RESULTS_DIR:-$ROOT_DIR/results/vio}"
 export VSLAMLAB_BENCHMARK="$VIO_DATA_DIR/VSLAM-LAB-Benchmark"
