@@ -1,0 +1,400 @@
+{
+  "schema_version": 1,
+  "evaluations": [
+    {
+      "sequence": "1018_13",
+      "module": "okvis1",
+      "directory": "evaluations/1018_13/okvis1"
+    },
+    {
+      "sequence": "1018_13",
+      "module": "orbslam3",
+      "directory": "evaluations/1018_13/orbslam3"
+    },
+    {
+      "sequence": "1018_13",
+      "module": "voxel-svio",
+      "directory": "evaluations/1018_13/voxel-svio"
+    },
+    {
+      "sequence": "kaeb_1",
+      "module": "okvis1",
+      "directory": "evaluations/kaeb_1/okvis1"
+    },
+    {
+      "sequence": "kaeb_1",
+      "module": "orbslam3",
+      "directory": "evaluations/kaeb_1/orbslam3"
+    },
+    {
+      "sequence": "kaeb_1",
+      "module": "voxel-svio",
+      "directory": "evaluations/kaeb_1/voxel-svio"
+    },
+    {
+      "sequence": "offroad1",
+      "module": "okvis1",
+      "directory": "evaluations/offroad1/okvis1"
+    },
+    {
+      "sequence": "offroad1",
+      "module": "orbslam3",
+      "directory": "evaluations/offroad1/orbslam3"
+    },
+    {
+      "sequence": "offroad1",
+      "module": "voxel-svio",
+      "directory": "evaluations/offroad1/voxel-svio"
+    }
+  ],
+  "files": {
+    "sources.json": {
+      "sha256": "1bae618e110c9002127bbc116d49e494a3e42cdcf11754c60773f314f8b08bce",
+      "source": "results/vio/report_tables_20261019/sources.json"
+    },
+    "reference_results.csv": {
+      "sha256": "d1fbf701b4a662c62b2c55e541c9eb502f91433ba13ecee333b8cc37b4da7694",
+      "source": "results/vio/report_tables_20261019/reference_results.csv"
+    },
+    "vio_reference_table.tex": {
+      "sha256": "2242f52e6de1af4f31f9cc43fa9df54413e0ccfd0d3a44910979e5f6a973c633",
+      "source": "results/vio/report_tables_20261019/vio_reference_table.tex"
+    },
+    "evaluations/1018_13/okvis1/summary.json": {
+      "sha256": "bb53eae05c052fc1e0c52700c2cdb8a83ad319e95756701bb7a49917055f2aab",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-41/summary.json"
+    },
+    "evaluations/1018_13/okvis1/ape_position_m.zip": {
+      "sha256": "466fddbc72eaa6b31394fe6217bfb67cb9f9526069f089c684a11373f17a537c",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-41/ape_position_m.zip"
+    },
+    "evaluations/1018_13/okvis1/ape_orientation_deg.zip": {
+      "sha256": "6939f3c8f5fa8dee113a4fbf4d76f068585821a4ff8ba3d2dfcebe77ac3ce6a7",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-41/ape_orientation_deg.zip"
+    },
+    "evaluations/1018_13/okvis1/rpe_position_m.zip": {
+      "sha256": "a1cc7cca146ee1aa78f62ed17d7ceb04cf409a2633f2cdba6f22791dbee0d271",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-41/rpe_position_m.zip"
+    },
+    "evaluations/1018_13/okvis1/rpe_orientation_deg.zip": {
+      "sha256": "81ebc32646d4d5c87b567f58d51ea575fb347df173c6c47d83d1cc7cf5c9da95",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-41/rpe_orientation_deg.zip"
+    },
+    "evaluations/1018_13/orbslam3/summary.json": {
+      "sha256": "29e15d621b80e6de11b7ad7c9d25319a810589802ab13f04f4c21f750aba7927",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-37/summary.json"
+    },
+    "evaluations/1018_13/orbslam3/ape_position_m.zip": {
+      "sha256": "6825bebe90fa17e2ab7969d39f442c0b12d69d4a65b2347d1bee7a6f37477522",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-37/ape_position_m.zip"
+    },
+    "evaluations/1018_13/orbslam3/ape_orientation_deg.zip": {
+      "sha256": "5eb117617315e690bc8da2f5c7196c4a4aada062eb01dacc1908f70b55687431",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-37/ape_orientation_deg.zip"
+    },
+    "evaluations/1018_13/orbslam3/rpe_position_m.zip": {
+      "sha256": "c727bb5f024618bee66bdd087fa789e3e3858647e39b7e967a98730421950c70",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-37/rpe_position_m.zip"
+    },
+    "evaluations/1018_13/orbslam3/rpe_orientation_deg.zip": {
+      "sha256": "e6006dcbc3e999eb06d90e1207b1c0d3ba7aa2ee3cc6ba95da1567face064aeb",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-37/rpe_orientation_deg.zip"
+    },
+    "evaluations/1018_13/voxel-svio/summary.json": {
+      "sha256": "16cf2440bb493c036f3c4c5e7ccda5e87d13964366461ba2805882335d025ec1",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-44/summary.json"
+    },
+    "evaluations/1018_13/voxel-svio/ape_position_m.zip": {
+      "sha256": "b8d3a46d1d427b9cd234ce6e1fbea79cb301809c09ce7006e298eb17bbac68fe",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-44/ape_position_m.zip"
+    },
+    "evaluations/1018_13/voxel-svio/ape_orientation_deg.zip": {
+      "sha256": "2ee168a67125d300eaceccc41c1afa2f08efb6608cccdb8eb7951d0e19e0627a",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-44/ape_orientation_deg.zip"
+    },
+    "evaluations/1018_13/voxel-svio/rpe_position_m.zip": {
+      "sha256": "de33c84a272b5d36ab9b70e59fbdafbc4bcb22c3b2becbc54959f79cb7c230e0",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-44/rpe_position_m.zip"
+    },
+    "evaluations/1018_13/voxel-svio/rpe_orientation_deg.zip": {
+      "sha256": "c5a39c4b4660bcc47dec7d02fff0e583ca7eb066140a7df4ae1bd79876c1b96b",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations/00000/2026-10-16_21-05-44/rpe_orientation_deg.zip"
+    },
+    "evaluations/kaeb_1/okvis1/summary.json": {
+      "sha256": "1a4bd96d7a65298cb145fea18ea9b323e7a3af5b547fbccbc9d88849b881c019",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-40/summary.json"
+    },
+    "evaluations/kaeb_1/okvis1/ape_position_m.zip": {
+      "sha256": "2678bc00352be74bb818d434bf53ffaa6f4273be9d858bee4d488c68deb867a1",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-40/ape_position_m.zip"
+    },
+    "evaluations/kaeb_1/okvis1/ape_orientation_deg.zip": {
+      "sha256": "5fd082678cadc5469e597b544dd14135eb368337c12af2ca9783ebe7d720eb8e",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-40/ape_orientation_deg.zip"
+    },
+    "evaluations/kaeb_1/okvis1/rpe_position_m.zip": {
+      "sha256": "0fbdb79183e5594cb2802a4effcbca8187ced4a2a13c2870ee91015f34ce45d2",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-40/rpe_position_m.zip"
+    },
+    "evaluations/kaeb_1/okvis1/rpe_orientation_deg.zip": {
+      "sha256": "4b3990bb33f7ba79b6a9c0861c523a1a754ffd6d2b296b06e8fbeb47b7fb270d",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/okvis1_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-40/rpe_orientation_deg.zip"
+    },
+    "evaluations/kaeb_1/orbslam3/summary.json": {
+      "sha256": "037c078c45863d236cb776acf7274c75a1bfcf6a588176501c08d3ad12847c50",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-37/summary.json"
+    },
+    "evaluations/kaeb_1/orbslam3/ape_position_m.zip": {
+      "sha256": "d0fc1dfcc0116be98fce85df3f27d8807fcd63c21059a59772f9df74272e93dc",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-37/ape_position_m.zip"
+    },
+    "evaluations/kaeb_1/orbslam3/ape_orientation_deg.zip": {
+      "sha256": "1e20afb412705af75a21eb8520058fd8894ea0fee5859909a6dda8233ca8412c",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-37/ape_orientation_deg.zip"
+    },
+    "evaluations/kaeb_1/orbslam3/rpe_position_m.zip": {
+      "sha256": "6925c9babe675a3311554d55e045a2293ceec0d856c2fdd71686d716d928a272",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-37/rpe_position_m.zip"
+    },
+    "evaluations/kaeb_1/orbslam3/rpe_orientation_deg.zip": {
+      "sha256": "64c453a3f61cfbd87ba4a9aefd6771c422fb9022bd9a893b57972ee14adcdac6",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-37/rpe_orientation_deg.zip"
+    },
+    "evaluations/kaeb_1/voxel-svio/summary.json": {
+      "sha256": "a4088e92cc928f82a429935284ef3ca226018556c6cd679ec82e9f4e8446c3a7",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-44/summary.json"
+    },
+    "evaluations/kaeb_1/voxel-svio/ape_position_m.zip": {
+      "sha256": "0469562677be69c9dc1588455d709a3cff05dbf897d28d2b56deba6057e2c536",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-44/ape_position_m.zip"
+    },
+    "evaluations/kaeb_1/voxel-svio/ape_orientation_deg.zip": {
+      "sha256": "9f0306d87c363361da25ab0e9b88eff5772211af9f3d2f840a261ad43bca0e7b",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-44/ape_orientation_deg.zip"
+    },
+    "evaluations/kaeb_1/voxel-svio/rpe_position_m.zip": {
+      "sha256": "baf99642221bbe655b59c0806b644b14b5889775af5fef590aab17b639d2974b",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-44/rpe_position_m.zip"
+    },
+    "evaluations/kaeb_1/voxel-svio/rpe_orientation_deg.zip": {
+      "sha256": "e3cd9bff5a34d79ddeb9048f1b24969f1a0750249fd0dc7da808428e9b48ccff",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/voxel_svio_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-16_21-05-44/rpe_orientation_deg.zip"
+    },
+    "evaluations/offroad1/okvis1/summary.json": {
+      "sha256": "7ec8907a580b40e62d4870f001e4b76b8bf5b31e49714eaeb5557f6c0b6f3257",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/okvis1_stereo_vi_0/evaluations/2026-10-19_10-03-12/summary.json"
+    },
+    "evaluations/offroad1/okvis1/ape_position_m.zip": {
+      "sha256": "5db549a5fb7314d7519ca472db4f37ca43d8a653288e90ac6b5725fbe40ce162",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/okvis1_stereo_vi_0/evaluations/2026-10-19_10-03-12/ape_position_m.zip"
+    },
+    "evaluations/offroad1/okvis1/ape_orientation_deg.zip": {
+      "sha256": "f4931770b0c689b7a38bba24b4803818a3b5eefd6a01307b707054f1fb838631",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/okvis1_stereo_vi_0/evaluations/2026-10-19_10-03-12/ape_orientation_deg.zip"
+    },
+    "evaluations/offroad1/okvis1/rpe_position_m.zip": {
+      "sha256": "e98a5a489fe38d708fd40a1722c7f0b182e7775e2ea0a6acf7b611e209bf5497",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/okvis1_stereo_vi_0/evaluations/2026-10-19_10-03-12/rpe_position_m.zip"
+    },
+    "evaluations/offroad1/okvis1/rpe_orientation_deg.zip": {
+      "sha256": "f1e43bc7c76507adc28204d4465b48967f114eb233ced63da787cbfebb1c1939",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/okvis1_stereo_vi_0/evaluations/2026-10-19_10-03-12/rpe_orientation_deg.zip"
+    },
+    "evaluations/offroad1/orbslam3/summary.json": {
+      "sha256": "918c9343f58bb852db613e78a2cbd3b8718d8a5939e1e9daece3d5e7cf678d99",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/orbslam3_stereo_vi_0/evaluations/2026-10-19_10-03-09/summary.json"
+    },
+    "evaluations/offroad1/orbslam3/ape_position_m.zip": {
+      "sha256": "38ae0de44cb757880ff7f2d7b0f1c071bd0fdfbd75c2b2dc0c1e4bf860bb9729",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/orbslam3_stereo_vi_0/evaluations/2026-10-19_10-03-09/ape_position_m.zip"
+    },
+    "evaluations/offroad1/orbslam3/ape_orientation_deg.zip": {
+      "sha256": "7ab10d52aa147207a88c4ac10450eb0976c0a1a9e1a18dfcf92826cea3158f2b",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/orbslam3_stereo_vi_0/evaluations/2026-10-19_10-03-09/ape_orientation_deg.zip"
+    },
+    "evaluations/offroad1/orbslam3/rpe_position_m.zip": {
+      "sha256": "edabc23cb0b85385e4fe9e0363a3a2cb892a1cd00c3a585e94a559094d04e751",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/orbslam3_stereo_vi_0/evaluations/2026-10-19_10-03-09/rpe_position_m.zip"
+    },
+    "evaluations/offroad1/orbslam3/rpe_orientation_deg.zip": {
+      "sha256": "2f5acd2a7312f9fcb0b6ae17d601784fe66cd4cd15d264cdec83fa11eb7a57fd",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/orbslam3_stereo_vi_0/evaluations/2026-10-19_10-03-09/rpe_orientation_deg.zip"
+    },
+    "evaluations/offroad1/voxel-svio/summary.json": {
+      "sha256": "3a9610816090e177ef3aca084f48b77776c1c3492aebd08421bbfbbf7beab2f2",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/voxel_svio_stereo_vi_0/evaluations/2026-10-19_10-03-14/summary.json"
+    },
+    "evaluations/offroad1/voxel-svio/ape_position_m.zip": {
+      "sha256": "d3e4dba49ff727a86cbb4a60b55fd899fcaf05d3daf86462db4f676562d76a87",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/voxel_svio_stereo_vi_0/evaluations/2026-10-19_10-03-14/ape_position_m.zip"
+    },
+    "evaluations/offroad1/voxel-svio/ape_orientation_deg.zip": {
+      "sha256": "847ca7b56b10bf3cef0f06b4bccd4648bf7c1e339f896e6ed50a26f024295b36",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/voxel_svio_stereo_vi_0/evaluations/2026-10-19_10-03-14/ape_orientation_deg.zip"
+    },
+    "evaluations/offroad1/voxel-svio/rpe_position_m.zip": {
+      "sha256": "95b18679c7d5d06ef0a6b0b9faec13762ea7b5fe091bc41fcb37444f9b4eab62",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/voxel_svio_stereo_vi_0/evaluations/2026-10-19_10-03-14/rpe_position_m.zip"
+    },
+    "evaluations/offroad1/voxel-svio/rpe_orientation_deg.zip": {
+      "sha256": "b53514b5234c2ab39ff15cc124ff50dd36a43720155505019b652836a8a70c7b",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/voxel_svio_stereo_vi_0/evaluations/2026-10-19_10-03-14/rpe_orientation_deg.zip"
+    },
+    "voxel_repeats/0/vslamlab_exp_log.csv": {
+      "sha256": "c3842cb826093134cfb3b36e9641f3c5f6b57f64e5f8cc8111f17c292df9c4d8",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T210952_4db73a91/voxel_svio_stereo_vi_1/vslamlab_exp_log.csv"
+    },
+    "voxel_repeats/0/summary.json": {
+      "sha256": "4a027f2fc9f7ba30a158806f2e83671777f27286205aea5eae15fa85c9c51b25",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T210952_4db73a91/voxel_svio_stereo_vi_1/GEODE-GAMMA/offroad1/evaluations/00000/2026-10-19_08-16-26/summary.json"
+    },
+    "voxel_repeats/1/vslamlab_exp_log.csv": {
+      "sha256": "c3842cb826093134cfb3b36e9641f3c5f6b57f64e5f8cc8111f17c292df9c4d8",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T210952_4db73a91/voxel_svio_stereo_vi_1/vslamlab_exp_log.csv"
+    },
+    "voxel_repeats/1/summary.json": {
+      "sha256": "b892ee87fc4b56ed641025acf814e818537a7281fd0f9a2942fa3bf6412a2e53",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T210952_4db73a91/voxel_svio_stereo_vi_1/GEODE-GAMMA/offroad1/evaluations/00001/2026-10-19_08-16-28/summary.json"
+    },
+    "voxel_repeats/2/vslamlab_exp_log.csv": {
+      "sha256": "c3842cb826093134cfb3b36e9641f3c5f6b57f64e5f8cc8111f17c292df9c4d8",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T210952_4db73a91/voxel_svio_stereo_vi_1/vslamlab_exp_log.csv"
+    },
+    "comparisons/0.csv": {
+      "sha256": "0982ede22f4a903a8c9a696816ac14050da9bb117129347abc94575ec883f0e2",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/comparison.csv"
+    },
+    "comparisons/1.csv": {
+      "sha256": "bec799d57ebf8f0905e2d0ed83360cfd691fba1d50750a497e277e046c4671c4",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/comparison.csv"
+    },
+    "comparisons/2.csv": {
+      "sha256": "7e1251c66b623738c27411af068979469f9b8e494593e76c6b5a60aab638d6f0",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T210952_4db73a91/comparison.csv"
+    },
+    "inputs/comparison_20261016T174628_6de5c661.yaml": {
+      "sha256": "1cf49480852d5e4ceabc2d3c4195d128eb370a4c62c047d9a7a8ee3dd2b77802",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/inputs/comparison.yaml"
+    },
+    "inputs/comparison_20261018T182237_5927253c.yaml": {
+      "sha256": "4355addae3fea89ad8c766ebdb083e87253a7d225aee16678d149fb34a178d49",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/inputs/comparison.yaml"
+    },
+    "geode_reference/hypothesis.json": {
+      "sha256": "fef83c314fb282501bf2b3f3f21775b436f1f57ec300ab216626f2c4c7804499",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/hypothesis.json"
+    },
+    "geode_reference/before_after.json": {
+      "sha256": "82d201f8bd065ccf1886a2f2afb8363cd2d61ebbe7cfa6fdb63b61e399253ad0",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/before_after.json"
+    },
+    "figures/botanicgarden_1018_13_ape_map.pdf": {
+      "sha256": "b0fe1c8e014aad1bc428973b24ab1752e902d7f00a9ad0434085b609d05ac9c1",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/figures/botanicgarden_1018_13_ape_map.pdf"
+    },
+    "figures/botanicgarden_1018_13_ape_map.png": {
+      "sha256": "495ed5e8aa0393f764b5a321e12ddefb38c119812391f83dee75ac7a27e65513",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/figures/botanicgarden_1018_13_ape_map.png"
+    },
+    "figures/botanicgarden_1018_13_errors.pdf": {
+      "sha256": "65a015ed234f1130bab60b24825e7283f8f23af222d845d22e3edee4b7b6d2ef",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/figures/botanicgarden_1018_13_errors.pdf"
+    },
+    "figures/botanicgarden_1018_13_errors.png": {
+      "sha256": "c79690a1a8579aa343b744ef2503ddba1a7310acd48bdb7308fc2cffe0f042f8",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/figures/botanicgarden_1018_13_errors.png"
+    },
+    "figures/botanicgarden_1018_13_summary.csv": {
+      "sha256": "a4869d381f3a8c5a33ac86f7b69deaabafe92f2b59c08b488906c2681e6fcdca",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/figures/botanicgarden_1018_13_summary.csv"
+    },
+    "figures/grandtour-alphasense_kaeb_1_ape_map.pdf": {
+      "sha256": "65243cbc43998cff53096247ba4621799474d6b47d6b7c8f073f161f6ce9a1f6",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/figures/grandtour-alphasense_kaeb_1_ape_map.pdf"
+    },
+    "figures/grandtour-alphasense_kaeb_1_ape_map.png": {
+      "sha256": "bd61756d37cdf669f3ccecbd771cc57b6b2f52c9d84f1da4ca774351212d430d",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/figures/grandtour-alphasense_kaeb_1_ape_map.png"
+    },
+    "figures/grandtour-alphasense_kaeb_1_errors.pdf": {
+      "sha256": "cd0331a96860280510ec2d3171c3e3115c3aa551d4c667a84397ba5cfb5fe4c9",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/figures/grandtour-alphasense_kaeb_1_errors.pdf"
+    },
+    "figures/grandtour-alphasense_kaeb_1_errors.png": {
+      "sha256": "2553033461beea311e4fabf69bfa827e416af1e2d4abfeca5fce975cd09ef95e",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/figures/grandtour-alphasense_kaeb_1_errors.png"
+    },
+    "figures/grandtour-alphasense_kaeb_1_summary.csv": {
+      "sha256": "b0c2b9f326bf50febda2fdb2eacc920cb1a1dd6dccd7e3ac0574f3627756ac85",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/figures/grandtour-alphasense_kaeb_1_summary.csv"
+    },
+    "figures/geode-gamma_offroad1_ape_map.pdf": {
+      "sha256": "265c9a62f559ebcdd4d13ca6bfc31e36fe10a4ee4fa5946437776a54777e93ac",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/figures/geode-gamma_offroad1_ape_map.pdf"
+    },
+    "figures/geode-gamma_offroad1_ape_map.png": {
+      "sha256": "ddee1363cda0db193314659a8793dcc7626aadccae23eb5e72a24335dac85244",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/figures/geode-gamma_offroad1_ape_map.png"
+    },
+    "figures/geode-gamma_offroad1_errors.pdf": {
+      "sha256": "b10f2f81d60eaaf5eb7dbcfc190b097154c8c57133c08e813fe0a121f4121e33",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/figures/geode-gamma_offroad1_errors.pdf"
+    },
+    "figures/geode-gamma_offroad1_errors.png": {
+      "sha256": "fe5dbf30aacc20afcaebfba17d8e915562aed87a90b07f23b98b4a558dca55a5",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/figures/geode-gamma_offroad1_errors.png"
+    },
+    "figures/geode-gamma_offroad1_summary.csv": {
+      "sha256": "bec799d57ebf8f0905e2d0ed83360cfd691fba1d50750a497e277e046c4671c4",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/figures/geode-gamma_offroad1_summary.csv"
+    },
+    "additional/sqrtvins/kaeb1_init015/summary.json": {
+      "sha256": "772ce289aafdc8827430417759134ddb56780264cfdf5f6c4211e0b7a7c049ef",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261019T113639_6e8059f5/sqrtvins_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-19_14-43-43/summary.json"
+    },
+    "additional/sqrtvins/kaeb1_init015/comparison.yaml": {
+      "sha256": "ed4047a46a741f371202013b1164208627d7e822df5028dfb3d07a6825acaf48",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261019T113639_6e8059f5/inputs/comparison.yaml"
+    },
+    "additional/sqrtvins/kaeb1_init015/sqrtvins_native.yaml": {
+      "sha256": "3037b715aead6d67bdf89e108b43ccf4349d72b0750ba3e775cfe01495270f83",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261019T113639_6e8059f5/sqrtvins_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/sqrtvins_native.yaml"
+    },
+    "additional/sqrtvins/kaeb1_init2/summary.json": {
+      "sha256": "5ee433693c0ea9d88ab2a036ca45542e258e81b3379dd6ae56c44c35915148ec",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261019T114522_d2b98947/sqrtvins_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/evaluations/00000/2026-10-19_14-46-59/summary.json"
+    },
+    "additional/sqrtvins/kaeb1_init2/comparison.yaml": {
+      "sha256": "fc5259d9d56ba02976b434a68ac96dd9363d8df85f12ffb8f0ba659d5309129a",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261019T114522_d2b98947/inputs/comparison.yaml"
+    },
+    "additional/sqrtvins/kaeb1_init2/sqrtvins_native.yaml": {
+      "sha256": "bd5ebb54772d5f930f0894046f00b86d397b7105dd8e4b442cba96dd904a24af",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261019T114522_d2b98947/sqrtvins_stereo_vi_0/GRANDTOUR-ALPHASENSE/kaeb_1/sqrtvins_native.yaml"
+    },
+    "additional/sqrtvins/offroad1/summary.json": {
+      "sha256": "673e51303abc10a71d6890d4854ab502d2d77734573f7b2556169172dab4cbc6",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261019T090458_5d9038a0/sqrtvins_stereo_vi_0/GEODE-GAMMA/offroad1/evaluations/00000/2026-10-19_12-34-50/summary.json"
+    },
+    "additional/sqrtvins/offroad1/comparison.yaml": {
+      "sha256": "39c39c1a49acd86fa3144af80de1d78a7e6b7ef2ec775bed26a4778e0289d089",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261019T090458_5d9038a0/inputs/comparison.yaml"
+    },
+    "additional/sqrtvins/offroad1/sqrtvins_native.yaml": {
+      "sha256": "4c7cdd0814f02782e7a5374e7c2684c66aff89d98baa12a899c6c8a9ae128551",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261019T090458_5d9038a0/sqrtvins_stereo_vi_0/GEODE-GAMMA/offroad1/sqrtvins_native.yaml"
+    },
+    "additional/sqrtvins/offroad7/summary.json": {
+      "sha256": "68d66546dda367e338b98c53ff069155ccb8ff917c46c378de1ebfe71b6888a5",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261019T130235_8527686d/sqrtvins_stereo_vi_0/GEODE-GAMMA/offroad7/evaluations/00000/2026-10-19_16-08-05/summary.json"
+    },
+    "additional/sqrtvins/offroad7/comparison.yaml": {
+      "sha256": "e74282c382dbbde543002b243f4514dd7a0965521b22c16b38d103c5d0daf80c",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261019T130235_8527686d/inputs/comparison.yaml"
+    },
+    "additional/sqrtvins/offroad7/sqrtvins_native.yaml": {
+      "sha256": "4c7cdd0814f02782e7a5374e7c2684c66aff89d98baa12a899c6c8a9ae128551",
+      "source": "results/vio/VSLAM-LAB-Evaluation/comparison_20261019T130235_8527686d/sqrtvins_stereo_vi_0/GEODE-GAMMA/offroad7/sqrtvins_native.yaml"
+    }
+  }
+}

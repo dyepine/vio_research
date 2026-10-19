@@ -16,7 +16,8 @@ make evaluate RUN_DIR=/path/to/new/comparison EVAL_ARGS=--saved-protocol
 Без `RGB_MAX` запускаются полные записи. Настройки шума совпадают с
 `orbslam3_okvis2_no_loop.yaml`; priors/limits заданы отдельно через
 `imu_overrides`. Оценка: `align: origin`, `correct_scale: false`.
-Это отдельный эксперимент; основной `comparison.yaml` не меняется.
+Это отдельный исторический эксперимент. Основная матрица сдачи —
+`report.yaml` с SE3; её результаты описаны в [artifacts/report](../artifacts/report/README.md).
 Интеграция включена в закреплённый локальный коммит submodule VSLAM-LAB.
 Новые коммиты fork ещё не опубликованы; для клонирования на другой машине
 сначала требуется их публикация. Системные зависимости сборки остаются внешними.

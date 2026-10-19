@@ -1,4 +1,4 @@
 [submodule "external/VSLAM-LAB"]
 	path = external/VSLAM-LAB
 	url = https://github.com/dyepine/VSLAM-LAB.git
-	branch = vio-research-datasets
+	branch = integration/feature-history

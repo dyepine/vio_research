@@ -1,0 +1,188 @@
+{
+  "alignment_transform_gt_from_estimate": [
+    [
+      -0.0070244805077999805,
+      0.9999533730041748,
+      -0.006626348252944812,
+      -1.0197018124947261
+    ],
+    [
+      -0.9997116733214011,
+      -0.0071746321251969095,
+      -0.022914948806243535,
+      0.7000706274889232
+    ],
+    [
+      -0.022961421962069538,
+      0.006463472088735104,
+      0.9997154578328964,
+      -0.25161884452351907
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "matched_poses": 488,
+  "matched_pairs": 488,
+  "unique_matched_estimate_poses": 488,
+  "unique_matched_gt_poses": 488,
+  "max_matched_time_difference_s": 0.04995372799999842,
+  "matched_segments": [
+    {
+      "start_s": 10.735785336,
+      "end_s": 45.936152952,
+      "poses": 122
+    },
+    {
+      "start_s": 47.136349304,
+      "end_s": 69.03557388,
+      "poses": 72
+    },
+    {
+      "start_s": 70.03557388,
+      "end_s": 78.835607928,
+      "poses": 30
+    },
+    {
+      "start_s": 80.735602296,
+      "end_s": 88.735602296,
+      "poses": 19
+    },
+    {
+      "start_s": 89.835545976,
+      "end_s": 93.43552396,
+      "poses": 10
+    },
+    {
+      "start_s": 94.73552396,
+      "end_s": 100.63552396,
+      "poses": 16
+    },
+    {
+      "start_s": 101.835524472,
+      "end_s": 106.335524472,
+      "poses": 14
+    },
+    {
+      "start_s": 107.535524216,
+      "end_s": 168.835582328,
+      "poses": 205
+    }
+  ],
+  "unavailable_metrics": {},
+  "protocol": {
+    "align": "SE3",
+    "correct_scale": false,
+    "max_time_difference_s": 0.05,
+    "estimate_frame": "camera",
+    "camera": "rgb_0",
+    "evaluate_orientation": true,
+    "evaluate_rpe": true,
+    "max_pose_gap_s": 1.0,
+    "rpe_delta_m": 1.0,
+    "rpe_relative_tolerance": 0.1,
+    "gt_valid_intervals_ns": null,
+    "T_body_reference": null
+  },
+  "evo_version": "v1.34.3",
+  "time_origin_ns": 1666066357789669000,
+  "estimate_input_frame": "camera",
+  "compared_pose_frame": "body",
+  "evaluation_code_sha256": "374fd726b7b26d6205c5c225286e2a0936c17943a95ae3ea88be43fa7edd5a01",
+  "input_adapter_sha256": "bf54e4790a04beb18c2461688caa5888972797ddb742a170fbb5f187cc00950c",
+  "run_directory": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_1/BOTANICGARDEN/1018_13/evaluations",
+  "trajectory": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_1/BOTANICGARDEN/1018_13/00000_KeyFrameTrajectory.csv",
+  "trajectory_sha256": "82314326f07dc5710ffa0bc8757c000271a403baea4411e4e02ca1eb76817039",
+  "groundtruth": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_1/BOTANICGARDEN/1018_13/groundtruth.csv",
+  "groundtruth_sha256": "aa216a7c95b01ee05a3aece94a4d045412e3c9e18dffce52c0d2575c37229772",
+  "estimate_poses": 491,
+  "matched_fraction_of_saved_poses": 0.9938900203665988,
+  "saved_pose_span_s": 158.099796992,
+  "max_saved_pose_gap_s": 1.499994112,
+  "saved_pose_gaps": [
+    {
+      "start_ns": 1666066403725821952,
+      "end_ns": 1666066404926018304
+    },
+    {
+      "start_ns": 1666066436625276928,
+      "end_ns": 1666066438125271040
+    },
+    {
+      "start_ns": 1666066446525271296,
+      "end_ns": 1666066447625214976
+    },
+    {
+      "start_ns": 1666066451225192960,
+      "end_ns": 1666066452525192960
+    },
+    {
+      "start_ns": 1666066458425192960,
+      "end_ns": 1666066459625193472
+    },
+    {
+      "start_ns": 1666066464125193472,
+      "end_ns": 1666066465325193216
+    }
+  ],
+  "execution": {
+    "success": true,
+    "confirmation": "native STATUS/SUCCESS log",
+    "time_s": 190.1250171661377
+  },
+  "warnings": [
+    "GT quality is not certified; errors describe saved keyframes, not all input images.",
+    "Completion follows native STATUS/SUCCESS; process exit code was not recorded."
+  ],
+  "selected_input_images": 1600,
+  "metrics": {
+    "ape_position_m": {
+      "rmse": 1.1799316725481515,
+      "mean": 1.1089285846510601,
+      "median": 1.1562496652415013,
+      "std": 0.40313291359807685,
+      "min": 0.37725605533572365,
+      "max": 1.7084664824769282,
+      "sse": 679.4125109185518
+    },
+    "rpe_position_m": {
+      "rmse": 0.06093254717351686,
+      "mean": 0.05851287842116805,
+      "median": 0.0565977274803955,
+      "std": 0.017000540106786664,
+      "min": 0.010261609192713192,
+      "max": 0.13704261419110592,
+      "sse": 0.83166166833184
+    },
+    "ape_orientation_deg": {
+      "rmse": 0.8690541686218606,
+      "mean": 0.8353841861303981,
+      "median": 0.8011291484125314,
+      "std": 0.2395587810168632,
+      "min": 0.24903038036940478,
+      "max": 2.3434455904855054,
+      "sse": 368.56451222352825
+    },
+    "rpe_orientation_deg": {
+      "rmse": 0.44169723006833783,
+      "mean": 0.2978401093508009,
+      "median": 0.19486490979076715,
+      "std": 0.3261712928998276,
+      "min": 0.01074055344609641,
+      "max": 2.3035098110215806,
+      "sse": 43.70160324320945
+    }
+  },
+  "metric_sample_counts": {
+    "ape_position_m": 488,
+    "rpe_position_m": 224,
+    "ape_orientation_deg": 488,
+    "rpe_orientation_deg": 224
+  },
+  "association": "evo associate_trajectories; shorter trajectory queries longer; pose reuse allowed; no boundary extrapolation",
+  "calibration": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261016T174628_6de5c661/orbslam3_stereo_vi_1/BOTANICGARDEN/1018_13/calibration_exp.yaml",
+  "calibration_sha256": "65c20b5fb9cd17f46ca30a91b08636c6527a42ed852af5753f0cc0d16eff59a1"
+}

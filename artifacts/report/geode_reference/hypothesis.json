@@ -1,0 +1,45 @@
+{
+  "hypothesis": "roll_new=roll, pitch_new=-pitch, yaw_new=90deg-yaw; xyz extrinsic Euler convention",
+  "matrix_equivalent": "R_new=Rz(90deg) Rx(180deg) R_old Rx(180deg)",
+  "fitted_bias_applied": false,
+  "positions_changed": false,
+  "timestamps_changed": false,
+  "source_run": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c",
+  "status": "Unverified orientation-convention hypothesis; not certified ground truth",
+  "original_input_sha256": {
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/orbslam3_stereo_vi_0/GEODE-GAMMA/offroad1/evaluations/00000/2026-10-18_21-46-01/summary.json": "894d09802311f888ac7d634473eead0c5db13c713ba02a57c0ec6f34ff59c925",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/okvis1_stereo_vi_0/GEODE-GAMMA/offroad1/groundtruth.csv": "ff078cc97422f15201132b3bb1e3bf6a4967b806ef1811992514e85059b9635b",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/voxel_svio_stereo_vi_0/vslamlab_exp_log.csv": "c570b2bbbb557ef72007c592b9b7435b4cd40099778f0893b763deecc4027bdc",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/voxel_svio_stereo_vi_0/GEODE-GAMMA/offroad1/calibration_exp.yaml": "40b330d652d97d6694e7811ac1000b788c3182d27721ce12dd5fa29d91b5ec5a",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/voxel_svio_stereo_vi_0/GEODE-GAMMA/offroad1/00000_KeyFrameTrajectory.csv": "45ef932b6708dab7f094e7a6fbd5f5a4b1a1f672e1f8660d34d595ce77a9deb7",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/orbslam3_stereo_vi_0/GEODE-GAMMA/offroad1/calibration_exp.yaml": "40b330d652d97d6694e7811ac1000b788c3182d27721ce12dd5fa29d91b5ec5a",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/orbslam3_stereo_vi_0/GEODE-GAMMA/offroad1/groundtruth.csv": "ff078cc97422f15201132b3bb1e3bf6a4967b806ef1811992514e85059b9635b",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/orbslam3_stereo_vi_0/GEODE-GAMMA/offroad1/00000_KeyFrameTrajectory.csv": "2d482c9396057661603a9fd6fcfa3d1a6e6452981da040dc65dafe6249442aea",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/okvis1_stereo_vi_0/vslamlab_exp_log.csv": "10ae775da165ff9d5b34a420995cb3ed51d623cd736a2576d0a76dae6e6827de",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/orbslam3_stereo_vi_0/vslamlab_exp_log.csv": "13969aa232f8b1cb7abfc8f1acdad3fa8e1550d3686f4c468697a6ca2a93e5fe",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/experiment.yaml": "11f6305ca37e3be2f5d440e90e509e5c2003b48c66447116517c9d201eac191f",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/comparison.csv": "9ea0d768582fbed934ffc0bd6641e0ec87fdb22508827b330b07e9cb7fe66e77",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/okvis1_stereo_vi_0/GEODE-GAMMA/offroad1/calibration_exp.yaml": "40b330d652d97d6694e7811ac1000b788c3182d27721ce12dd5fa29d91b5ec5a",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/voxel_svio_stereo_vi_0/GEODE-GAMMA/offroad1/evaluations/00000/2026-10-18_21-46-05/summary.json": "fcfd21e690ddaa2e8e1b5dfad5c173ce54ead5cb91ce93d50f7aad830aa8ebbd",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/okvis1_stereo_vi_0/GEODE-GAMMA/offroad1/evaluations/00000/2026-10-18_21-46-03/summary.json": "8fa6d4134587884deccdb973fe4626b5adf8260ccb7bdb40def9e065a40b7c04",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/okvis1_stereo_vi_0/GEODE-GAMMA/offroad1/00000_KeyFrameTrajectory.csv": "bfcc8ea66fbfa8b5d770853d99b0a53139e0907d5bcaadb585372de79f050e80",
+    "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/voxel_svio_stereo_vi_0/GEODE-GAMMA/offroad1/groundtruth.csv": "ff078cc97422f15201132b3bb1e3bf6a4967b806ef1811992514e85059b9635b"
+  },
+  "results": [
+    {
+      "method": "orbslam3",
+      "groundtruth": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/orbslam3_stereo_vi_0/groundtruth_orientation_candidate.csv",
+      "groundtruth_sha256": "dfb208d286e4fa1fe77f6cf01199da9a6ee276f333e77644514147f93b60f379"
+    },
+    {
+      "method": "okvis1",
+      "groundtruth": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/okvis1_stereo_vi_0/groundtruth_orientation_candidate.csv",
+      "groundtruth_sha256": "dfb208d286e4fa1fe77f6cf01199da9a6ee276f333e77644514147f93b60f379"
+    },
+    {
+      "method": "voxel-svio",
+      "groundtruth": "/home/napalkov/coding/vio_research/results/vio/VSLAM-LAB-Evaluation/comparison_20261018T182237_5927253c/evaluation_variants/gt_orientation_candidate/2026-10-19_10-03-08/voxel_svio_stereo_vi_0/groundtruth_orientation_candidate.csv",
+      "groundtruth_sha256": "dfb208d286e4fa1fe77f6cf01199da9a6ee276f333e77644514147f93b60f379"
+    }
+  ]
+}
