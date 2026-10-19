@@ -2,8 +2,6 @@
 **
 !docker/
 !docker/**
-!OVERVIEW.md
-!PLAN.md
 !Makefile
 !README.md
 !compose.yaml
