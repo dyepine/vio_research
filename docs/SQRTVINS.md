@@ -76,3 +76,23 @@ dt 0.05 s, GT с новой конвенцией ориентации. Увел�
 source .envrc
 external/VSLAM-LAB/.pixi/envs/vslamlab/bin/python -m unittest discover -s tests/migration -p test_sqrtvins.py -q
 ```
+
+## Сохранённые полные контроли
+
+Источники этих проверок включены в
+[artifacts/report/additional/sqrtvins](../artifacts/report/additional/sqrtvins):
+summary.json, конфиг запуска и фактический native YAML, с хешами в bundle.json.
+Это дополнительные результаты, не строки основной таблицы.
+
+| Запись и окно инициализации | APE позиции RMSE, м | RPE позиции RMSE, м |
+| --- | ---: | ---: |
+| GrandTour kaeb_1, 0.15 s | 157337.711 | 5789.272 |
+| GrandTour kaeb_1, 2.0 s | 1.052 | 0.024 |
+| GEODE offroad1, 2.0 s | 37553.358 | 1000.829 |
+| GEODE offroad7, 2.0 s | 27125.585 | 1031.550 |
+
+Точные числа следует читать из summary.json; протокол — SE3 без коррекции масштаба.
+Окно инициализации существенно влияет на kaeb_1; это не исследование причин
+расходимости GEODE. Для BotanicGarden сохранённая оценка sqrtVINS в проверенных
+каталогах результатов не найдена. Фраза авторского отчёта о схожих результатах
+sqrtVINS на BotanicGarden пока не имеет приложенного подтверждения.
