@@ -1,0 +1,35 @@
+services:
+  vio:
+    build: .
+    platform: linux/amd64
+    init: true
+    shm_size: 2gb
+    volumes:
+      - type: bind
+        source: ./.git
+        target: /workspace/.git
+        read_only: true
+        bind:
+          create_host_path: false
+      - tools:/workspace/.tools
+      - pixi:/workspace/external/VSLAM-LAB/.pixi
+      - okvis1:/workspace/external/VSLAM-LAB/Baselines/OKVIS1
+      - voxel-svio:/workspace/external/VSLAM-LAB/Baselines/Voxel-SVIO
+      - sqrtvins:/workspace/external/VSLAM-LAB/Baselines/SqrtVINS
+      - orbslam3:/workspace/external/VSLAM-LAB/Baselines/ORB-SLAM3
+      - home:/home/vio
+      - type: bind
+        source: ${VIO_DOCKER_DATA_DIR:-./datasets}
+        target: /data
+      - type: bind
+        source: ${VIO_DOCKER_RESULTS_DIR:-./results/vio}
+        target: /results
+
+volumes:
+  tools:
+  pixi:
+  okvis1:
+  voxel-svio:
+  sqrtvins:
+  orbslam3:
+  home:

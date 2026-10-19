@@ -6,58 +6,62 @@ ANYmal GrandTour `kaeb_1` и GEODE Offroad1 γ.
 Замыкание петель отключено. Подготовка, запуск и оценка используют
 закреплённый fork VSLAM-LAB и Pixi; APE/RPE вычисляет стандартный evo.
 
-## Воспроизведение
+## Запуск через Docker Compose
 
-Поддерживаемое окружение нативных адаптеров — **Ubuntu 22.04 x86_64**.
-Помимо `git`, `make`, `curl`, `tar`, `sha256sum` и `dpkg-deb`, для сборки нужны
-системные dev-пакеты. На чистой Ubuntu их устанавливают один раз:
-
-```bash
-sudo apt-get update
-sudo apt-get install -y git make curl ca-certificates tar dpkg-dev \
-  build-essential cmake libopencv-dev libeigen3-dev libceres-dev \
-  libgoogle-glog-dev libsuitesparse-dev libboost-filesystem-dev \
-  libboost-system-dev libboost-thread-dev libboost-date-time-dev libyaml-cpp-dev
-```
-
-Нативные сборки используют Ceres 2.0 из Ubuntu 22.04; Ceres 2.2+ для OKVIS1
-не поддерживается. Системный ROS не нужен. Это Pixi workflow с явно указанными
-системными зависимостями, а не полностью изолированная сборка всех C++ библиотек.
+На хосте нужны **Git и Docker с Compose**. CMake, компилятор, OpenCV,
+Ceres и остальные C++ зависимости устанавливаются автоматически при сборке
+образа Ubuntu 22.04 x86_64. Pixi и Python-окружения устанавливает bootstrap
+внутри контейнера; системный ROS и ручной `apt install` на хосте не нужны.
 
 ```bash
 git clone --branch integration/feature-history --recurse-submodules https://github.com/dyepine/vio_research.git
 cd vio_research
-# При checkout другой ветки повторить: git submodule update --init
-make prepare CONFIG=configs/experiments/report.yaml
-make run CONFIG=configs/experiments/report.yaml JOBS=1
-make evaluate CONFIG=configs/experiments/report.yaml \
-  RUN_DIR=/absolute/path/to/new/comparison EVAL_ARGS=--saved-protocol
+docker compose build
+docker compose run --rm vio make prepare
+docker compose run --rm vio make run JOBS=1
+docker compose run --rm vio make evaluate \
+  RUN_DIR=/results/VSLAM-LAB-Evaluation/comparison_<id> EVAL_ARGS=--saved-protocol
 ```
 
-`RUN_DIR` — каталог `comparison_...`, напечатанный runner. Каждая новая матрица
-и версия оценки сохраняются отдельно. Первый `make prepare` устанавливает локальный
-Pixi 0.81.0 с SHA-256 и среды из `external/VSLAM-LAB/pixi.lock`, затем скачивает
-и подготавливает только три записи эксперимента. Нужны сеть и достаточно места;
-перед подготовкой проверяются бюджет 125 GB и запас 15 GB.
-
-Данные по умолчанию находятся в `$HOME/datasets/vio_research`, результаты —
-в `results/vio/`. Для другого диска задайте `VIO_DATA_DIR` при каждой команде
-или сохраните путь в `.envrc`, созданной `make configure`.
-`.envrc` исполняется как shell-код и автоматически не перезаписывается.
-Приведённые команды явно задают `CONFIG`, поэтому подходят и для старой `.envrc`.
-На новом checkout подготовка по умолчанию читает `configs/datasets/selected.yaml`,
-а запуск — `configs/experiments/report.yaml`: оба выбирают те же три записи.
+`RUN_DIR` — путь, напечатанный runner **внутри контейнера**. Данные сохраняются
+на хосте в `datasets/`, результаты — в `results/vio/`. Для уже скачанных данных
+на другом диске перед командами задайте:
 
 ```bash
-make run CONFIG=configs/experiments/report.yaml PLAN=1       # материализация без VIO
-make run CONFIG=configs/experiments/report.yaml RGB_MAX=200  # короткая проверка
-make test                                                 # offline-тесты в Pixi
-python3 scripts/build_report_table.py --check               # проверка сохранённой таблицы
+export VIO_DOCKER_DATA_DIR=/path/to/existing/vio_research/data
+# Необязательно: другое место для результатов.
+export VIO_DOCKER_RESULTS_DIR=/path/to/results
 ```
 
-`PLAN=1` требует подготовленные данные. Проверка на 200 кадрах не является полным
-benchmark. `JOBS=1` запускает методы последовательно; при параллельном запуске
-они делят RAM/CPU, а wall time не характеризует изолированное быстродействие.
+Контейнер использует отдельные volumes для Pixi, кэшей и нативных сборок;
+существующие окружения и бинарники хоста не переиспользуются. Исходники входят в образ; после изменения кода повторите `docker compose build`.
+Git metadata монтируется для чтения, чтобы bootstrap проверял закреплённый submodule. Результаты создаются с UID/GID владельца checkout, а локальная `.envrc`
+хоста в контейнере не исполняется. Конфигурация контейнера — `scripts/env.sh`,
+машинные пути задаются переменными образа и bind mounts в `compose.yaml`.
+
+```bash
+docker compose run --rm vio make test
+docker compose run --rm vio make run RGB_MAX=200       # короткая проверка
+docker compose run --rm vio make run PLAN=1            # материализация без VIO
+docker compose run --rm vio make run CONFIG=configs/experiments/sqrtvins.yaml
+docker compose run --rm vio python3 scripts/build_report_table.py --check  # без датасетов
+```
+
+`PLAN=1` требует подготовленные данные. Короткая проверка не является полным
+benchmark. Новая матрица и каждая версия оценки сохраняются отдельно.
+Для первого скачивания нужны сеть и место; подготовка проверяет бюджет 125 GB
+и запас 15 GB. При `JOBS>1` методы делят CPU/RAM, поэтому их wall time
+не характеризует изолированное быстродействие.
+
+### Локальный Pixi workflow
+
+Для уже настроенной Ubuntu 22.04 остаются `make prepare`, `make run`,
+`make evaluate` и `make test`. Нативные сборки требуют пакеты, перечисленные
+в `Dockerfile`; для запуска без их ручной установки используйте Compose выше.
+OKVIS1 требует Ceres 2.0, Ceres 2.2+ не поддерживается.
+Bootstrap устанавливает локальный Pixi 0.81.0 с SHA-256 и окружения из
+`external/VSLAM-LAB/pixi.lock`. Данные по умолчанию — `$HOME/datasets/vio_research`.
+`.envrc` создаётся через `make configure` и автоматически не перезаписывается.
 
 ## Результаты отчёта
 
