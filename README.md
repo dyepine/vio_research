@@ -37,7 +37,7 @@ export VIO_DATA_DIR="/path/to/datasets/vio_research"
 export VIO_RESULTS_DIR="$ROOT_DIR/results/vio"
 ```
 
-По умолчанию данные хранятся в `$HOME/datasets/vio_research`, результаты —
+По умолчанию данные хранятся в `./datasets/` в корне проекта, результаты —
 в `results/vio/` внутри проекта. Если данные уже скачаны, укажите их существующий
 корень: тот каталог, **внутри которого** находится `VSLAM-LAB-Benchmark/`.
 `.envrc` локальный, в Git не попадает и повторным `make configure` не перезаписывается.
