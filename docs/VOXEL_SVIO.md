@@ -13,9 +13,15 @@ make evaluate RUN_DIR=/absolute/path/to/comparison EVAL_ARGS=--saved-protocol
 Матрица: ORB-SLAM3, OKVIS 1, Voxel-SVIO × GrandTour Alphasense `kaeb_1`
 и BotanicGarden `1018_13`, по одному запуску. Все получают `rgb_0`, `rgb_1`,
 `imu_0` и один и тот же проверенный интервал камер/IMU. `FrameStart` отсутствует.
-Для GrandTour применяется опубликованный Allan-профиль из конфига OKVIS 1;
-для BotanicGarden — рабочий профиль авторов ORB-SLAM3. Плотности и random walk
-одинаковы для трёх методов и записываются в per-run `calibration_exp.yaml`.
+Для GrandTour у всех трёх методов используются исторические random walks:
+`sigma_gw_c: 0.000266`, `sigma_aw_c: 0.0043`. В A/B на `kaeb_1` они дали
+APE 1.23–1.50 м в трёх повторах; меньшие значения — 2.40–150.07 м.
+Эта A/B-проверка проводилась только для ORB-SLAM3; влияние замены RW
+на OKVIS 1 и Voxel-SVIO ещё не измерено. Профиль GrandTour общий для всех методов;
+профиль BotanicGarden остаётся общим рабочим профилем авторов ORB-SLAM3.
+Эффективные значения каждого метода записываются в per-run `calibration_exp.yaml`.
+A/B: `results/vio/VSLAM-LAB-Evaluation/comparison_20261016T163321_ea4ed95b/ab_report.md`.
+Приведённый ниже исторический прогон выполнялся до этой замены.
 Профиль BotanicGarden не объявляется измеренным шумом датчика.
 
 Loop closure выключен у ORB-SLAM3; OKVIS 1 и Voxel-SVIO работают как VIO,
@@ -44,13 +50,14 @@ CPU/RAM, поэтому измеренные wall time не являются с�
 
 Оцениватель компилируется из оригинальных `src/*.cpp`. Файловая обвязка
 заменяет ROS-подписки, parameter server и публикацию визуализации.
-MSCKF, инициализаторы, tracking, triangulation, state update и voxel map
-остаются авторскими. Реальные PCL-контейнеры сохраняются: используются
+MSCKF, инициализаторы, triangulation, state update и voxel map остаются
+авторскими; исправления undefined behavior перечислены ниже. Реальные
+PCL-контейнеры сохраняются: используются
 заголовки Ubuntu `libpcl-dev` 1.12.1, распакованные локально с проверкой SHA256.
 Пакеты в систему не устанавливаются, ROS master и replay не нужны.
 Исходники загружаются через partial/sparse clone без 26 MB demo GIF.
 
-Два patch доступны в `Baselines/extra-files/voxel_svio/`:
+Три patch доступны в `Baselines/extra-files/voxel_svio/`:
 
 - `offline.patch`: ROS-входы/выходы заменены файловыми; `gravity_mag` из
   калибровки передаётся и initializer, и propagator. В upstream propagator
@@ -58,6 +65,13 @@ MSCKF, инициализаторы, tracking, triangulation, state update и vo
 - `compatibility.patch`: `addPointToVoxel` возвращает `false`, когда
   существующий voxel заполнен. В upstream в этой ветке отсутствует return,
   хотя вызывающий код использует bool; это undefined behavior.
+- `memory_safety.patch`: таблица порогов pixel selector включает неполные
+  блоки по правому и нижнему краю изображения; границы обхода ограничены
+  размером кадра. Для пустого граничного блока задан порог без чтения
+  незаполненных histogram bins. Первые/последние строки градиентов обоих
+  изображений на каждом уровне пирамиды определены как нулевые. Это устраняет
+  подтверждённые Valgrind чтения неинициализированных значений на GEODE
+  1224×1024. Шумы, калибровка и параметры оценивателя не меняются.
 
 За основу настроек взят авторский `config/euroc.yaml`. Для offline-запуска
 бюджет dynamic-initialization MLE увеличен с 0.05 до 5 s, число потоков — 2.
@@ -88,8 +102,18 @@ env -u LD_LIBRARY_PATH ctest --test-dir external/VSLAM-LAB/Baselines/Voxel-SVIO/
 ```
 
 Системный `LD_LIBRARY_PATH` очищается только для сборки и дочернего бинарника.
-Нативный тест проверяет заполнение voxel и JPL/Hamilton ориентацию;
-Python-тесты проверяют калибровку, плотности шума и преобразование IMU/body.
+Нативные тесты проверяют заполнение voxel, JPL/Hamilton ориентацию,
+градиенты и выбор пикселей обеих камер на GEODE/EuRoC размерах и неполных
+блоках. При наличии Valgrind CTest также проверяет этот pixel-memory тест
+под Memcheck с отказом при ошибках памяти. Python-тесты проверяют калибровку,
+плотности шума и преобразование IMU/body.
+После обновления patch существующий бинарник нужно пересобрать командой выше.
+Проверка исправления на GEODE 2026-10-19: Memcheck pixel-memory теста —
+0 ошибок; возврат каждого старого модуля отдельно воспроизводит ошибку.
+Две попытки полной `offroad1` после исправления всё ещё разошлись и перестали
+продвигаться после отметки 2250/4048 пар. Сохранённые 2107 IMU-поз совпали
+побайтово при разном `MALLOC_PERTURB_`; успешное прохождение записи не получено.
+Подробности — [проверка исправления](../results/vio/diagnostics/voxel_memory_fix_20261019/README.md).
 Общие проверки представления stereo-входов вынесены в `stereo_vi_inputs.py`
 и используются также OKVIS 1. Интеграции включены в закреплённые локальные коммиты
 submodule; публикация новых коммитов fork пока не выполнена.

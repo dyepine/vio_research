@@ -1,4 +1,4 @@
-# Stereo-inertial VIO: same camera/IMU interval and noise profiles; no loop closure.
+# Stereo-inertial VIO: same camera/IMU interval and shared noise profiles; no loop closure.
 # BotanicGarden 1018_13 starts at the audited camera/IMU interval, without FrameStart.
 Datasets:
   grandtour-alphasense:
@@ -11,12 +11,13 @@ Methods:
     Parameters:
       mode: stereo-vi
       verbose: 0
-      imu_noise_by_dataset: &id001
+      imu_noise_by_dataset: &imu_noise_profiles
         grandtour-alphasense:
           sigma_g_c: 0.00020202932517334086
           sigma_a_c: 0.0012593921763625943
-          sigma_gw_c: 1.8672379701877664e-06
-          sigma_aw_c: 4.317454918100831e-05
+          # Historical RW: stable in all three kaeb_1 A/B repeats.
+          sigma_gw_c: 0.000266
+          sigma_aw_c: 0.0043
         botanicgarden:
           sigma_g_c: 0.002
           sigma_a_c: 0.01
@@ -32,7 +33,7 @@ Methods:
     Parameters:
       mode: stereo-vi
       verbose: 0
-      imu_noise_by_dataset: *id001
+      imu_noise_by_dataset: *imu_noise_profiles
       imu_overrides:
         sigma_bg: 0.03
         sigma_ba: 0.1
@@ -50,12 +51,12 @@ Methods:
     Parameters:
       mode: stereo-vi
       verbose: 0
-      imu_noise_by_dataset: *id001
+      imu_noise_by_dataset: *imu_noise_profiles
     Evaluation:
       estimate_frame: body
 NumRuns: 1
 Evaluation:
-  align: origin
+  align: SE3
   correct_scale: false
   max_time_difference_s: 0.05
   evaluate_orientation: true
