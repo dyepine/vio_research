@@ -1,7 +1,7 @@
 # Include project sources, never local environments, datasets or credentials.
 **
-!Dockerfile
-!.dockerignore
+!docker/
+!docker/**
 !OVERVIEW.md
 !PLAN.md
 !Makefile
@@ -36,3 +36,7 @@ external/VSLAM-LAB/Capabilities/sources/
 external/VSLAM-LAB/recipes/
 **/__pycache__/
 **/*.pyc
+**/.env*
+**/.netrc
+**/.git-credentials
+**/settings.local.json

@@ -1,6 +1,8 @@
 services:
   vio:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     platform: linux/amd64
     init: true
     shm_size: 2gb

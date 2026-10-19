@@ -20,7 +20,7 @@ docker compose build
 docker compose run --rm vio make prepare
 docker compose run --rm vio make run JOBS=1
 docker compose run --rm vio make evaluate \
-  RUN_DIR=/results/VSLAM-LAB-Evaluation/comparison_<id> EVAL_ARGS=--saved-protocol
+  RUN_DIR=/results/VSLAM-LAB-Evaluation/comparison_YYYYMMDDTHHMMSS_HASH EVAL_ARGS=--saved-protocol
 ```
 
 `RUN_DIR` — путь, напечатанный runner **внутри контейнера**. Данные сохраняются
@@ -38,6 +38,7 @@ export VIO_DOCKER_RESULTS_DIR=/path/to/results
 Git metadata монтируется для чтения, чтобы bootstrap проверял закреплённый submodule. Результаты создаются с UID/GID владельца checkout, а локальная `.envrc`
 хоста в контейнере не исполняется. Конфигурация контейнера — `scripts/env.sh`,
 машинные пути задаются переменными образа и bind mounts в `compose.yaml`.
+Dockerfile, entrypoint и правила build context лежат в `docker/`.
 
 ```bash
 docker compose run --rm vio make test
@@ -57,7 +58,7 @@ benchmark. Новая матрица и каждая версия оценки �
 
 Для уже настроенной Ubuntu 22.04 остаются `make prepare`, `make run`,
 `make evaluate` и `make test`. Нативные сборки требуют пакеты, перечисленные
-в `Dockerfile`; для запуска без их ручной установки используйте Compose выше.
+в `docker/Dockerfile`; для запуска без их ручной установки используйте Compose выше.
 OKVIS1 требует Ceres 2.0, Ceres 2.2+ не поддерживается.
 Bootstrap устанавливает локальный Pixi 0.81.0 с SHA-256 и окружения из
 `external/VSLAM-LAB/pixi.lock`. Данные по умолчанию — `$HOME/datasets/vio_research`.

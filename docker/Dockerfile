@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && git config --system --add safe.directory /workspace/external/VSLAM-LAB
 
 ENV HOME=/home/vio \
+    GIT_OPTIONAL_LOCKS=0 \
     ROOT_DIR=/workspace \
     VIO_ENV_FILE=/opt/vio/env.sh \
     VIO_DATA_DIR=/data \
@@ -30,7 +31,7 @@ RUN mkdir -p /workspace/.tools /workspace/external/VSLAM-LAB/.pixi \
       /data /results \
     && chown -R 1000:1000 /workspace /home/vio /data /results
 COPY scripts/env.sh /opt/vio/env.sh
-COPY scripts/container-entrypoint.sh /usr/local/bin/vio-entrypoint
+COPY docker/entrypoint.sh /usr/local/bin/vio-entrypoint
 RUN chmod 755 /usr/local/bin/vio-entrypoint
 COPY --chown=1000:1000 . /workspace
 RUN mkdir -p /workspace/.git
